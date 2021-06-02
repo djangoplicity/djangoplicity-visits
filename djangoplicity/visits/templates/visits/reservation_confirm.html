@@ -9,9 +9,9 @@
 </div>
 
     {% transurl 'visits-reservation-update' reservation.code as url %}
-    <p>{% blocktrans with limit=reservation.showing.activity.latest_reservation_time %}If you wish to cancel or change your reservation <a href="https://www.eso.org{{ url }}">click here</a>. If you wish to change the date or time of your reservation please cancel your reservation and make a new reservation on this page. Cancellations and changes can only be made up until 13:00 of the Friday before your visit.{% endblocktrans %}</p>
+    <p>{% blocktrans with limit=reservation.showing.activity.latest_reservation_time %}If you wish to cancel or change your reservation <a href="{{ SITE_DOMAIN }}{{ url }}">click here</a>. If you wish to change the date or time of your reservation please cancel your reservation and make a new reservation on this page. Cancellations and changes can only be made up until 13:00 of the Friday before your visit.{% endblocktrans %}</p>
 
     <hr>
-    <a href="/public/about-eso/visitors/">{% trans 'Back to visits page' %}</a>
+    <a href="/public/about/visitors/">{% trans 'Back to visits page' %}</a>
 </div>
 {% endblock %}

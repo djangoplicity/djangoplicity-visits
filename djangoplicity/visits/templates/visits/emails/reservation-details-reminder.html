@@ -25,12 +25,12 @@ Please bring this message with you to the Observatory in electronic or paper for
     {% endblocktrans %}</li>
 
     <li>{% blocktrans %}
-        Every visitor must read and sign the <a href="https://www.eso.org/public/archives/static/about-eso/visitors/paranal/releaseform.pdf">Release Form in English</a> or <a href="https://www.eso.org/public/archives/static/about-eso/visitors/paranal/releaseformsp.pdf">Spanish</a>. The <strong>signed and printed</strong> form must be delivered on arrival at the Observatory gate. Unfortunately, we cannot accept electronic copies of the form.
+        Every visitor must read and sign the <a href="{{ SITE_DOMAIN }}/public/archives/static/about/visitors/paranal/releaseform.pdf">Release Form in English</a> or <a href="{{ SITE_DOMAIN }}/public/archives/static/about-eso/visitors/paranal/releaseformsp.pdf">Spanish</a>. The <strong>signed and printed</strong> form must be delivered on arrival at the Observatory gate. Unfortunately, we cannot accept electronic copies of the form.
     {% endblocktrans %}</li>
 
     {% transurl 'visits-reservation-update' reservation.code as url %}
     <li>{% blocktrans with limit=reservation.showing.activity.latest_reservation_time %}
-        If you wish to cancel or change your reservation <a href="https://www.eso.org{{ url }}">click here</a>. If you wish to change the date or time of your reservation please cancel your reservation and make a new reservation on this page. <strong>Cancellations and changes can only be made up until 13:00 of the Friday before your visit</strong>.
+        If you wish to cancel or change your reservation <a href="{{ SITE_DOMAIN }}{{ url }}">click here</a>. If you wish to change the date or time of your reservation please cancel your reservation and make a new reservation on this page. <strong>Cancellations and changes can only be made up until 13:00 of the Friday before your visit</strong>.
     {% endblocktrans %}</li>
 
     <li>{% blocktrans %}
@@ -38,7 +38,7 @@ Please bring this message with you to the Observatory in electronic or paper for
     {% endblocktrans %}</li>
 
     <li>{% blocktrans with observatory=reservation.showing.activity.observatory %}
-        For information on how to reach {{ observatory }} click <a href="https://www.eso.org/public/about-eso/visitors/{{obsurl}}/">here</a>
+        For information on how to reach {{ observatory }} click <a href="{{ SITE_DOMAIN }}/public/about-eso/visitors/{{obsurl}}/">here</a>
     {% endblocktrans %}</li>
 
     <li>{% blocktrans with observatory=reservation.showing.activity.observatory map=reservation.showing.activity.map_url %}

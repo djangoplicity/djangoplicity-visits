@@ -1,96 +1,54 @@
+{% load i18n staticfiles %}
 <!DOCTYPE html>
-{% load i18n %}
-{% load staticfiles %}
 <html lang="{{ LANGUAGE_CODE }}">
-<head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#">
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<base target="_top" />
-<meta name="robots" content="index,follow" />
-{% if archive_title or archive %}
-<meta name="description" content="{% if archive_title %}{% trans archive_title %}{% else %}{{ archive|capfirst }} {% trans "Archive" %}{%endif%}" />
-{% endif %}
-<meta name="author" content="information@eso.org" />
-<meta name="description" content="ESO, European Organisation for Astronomical Research in the Southern Hemisphere" />
-<meta name="keywords" content="ESO, eso.org, Astronomy, Astrophysics, Astronomie, Suedsternwarte, telescopes, detectors, comets, planets, stars, galaxies, nebulae, universe, NTT, VLT, VLTI, ALMA, ELT, La Silla, Paranal, Garching, Chile" />
+    <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="{{ EMAIL_INFO }}"/>
+    {% spaceless %}
+    {% endspaceless %}
+    <link href="{{ RSS_URL }}" rel="alternate" type="application/rss+xml" title="{{ RSS_TITLE }}">
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+    {% if archive_title or archive %}
+    <meta name="description" content="{% if archive_title %}{% trans archive_title %}{% else %}{{ archive|capfirst }} {% trans "Archive" %}{%endif%}" />
+    {% endif %}
+    <meta name="description" content="{{ WEBSITE_DESCRIPTION }}"/>
+    <meta name="keywords" content="{{ WEBSITE_KEYWORDS }}" />
 
-{% load djangoplicity_translation %}
-{% spaceless %}
-{% for code, lang in LANGUAGES %}
-<link rel="alternate" href="https://www.eso.org{{ request.path|url_for_lang:code }}" hreflang="{% if code == "en" %}x-default{% else %}{{ code }}{% endif %}" />
-{% endfor %}
-{% endspaceless %}
+    {% load djangoplicity_translation %}
+    {% spaceless %}
+    {% for code, lang in LANGUAGES %}
+    <link rel="alternate" href="{{ SITE_DOMAIN }}{{ request.path|url_for_lang:code }}" hreflang="{% if code == "en" %}x-default{% else %}{{ code }}{% endif %}" />
+    {% endfor %}
+    {% endspaceless %}
 
-<link rel="shortcut icon" href="https://www.eso.org/public/archives/favicon.ico" />
-{% load djangoplicity_utils %}
-<title>{% block site_title %}ESO{% if LANGUAGE_CODE != 'en' %} {{ LANGUAGE_CODE|code_to_local_country }}{% endif %}{% endblock %}</title>
+    <link rel="icon" href="{% static 'images/favicon/favicon.ico' %}">
+    {% load djangoplicity_utils %}
+    <title>{% block site_title %}{{ WEBSITE_NAME }}{% if LANGUAGE_CODE != 'en' %} {{ LANGUAGE_CODE|code_to_local_country }}{% endif %}{% endblock %}</title>
 
-{% load i18n %}
-{% load djangoplicity_utils %}
-{% load pipeline %}
-{% load menus %}
+    {% load i18n %}
+    {% load djangoplicity_utils %}
+    {% load pipeline %}
+    {% load menus %}
 
-{% stylesheet 'main' %}
+    {% stylesheet 'main' %}
+    <!--[if lte IE 9]>
+        {% javascript 'ie8compat' %}
+        <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></SCRIpt>
+        <script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <![endif]-->
 
-<link href="http://feeds.feedburner.com/EsoTopNews" rel="alternate"  type="application/rss+xml" title="ESO Top News" />
-<link href="http://feeds.feedburner.com/EsoAnnouncements" rel="alternate"  type="application/rss+xml" title="ESO Announcements" />
-<link href="http://feeds.feedburner.com/ESOcast" rel="alternate"  type="application/rss+xml" title="ESOCast" />
-<link href="https://recruitment.eso.org/jobs.rss" rel="alternate" type="application/rss+xml" title="Jobs@ESO" />
-<link href="https://www.eso.org/public/blog/feed/" rel="alternate" type="application/rss+xml" title="ESOblog" />
+    {% include "archives/opengraph.html" %}
 
+    {% block analytics %}
+    {% endblock %}
 
-<!--[if lte IE 9]>
-	{% javascript 'ie8compat' %}
-	<script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></SCRIpt>
-	<script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-<![endif]-->
-
-{% include "archives/opengraph.html" %}
-<meta name="twitter:site" content="@ESO" />
-<meta name="twitter:creator" content="@ESO" />
-
-<!-- Matomo -->
-<script type="text/javascript">
-  var _paq = window._paq || [];
-  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-  _paq.push(['trackPageView']);
-  _paq.push(['enableLinkTracking']);
-  (function() {
-    var u="/mtmo/";
-    _paq.push(['setTrackerUrl', u+'matomo.php']);
-    _paq.push(['setSiteId', '1']);
-    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
-  })();
-</script>
-<!-- End Matomo Code -->
-
-<!-- Google Analytics -->
-<script>
-function has_privacy_cookie() {
-	return document.cookie.split(';').filter(function(item) {
-		return item.indexOf('privacy_notice_accepted=True') >= 0
-	}).length > 0
-}
-
-if (has_privacy_cookie()) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-	ga('create', 'UA-1965004-1', 'auto');
-	ga('send', 'pageview');
-}
-
-</script>
-<script async src='//www.google-analytics.com/analytics.js'></script>
-<!-- End Google Analytics -->
-
-{% block extra_header %}
-{% endblock %}
+    {% block extra_header %}
+    {% endblock %}
 </head>
 
 <body>
-
-{% include 'privacy/notice.html' %}
 
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function(event) {
