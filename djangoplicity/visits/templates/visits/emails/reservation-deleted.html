@@ -1,0 +1,7 @@
+{% extends 'email_base_600.html' %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans 'Reservation deleted' %}</h1>
+<p>{% blocktrans %}Your reservation has been successfully deleted.{% endblocktrans %}</p>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "visits/visits-base.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+
+{% block content %}
+<div id="visits">
+    <div class="alert alert-success" role="alert">{% trans 'Your reservation was cancelled successfully.' %}</div>
+    <a href="/public/about-eso/visitors/">{% trans 'Back to visits page' %}</a>
+</div>
+{% endblock %}

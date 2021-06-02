@@ -1,0 +1,8 @@
+{% extends 'email_base_600.html' %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans 'Reservation confirmation' %}</h1>
+{% include 'visits/emails/reservation-details.html' %}
+
+{% endblock %}

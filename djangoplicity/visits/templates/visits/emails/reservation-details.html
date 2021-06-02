@@ -1,0 +1,48 @@
+{% load i18n %}
+{% load transurl from djangoplicity_translation %}
+<p>
+{% blocktrans with observatory=reservation.showing.activity.observatory meeting_point=reservation.showing.activity.meeting_point %}Thank you for reserving places at a public guided tour at {{ observatory }}!<br>The meeting point is the Security Gate.{% endblocktrans %}
+</p>
+
+<p>
+{% trans 'Date' %}: {{ reservation.showing.start_time|date }}<br>
+{% trans 'Time' %}: {{ reservation.showing.start_time|date:"G:i" }}<br>
+{% trans 'Number of places' %}: {{ reservation.n_spaces }}<br>
+</p>
+
+<h2>{% trans 'Reservation number: '%} {{ reservation.code }}</h2>
+
+<p>{% blocktrans %}
+Please bring this message with you to the Observatory in electronic or paper form.
+{% endblocktrans %}</p>
+
+<p><strong>{% trans 'Important' %}:</strong></p>
+
+<ul>
+
+    <li>{% blocktrans %}
+        Tours have limited places and they are free, significant resources are allocated to give you a good experience in a remote place. Therefore we kindly ask you to cancel your reservation in case you cannot attend. In this way you will give other people the opportunity to visit the Observatory.
+    {% endblocktrans %}</li>
+
+    <li>{% blocktrans %}
+        Every visitor must read and sign the <a href="https://www.eso.org/public/archives/static/about-eso/visitors/paranal/releaseform.pdf">Release Form in English</a> or <a href="https://www.eso.org/public/archives/static/about-eso/visitors/paranal/releaseformsp.pdf">Spanish</a>. The <strong>signed and printed</strong> form must be delivered on arrival at the Observatory gate. Unfortunately, we cannot accept electronic copies of the form.
+    {% endblocktrans %}</li>
+
+    {% transurl 'visits-reservation-update' reservation.code as url %}
+    <li>{% blocktrans with limit=reservation.showing.activity.latest_reservation_time %}
+        If you wish to cancel or change your reservation <a href="https://www.eso.org{{ url }}">click here</a>. If you wish to change the date or time of your reservation please cancel your reservation and make a new reservation on this page. <strong>Cancellations and changes can only be made up until 13:00 of the Friday before your visit</strong>.
+    {% endblocktrans %}</li>
+
+    <li>{% blocktrans %}
+        For safety reasons, <strong>children under 4 years are not allowed</strong> to visit the observatory.
+    {% endblocktrans %}</li>
+
+    <li>{% blocktrans with observatory=reservation.showing.activity.observatory %}
+        For information on how to reach {{ observatory }} click <a href="https://www.eso.org/public/about-eso/visitors/{{obsurl}}/">here</a>
+    {% endblocktrans %}</li>
+
+    <li>{% blocktrans with observatory=reservation.showing.activity.observatory map=reservation.showing.activity.map_url %}
+        Find {{ observatory }} on <a href="{{ map }}">this map</a>
+    {% endblocktrans %}</li>
+</ul>
+
