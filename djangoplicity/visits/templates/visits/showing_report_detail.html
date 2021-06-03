@@ -2,45 +2,42 @@
 {% load i18n %}
 
 {% block content %}
-<div id="visits">
-<h1>{% trans 'Public Visits Reports' %}</h1>
-
-<div class="row">
-    <h2>Showing: {{ showing }}</h2>
-
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone number</th>
-                <th>Phone number in Chile</th>
-                <th>Country</th>
-                <th>Number of places</th>
-                <th>Language</th>
-                <th>Reservation code</th>
-                <th>Reservation date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for r in showing.reservation_set.all %}
-            <tr>
-                <td>{{ r.name }}</td>
-                <td>{{ r.email }}</td>
-                <td>{{ r.phone }}</td>
-                <td>{{ r.phone_chile }}</td>
-                <td>{{ r.country }}</td>
-                <td>{{ r.n_spaces }}</td>
-                <td>{{ r.language }}</td>
-                <td>{{ r.code }}</td>
-                <td>{{ r.created }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<p><a href="../">Back to list</a></p>
-
+    <div class="row">
+        <div class="page-header">
+            <h1>{% trans 'Public Visits Reports' %}</h1>
+        </div>
+        <h2>Showing: {{ showing }}</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>{% trans 'Name' %}</th>
+                    <th>{% trans 'Email' %}</th>
+                    <th>{% trans 'Phone number' %}</th>
+                    <th>{% trans 'Alternative Phone number' %}</th>
+                    <th>{% trans 'Country' %}</th>
+                    <th>{% trans 'Number of places' %}</th>
+                    <th>{% trans 'Language' %}</th>
+                    <th>{% trans 'Reservation code' %}</th>
+                    <th>{% trans 'Reservation date' %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in showing.reservation_set.all %}
+                <tr>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.email }}</td>
+                    <td>{{ r.phone }}</td>
+                    <td>{{ r.alternative_phone }}</td>
+                    <td>{{ r.country }}</td>
+                    <td>{{ r.n_spaces }}</td>
+                    <td>{{ r.language }}</td>
+                    <td>{{ r.code }}</td>
+                    <td>{{ r.created }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p><a href="../">{% trans 'Back to list' %}</a></p>
 {% endblock %}
 

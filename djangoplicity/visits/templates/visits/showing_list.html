@@ -1,35 +1,34 @@
 {% extends "visits/visits-base.html" %}
 {% load i18n %}
 {% load transurl from djangoplicity_translation %}
-
 {% block content %}
-<div id="visits">
-<h1>{% trans 'Public Visits Observatories' %}</h1>
-
-<div class="row">
-    <div class="col-md-12">
-        <div class="thumbnail">
-            {% if perms.visits.change_activity %}
-                <a class="btn btn-link pull-right" href="{% url 'admin_site:visits_activity_change' activity.pk %}" role="button">Edit</a>
-            {% endif %}
-            <img src="{{ activity.key_visual_en.resource_screen640.url }}">
-            <div class="caption">
-                <h3>{{ activity }}</h3>
-                <ul class="list-group">
-                    {% for showing in showing_list %}
-                    {% ifchanged showing.start_time.month %}<hr><h4>{{ showing.start_time|date:"F Y" }}</h4>{% endifchanged %}
-                        <a class="list-group-item" href="{% transurl 'visits-reservation-create' showing.pk %}">
-                            {{ showing.start_time|date }}, {{ showing.start_time|date:"H:i" }}
-                            <span class="badge">
-                                {% if showing.free_spaces <= 0 %}{% trans 'Fully booked' %}{% else %}{% trans 'Available places' %}: {{ showing.free_spaces }}{% endif %}
-                            </span>
-                        </a>
-                    {% endfor %}
-                </ul>
+    <div class="row">
+        <div class="page-header">
+            <h1>{% trans 'Public Visits Observatories' %}</h1>
+        </div>
+        <div class="col-md-12">
+            <div class="thumbnail">
+                {% if perms.visits.change_activity %}
+                    <a class="btn btn-link pull-right" href="{% url 'admin_site:visits_activity_change' activity.pk %}" role="button">
+                        {% trans 'Edit' }%
+                    </a>
+                {% endif %}
+                <img src="{{ activity.key_visual_en.resource_screen640.url }}">
+                <div class="caption">
+                    <h3>{{ activity }}</h3>
+                    <ul class="list-group">
+                        {% for showing in showing_list %}
+                        {% ifchanged showing.start_time.month %}<hr><h4>{{ showing.start_time|date:"F Y" }}</h4>{% endifchanged %}
+                            <a class="list-group-item" href="{% transurl 'visits-reservation-create' showing.pk %}">
+                                {{ showing.start_time|date }}, {{ showing.start_time|date:"H:i" }}
+                                <span class="badge">
+                                    {% if showing.free_spaces <= 0 %}{% trans 'Fully booked' %}{% else %}{% trans 'Available places' %}: {{ showing.free_spaces }}{% endif %}
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
-</div>
-</div>
-
 {% endblock %}

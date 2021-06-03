@@ -1,57 +1,58 @@
 {% extends "visits/visits-base.html" %}
-{% load crispy_forms_tags %}
-{% load i18n %}
+{% load i18n crispy_forms_tags %}
 
 {% block content %}
-
-<div id="visits">
-    <h1>{{ activity }}</h1>
-    <div class="well info clearfix">
-        {% if perms.visits.change_showing %}
-            <a class="btn btn-link pull-right" href="{% url 'admin_site:visits_showing_change' showing.pk %}" role="button">Edit</a>
-        {% endif %}
-        <img src="{{ activity.key_visual_en.resource_potwmedium.url }}">
-        <p><strong>{% trans 'Date/Time' %}:</strong> {{ showing.start_time }}</p>
-        <p><strong>{% trans 'Location' %}:</strong> {{ activity.observatory }}</p>
-        <p><strong>{% trans 'Meeting point' %}:</strong> {% trans 'Security Gate' %}</p>
-        <p><strong>{% trans 'Duration' %}:</strong> {{ activity.duration }}</p>
-        <p><strong>{% trans 'Available places' %}:</strong> {{ showing.free_spaces }}</p>
-
-    </div>
-
-    {% if too_late %}
-    <div class="alert alert-warning">
-        {% blocktrans with limit=activity.latest_reservation_time %}Reservations can only be made until Friday 14:00 before the weekend of the visit.{% endblocktrans %}
-    </div>
-    {% elif showing.free_spaces <= 0 %}
-    <div class="alert alert-warning">
-        {% trans 'This showing is already fully booked' %}
-    </div>
-    {% else %}
-
-    <h2>{% trans 'Make a reservation' %}</h2>
-    <form method="post" class="form-horizontal">
-    {% crispy form  %}
-    </form>
-
-    {% endif %}
-
-    <hr>
-    <h3>{% trans 'Other showings' %}:</h3>
-    <ul class="list-group">
-        {% for other in other_showings %}
-            {% if showing != other %}
-            {% ifchanged other.start_time.month %}<hr><h4>{{ other.start_time|date:"F Y" }}</h4>{% endifchanged %}
-            <a class="list-group-item"href="{% url 'visits-reservation-create' other.pk %}">
-                {{ other.start_time|date }}, {{ other.start_time|date:"H:i" }}
-                <span class="badge">
-                    {% if other.free_spaces <= 0 %}{% trans 'Fully booked' %}{% else %}Available places: {{ other.free_spaces }}{% endif %}
-                </span>
-            </a>
+    <div class="row">
+        <div class="page-header">
+            <h1>{{ activity }}</h1>
+        </div>
+        <div class="well info clearfix">
+            <div class="col-sm-3">
+                <img src="{{ activity.key_visual_en.resource_potwmedium.url }}">
+            </div> 
+            <div class="col-sm-9">
+                {% if perms.visits.change_showing %}
+                    <a class="btn btn-link pull-right" href="{% url 'admin_site:visits_showing_change' showing.pk %}" role="button" style="float: right">Edit</a>
+                {% endif %}
+                <p><strong>{% trans 'Date/Time' %}:</strong> {{ showing.start_time }}</p>
+                <p><strong>{% trans 'Location' %}:</strong> {{ activity.observatory }}</p>
+                <p><strong>{% trans 'Meeting point' %}:</strong> {% trans 'Security Gate' %}</p>
+                <p><strong>{% trans 'Duration' %}:</strong> {{ activity.duration }}</p>
+                <p><strong>{% trans 'Available places' %}:</strong> {{ showing.free_spaces }}</p>
+            </div> 
+        </div>
+        <div class="col-sm-12">
+            {% if too_late %}
+                <div class="alert alert-warning">
+                    {% blocktrans with limit=activity.latest_reservation_time %}Reservations can only be made until Friday 13:00 before the weekend of the visit.{% endblocktrans %}
+                </div>
+            {% elif showing.free_spaces <= 0 %}
+                <div class="alert alert-warning">
+                    {% trans 'This showing is already fully booked' %}
+                </div>
+            {% else %}
+                <h3>{% trans 'Make a reservation' %}</h3>
+                <hr>
+                <form method="post" class="form-horizontal">
+                    {% crispy form  %}
+                </form>
             {% endif %}
-        {% endfor %}
-    </ul>
-
-</div>
+            <hr>            
+            <h3>{% trans 'Other showings' %}:</h3>
+            <ul class="list-group">
+                {% for other in other_showings %}
+                    {% if showing != other %}
+                    {% ifchanged other.start_time.month %}<hr><h4>{{ other.start_time|date:"F Y" }}</h4>{% endifchanged %}
+                    <a class="list-group-item"href="{% url 'visits-reservation-create' other.pk %}">
+                        {{ other.start_time|date }}, {{ other.start_time|date:"H:i" }}
+                        <span class="badge">
+                            {% if other.free_spaces <= 0 %}{% trans 'Fully booked' %}{% else %}Available places: {{ other.free_spaces }}{% endif %}
+                        </span>
+                    </a>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
 {% endblock %}
 

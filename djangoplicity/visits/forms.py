@@ -42,7 +42,7 @@ class ReservationForm(forms.ModelForm):
 
     email_confirm = forms.EmailField(label=_('Confirm Email'))
 
-    field_order = ['name', 'phone', 'phone_chile', 'email', 'email_confirm', 'country', 'language', 'n_spaces']
+    field_order = ['name', 'phone', 'alternative_phone', 'email', 'email_confirm', 'country', 'language', 'n_spaces']
     
     class Meta:
         model = Reservation
@@ -84,8 +84,8 @@ class ReservationForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_class = 'form-horizontal'
-        self.helper.label_class = 'col-lg-4'
-        self.helper.field_class = 'col-lg-8'
+        self.helper.label_class = 'col-lg-3'
+        self.helper.field_class = 'col-lg-9'
         self.helper.add_input(Submit('submit', _('Submit')))
 
     def clean(self):

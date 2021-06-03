@@ -4,14 +4,14 @@
 {% load transurl from djangoplicity_translation %}
 
 {% block content %}
-<div id="visits">
-    <div class="alert alert-success" role="alert">{% trans 'Your reservation was completed successfully, you will receive a confirmation email at ' %} <strong>{{ object.email }}</strong><br/><span class="alert-danger"><strong>{% trans 'Please, check your spam folder!' %}</strong></span>
-</div>
-
-    {% transurl 'visits-reservation-update' reservation.code as url %}
-    <p>{% blocktrans with limit=reservation.showing.activity.latest_reservation_time %}If you wish to cancel or change your reservation <a href="{{ SITE_DOMAIN }}{{ url }}">click here</a>. If you wish to change the date or time of your reservation please cancel your reservation and make a new reservation on this page. Cancellations and changes can only be made up until 13:00 of the Friday before your visit.{% endblocktrans %}</p>
-
+<div class="row">
     <hr>
-    <a href="/public/about/visitors/">{% trans 'Back to visits page' %}</a>
+    <div class="alert alert-success" role="alert">
+        {% trans 'Your reservation was completed successfully, you will receive a confirmation email at ' %} <strong>{{ object.email }}</strong><br/><span class="alert-danger"><strong>{% trans 'Please, check your spam folder!' %}</strong></span>
+        {% transurl 'visits-reservation-update' reservation.code as url %}
+        <p>{% blocktrans with limit=reservation.showing.activity.latest_reservation_time %}If you wish to cancel or change your reservation <a href="{{ SITE_DOMAIN }}{{ url }}">click here</a>. If you wish to change the date or time of your reservation please cancel your reservation and make a new reservation on this page. Cancellations and changes can only be made up until 13:00 of the Friday before your visit.{% endblocktrans %}</p>
+        <hr>
+        <a href="/public/about/visitors/">{% trans 'Back to visits page' %}</a>
+    </div>
 </div>
 {% endblock %}

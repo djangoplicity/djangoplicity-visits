@@ -1,4 +1,4 @@
-{% load i18n staticfiles %}
+{% load i18n staticfiles djangoplicity_utils pipeline menus djangoplicity_translation %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
     <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#">
@@ -11,26 +11,18 @@
     <link href="{{ RSS_URL }}" rel="alternate" type="application/rss+xml" title="{{ RSS_TITLE }}">
     <link href='//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
     {% if archive_title or archive %}
-    <meta name="description" content="{% if archive_title %}{% trans archive_title %}{% else %}{{ archive|capfirst }} {% trans "Archive" %}{%endif%}" />
+        <meta name="description" content="{% if archive_title %}{% trans archive_title %}{% else %}{{ archive|capfirst }} {% trans "Archive" %}{%endif%}"/>
     {% endif %}
     <meta name="description" content="{{ WEBSITE_DESCRIPTION }}"/>
     <meta name="keywords" content="{{ WEBSITE_KEYWORDS }}" />
-
-    {% load djangoplicity_translation %}
     {% spaceless %}
-    {% for code, lang in LANGUAGES %}
-    <link rel="alternate" href="{{ SITE_DOMAIN }}{{ request.path|url_for_lang:code }}" hreflang="{% if code == "en" %}x-default{% else %}{{ code }}{% endif %}" />
-    {% endfor %}
+        {% for code, lang in LANGUAGES %}
+            <link rel="alternate" href="{{ SITE_DOMAIN }}{{ request.path|url_for_lang:code }}" hreflang="{% if code == "en" %}x-default{% else %}{{ code }}{% endif %}"/>
+        {% endfor %}
     {% endspaceless %}
 
     <link rel="icon" href="{% static 'images/favicon/favicon.ico' %}">
-    {% load djangoplicity_utils %}
     <title>{% block site_title %}{{ WEBSITE_NAME }}{% if LANGUAGE_CODE != 'en' %} {{ LANGUAGE_CODE|code_to_local_country }}{% endif %}{% endblock %}</title>
-
-    {% load i18n %}
-    {% load djangoplicity_utils %}
-    {% load pipeline %}
-    {% load menus %}
 
     {% stylesheet 'main' %}
     <!--[if lte IE 9]>
@@ -38,37 +30,32 @@
         <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></SCRIpt>
         <script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
     <![endif]-->
-
     {% include "archives/opengraph.html" %}
-
     {% block analytics %}
     {% endblock %}
-
     {% block extra_header %}
     {% endblock %}
 </head>
 
 <body>
-
-<script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function(event) {
-        const nocp = document.querySelectorAll('.nocopypaste');
-        const prevent = function(e) {
-            e.preventDefault();
-        }
-        for ( element of nocp ) {
-            element.addEventListener('cut', prevent);
-            element.addEventListener('copy', prevent);
-            element.addEventListener('paste', prevent);
-        }
-    });
-</script>
-
-{% block content %}
-{% endblock %}
-{% csrf_token %}
-
-{% javascript 'main' %}
-</body>
-
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function(event) {
+            const nocp = document.querySelectorAll('.nocopypaste');
+            const prevent = function(e) {
+                e.preventDefault();
+            }
+            for ( element of nocp ) {
+                element.addEventListener('cut', prevent);
+                element.addEventListener('copy', prevent);
+                element.addEventListener('paste', prevent);
+            }
+        });
+    </script>
+    <div id="visits" class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+    {% csrf_token %}
+    {% javascript 'main' %}
+    </body>
 </html>

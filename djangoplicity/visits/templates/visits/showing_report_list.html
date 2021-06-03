@@ -2,17 +2,16 @@
 {% load i18n %}
 
 {% block content %}
-<div id="visits">
-<h1>{% trans 'Public Visits Reports' %}</h1>
-
-<div class="row">
-    <ul class="list-group">
-    {% for showing in showing_list %}
-        <a class="list-group-item" href="{% url 'visits-showings-reports-detail' showing.pk %}">
-            {{ showing }}
-        </a>
-    {% endfor %}
-    </ul>
-</div>
-
+    <div class="row">
+        <div class="page-header">
+            <h1>{% trans 'Public Visits Reports' %}</h1>
+        </div>
+        <ul class="list-group">
+        {% for showing in showing_list %}
+            <a class="list-group-item" href="{% url 'visits-showings-reports-detail' showing.pk %}">
+                {{ showing }}
+            </a>
+        {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

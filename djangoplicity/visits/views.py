@@ -108,6 +108,7 @@ class ReservationCreateView(CreateView):
             return self.showing  # pylint: disable=access-member-before-definition
 
         now = timezone.now()
+        k = self.kwargs['showingpk']
         try:
             self.showing = Showing.objects.get(
                 pk=self.kwargs['showingpk'],

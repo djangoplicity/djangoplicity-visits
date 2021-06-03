@@ -1,28 +1,22 @@
 {% extends "visits/visits-base.html" %}
-{% load crispy_forms_tags %}
-{% load i18n %}
+{% load i18n crispy_forms_tags %}
 
 {% block content %}
-<div id="visits">
+<div class="row">
     <h1>{{ activity }}</h1>
     <div class="well">
         <p>{{ object.showing.start_time }}</p>
     </div>
-
     <h2>{% trans 'Update your reservation' %}</h2>
     <form method="post" class="form-horizontal">
     {% crispy form  %}
     </form>
-
     <hr>
     <h2>{% trans 'Cancel your reservation' %}</h2>
-
     <p>{% trans 'Click the button below to cancel your reservation, this cannot be undone!' %}</p>
-
     <form method="post" action="../../delete/{{ object.code }}/" class="form-horizontal">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">{% trans 'Cancel the reservation' %}</button>
     </form>
-
 </div>
 {% endblock %}

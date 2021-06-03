@@ -126,7 +126,7 @@ class Reservation(models.Model):
     showing = models.ForeignKey('Showing')
     name = models.CharField(max_length=80, verbose_name=_('Full name'))
     phone = models.CharField(max_length=50, verbose_name=_('Phone'))
-    phone_chile = models.CharField(max_length=50, verbose_name=_('Phone in Chile'), null=True)
+    alternative_phone = models.CharField(max_length=50, verbose_name=_('Alternative Phone'), blank=True, null=True)
     email = models.EmailField(verbose_name=_('Email'))
     country = models.CharField(max_length=50, verbose_name=_('Country'))
     language = models.ForeignKey(Language, verbose_name=_('Preferred language'))
