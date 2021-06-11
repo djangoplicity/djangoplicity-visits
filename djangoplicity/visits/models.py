@@ -51,6 +51,7 @@ from djangoplicity.media.models import Image
 from djangoplicity.metadata.archives import fields as metadatafields
 from djangoplicity.translation.fields import TranslationForeignKey
 from djangoplicity.translation.models import TranslationModel
+from django.contrib.sites.models import Site
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -72,8 +73,12 @@ class Activity(TranslationModel):
     max_participants = models.IntegerField(help_text='Max. no of participants',
         default=150)
     slogan = models.CharField(max_length=255, blank=True)
-    description = models.TextField(blank=True)
+    description = metadatafields.AVMDescriptionField()
     published = models.BooleanField(default=False)
+
+    safety_form_text  = metadatafields.AVMDescriptionField()
+    disclaimer_form_text = metadatafields.AVMDescriptionField()
+    conduct_form_text = metadatafields.AVMDescriptionField()
 
     key_visual_en = TranslationForeignKey(Image, blank=True, null=True,
         on_delete=models.SET_NULL, related_name='+',
@@ -135,6 +140,10 @@ class Reservation(models.Model):
     created = models.DateTimeField(default=timezone.now)
     last_modified = models.DateTimeField(default=timezone.now)
 
+    accept_safety_form = models.BooleanField(verbose_name=_('Accept Safety Form'), default=False)
+    accept_disclaimer_form = models.BooleanField(verbose_name=_('Accept Disclaimer Form'), default=False)
+    accept_conduct_form = models.BooleanField(verbose_name=_('Accept Conduct Form'), default=False)
+
     def __unicode__(self):
         return '{}, {} ({} spaces)'.format(self.email, self.showing,
             self.n_spaces)
@@ -153,11 +162,10 @@ class Reservation(models.Model):
 
     def send_confirmation_email(self):
         template = loader.get_template('visits/emails/reservation-confirm.html')
+
         context = {
             'reservation': self,
-            'obsurl': ('paranal'
-                       if self.showing.activity.observatory == 'Paranal'
-                       else 'lasilla')
+            'home': 'http://%s' % Site.objects.get_current().domain,
         }
 
         translation.activate(self.language.code)
@@ -173,7 +181,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation confirmation'),
             txt_message,
-            'no-reply@eso.org',
+            'helixsoft@gmail.com',
             [self.email],
             html_message=html_message,
         )
@@ -184,9 +192,7 @@ class Reservation(models.Model):
         template = loader.get_template('visits/emails/reservation-reminder.html')
         context = {
             'reservation': self,
-            'obsurl': ('paranal'
-                       if self.showing.activity.observatory == 'Paranal'
-                       else 'lasilla')
+            'home': 'http://%s' % Site.objects.get_current().domain,
         }
 
         translation.activate(self.language.code)
@@ -202,7 +208,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation reminder'),
             txt_message,
-            'no-reply@eso.org',
+            'helixsoft@gmail.com',
             [self.email],
             html_message=html_message,
         )
@@ -211,7 +217,10 @@ class Reservation(models.Model):
 
     def send_deleted_email(self):
         template = loader.get_template('visits/emails/reservation-deleted.html')
-        context = {'reservation': self}
+        context = {
+            'reservation': self,
+            'home': 'http://%s' % Site.objects.get_current().domain,
+        }
 
         translation.activate(self.language.code)
 
@@ -221,7 +230,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation deleted'),
             txt_message,
-            'no-reply@eso.org',
+            'helixsoft@gmail.com',
             [self.email],
             html_message=html_message,
         )
@@ -230,7 +239,10 @@ class Reservation(models.Model):
 
     def send_updated_email(self):
         template = loader.get_template('visits/emails/reservation-updated.html')
-        context = {'reservation': self}
+        context = {
+            'reservation': self,
+            'home': 'http://%s' % Site.objects.get_current().domain,
+        }
 
         translation.activate(self.language.code)
 
@@ -240,7 +252,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation updated'),
             txt_message,
-            'no-reply@eso.org',
+            'helixsoft@gmail.com',
             [self.email],
             html_message=html_message,
         )

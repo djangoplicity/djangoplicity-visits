@@ -34,6 +34,7 @@ from crispy_forms.layout import Submit
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
+from django.conf import Settings
 
 from djangoplicity.visits.models import Reservation
 
@@ -42,7 +43,10 @@ class ReservationForm(forms.ModelForm):
 
     email_confirm = forms.EmailField(label=_('Confirm Email'))
 
-    field_order = ['name', 'phone', 'alternative_phone', 'email', 'email_confirm', 'country', 'language', 'n_spaces']
+    field_order = ['name', 'phone', 'alternative_phone', 'email',
+                   'email_confirm', 'country', 'language', 'n_spaces',
+                   'accept_safety_form', 'accept_disclaimer_form',
+                   'accept_conduct_form']
     
     class Meta:
         model = Reservation
@@ -80,6 +84,18 @@ class ReservationForm(forms.ModelForm):
             'class': 'nocopypaste'
         })
 
+        self.fields['accept_safety_form'].widget.attrs.update({
+            'class': 'acceptConditions', 'data-target': '#safety_form', 'data-toggle': 'modal'})
+        self.fields['accept_safety_form'].label = _("I hereby accept the Safety conditions on behalf of all visitors in my party.")
+
+        self.fields['accept_disclaimer_form'].widget.attrs.update({
+            'class': 'acceptConditions', 'data-target': '#disclaimer_form', 'data-toggle': 'modal'})
+        self.fields['accept_disclaimer_form'].label = _("I hereby accept the Liability Disclaimer conditions on behalf of all visitors in my party.")
+
+        self.fields['accept_conduct_form'].widget.attrs.update({
+            'class': 'acceptConditions', 'data-target': '#conduct_form', 'data-toggle': 'modal'})
+        self.fields['accept_conduct_form'].label = _("I hereby accept the Standard of Workplace Conduct conditions on behalf of all visitors in my party.")
+
         # Setup crispyform
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -103,7 +119,7 @@ class ReservationForm(forms.ModelForm):
         # Check if we already have the same reservation
         res = Reservation.objects.filter(showing=self.showing, email=email, n_spaces=self.cleaned_data['n_spaces'])
         if res:
-            raise forms.ValidationError(_('This reservation already exists. In case of issues with your reservation, please send an email to <a href="visits@eso.org">visits@eso.org</a>.'))
+            raise forms.ValidationError(_('This reservation already exists. In case of issues with your reservation, please send an email'))
 
         return cleaned_data
 

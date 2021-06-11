@@ -43,6 +43,8 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
     list_display = ('id', 'name')
     raw_id_fields = ('key_visual_en', 'key_visual_es')
+    richtext_fields = ('description', 'safety_form_text', 'disclaimer_form_text',
+                       'conduct_form_text')
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
@@ -53,9 +55,12 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
 
 class ActivityProxyAdmin(dpadmin.DjangoplicityModelAdmin):
     fields = ('lang', 'source', 'translation_ready', 'name', 'meeting_point',
-        'slogan', 'description')
+              'slogan', 'description', 'safety_form_text', 'disclaimer_form_text', 
+              'conduct_form_text')
     list_display = ('pk', 'name')
     raw_id_fields = ('source', )
+    richtext_fields = ('description', 'safety_form_text', 'disclaimer_form_text', 
+                       'conduct_form_text')
 
 
 class ReservationAdmin(dpadmin.DjangoplicityModelAdmin):
