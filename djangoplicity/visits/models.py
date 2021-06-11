@@ -181,7 +181,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation confirmation'),
             txt_message,
-            'develop@altix.co',
+            'development@altix.co',
             [self.email],
             html_message=html_message,
         )
@@ -208,7 +208,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation reminder'),
             txt_message,
-            'develop@altix.co',
+            'development@altix.co',
             [self.email],
             html_message=html_message,
         )
@@ -230,7 +230,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation deleted'),
             txt_message,
-            'develop@altix.co',
+            'development@altix.co',
             [self.email],
             html_message=html_message,
         )
@@ -252,7 +252,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation updated'),
             txt_message,
-            'develop@altix.co',
+            'development@altix.co',
             [self.email],
             html_message=html_message,
         )
