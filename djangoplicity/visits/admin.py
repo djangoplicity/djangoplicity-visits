@@ -32,16 +32,24 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-
+from django.core.urlresolvers import reverse
+from django.utils.html import format_html
 from djangoplicity.contrib import admin as dpadmin
 
 from djangoplicity.visits.models import Activity, ActivityProxy,\
     Language, Reservation, Showing
 
+def view_online_visit(obj):
+    url = "."
+    if isinstance(obj, Activity):
+        url = reverse('visits-showings-list', args=[obj.id])
+    elif isinstance(obj, Showing):
+        url = reverse('visits-reservation-create', args=[obj.id])
+    return format_html('<a href="{}">View Online</a>', url)
 
 class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
-    list_display = ('id', 'name')
+    list_display = ('id', 'name', view_online_visit,)
     raw_id_fields = ('key_visual_en', 'key_visual_es')
     richtext_fields = ('description', 'safety_form_text', 'disclaimer_form_text',
                        'conduct_form_text')
@@ -74,7 +82,7 @@ class ReservationAdmin(dpadmin.DjangoplicityModelAdmin):
 class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
     list_display = ('activity', 'start_time', 'private', 'total_spaces',
-        'free_spaces')
+        'free_spaces', view_online_visit)
     list_filter = ('activity', 'private')
     readonly_fields = ('total_spaces', 'free_spaces')
 
