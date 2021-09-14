@@ -116,6 +116,8 @@ class ReservationCreateView(CreateView):
             )
         except Showing.DoesNotExist:
             raise Http404
+        except ValueError:
+            raise Http404
 
         return self.showing
 
