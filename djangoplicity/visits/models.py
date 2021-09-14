@@ -50,7 +50,7 @@ from djangoplicity.archives.translation import TranslationProxyMixin
 from djangoplicity.media.models import Image
 from djangoplicity.metadata.archives import fields as metadatafields
 from djangoplicity.translation.fields import TranslationForeignKey
-from djangoplicity.translation.models import TranslationModel
+from djangoplicity.translation.models import TranslationModel, translation_reverse
 from django.contrib.sites.models import Site
 
 def eprint(*args, **kwargs):
@@ -97,6 +97,9 @@ class Activity(TranslationModel):
     class Translation:
         excludes = []
         fields = ['name', 'meeting_point', 'slogan', 'description']
+
+    def get_absolute_url(self):
+        return translation_reverse('visits-showings-list', args=[str( self.id if self.is_source() else self.source.id )], lang=self.lang )
 
 
 class ActivityProxy(Activity, TranslationProxyMixin):
@@ -284,6 +287,9 @@ class Showing(models.Model):
 
     def get_absolute_url(self):
         return reverse('visits-reservation-create', args=[self.pk])
+
+    def get_report_url(self):
+        return reverse('visits-showings-reports-detail', args=[self.pk])
 
     def get_activity(self):
         '''
