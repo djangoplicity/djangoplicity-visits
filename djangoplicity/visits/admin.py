@@ -48,9 +48,8 @@ def view_online(obj):
     return format_html('<a href="{}">View Online</a>', url)
 
 def view_report(obj):
-    if hasattr(obj, 'get_report_url'):
-        return format_html('<a href="{}">View Report</a>',
-        reverse('visits-showings-reports-detail', args=[obj.id]))
+    return format_html('<a href="{}">View Report</a>',
+    reverse('visits-showings-reports-detail', args=[obj.id]))
 
 
 class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
