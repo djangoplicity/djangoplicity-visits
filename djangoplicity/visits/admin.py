@@ -47,6 +47,12 @@ def view_online(obj):
         url = reverse('visits-reservation-create', args=[obj.id])
     return format_html('<a href="{}">View Online</a>', url)
 
+def view_report(obj):
+    if hasattr(obj, 'get_report_url'):
+        return format_html('<a href="{}">View Report</a>',
+        reverse('visits-showings-reports-detail', args=[obj.id]))
+
+
 class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
     list_display = ('id', 'name', view_online,)
@@ -82,7 +88,7 @@ class ReservationAdmin(dpadmin.DjangoplicityModelAdmin):
 class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
     list_display = ('activity', 'start_time', 'private', 'total_spaces',
-        'free_spaces', view_online)
+        'free_spaces', view_online, view_report)
     list_filter = ('activity', 'private')
     readonly_fields = ('total_spaces', 'free_spaces')
 
