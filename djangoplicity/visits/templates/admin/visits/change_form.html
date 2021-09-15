@@ -7,7 +7,7 @@
     {% has_attribute original "get_report_url" as has_report %}
     {% if has_report %}<li><a href="{{ original.get_report_url }}">{% trans "Report" %}</a></li>{% endif %}
     <li><a href="{% url opts|admin_urlname:'history' original.pk|admin_urlquote %}" class="historylink">{% trans "History" %}</a></li>
-  {% if has_absolute_url %}<li><a href="{{ original.get_absolute_url }}" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
+  {% if has_absolute_url %}<li><a href="{{ original.get_absolute_url }}" class="viewsitelink" target="_blank">{% trans "View on site" %}</a></li>{% endif%}
   </ul>
 {% endif %}{% endif %}
 {% endblock %}

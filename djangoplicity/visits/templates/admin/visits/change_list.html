@@ -3,7 +3,7 @@
 
 {% block object-tools-items %}
 {% if has_add_permission %}
-<li><a href="{% url 'visits-showings-reports-list' %}">{% trans "View Visit Reports" %}</a></li>
+<li><a href="{% url 'visits-showings-reports-list' %}" target="_blank">{% trans "View Visits Reports" %}</a></li>
 <li>
     {% url cl.opts|admin_urlname:'add' as add_url %}
     <a href="{% add_preserved_filters add_url is_popup to_field %}" class="addlink">
