@@ -45,10 +45,10 @@ def view_online(obj):
         url = reverse('visits-showings-list', args=[obj.id])
     elif isinstance(obj, Showing):
         url = reverse('visits-reservation-create', args=[obj.id])
-    return format_html('<a href="{}">View Online</a>', url)
+    return format_html('<a href="{}" target="_blank">View Online</a>', url)
 
 def view_report(obj):
-    return format_html('<a href="{}">View Report</a>',
+    return format_html('<a href="{}" target="_blank">View Report</a>',
     reverse('visits-showings-reports-detail', args=[obj.id]))
 
 
