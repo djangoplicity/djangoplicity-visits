@@ -45,7 +45,7 @@ jobs:
         run: python manage.py migrate
       - name: Run tests
         run: |
-          env DJANGO_SETTINGS_MODULE="test_project.test_settings" coverage run --source='.' manage.py test
+          env DJANGO_SETTINGS_MODULE="test_project.settings" coverage run --source='.' manage.py test
           coverage xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
