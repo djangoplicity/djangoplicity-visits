@@ -19,3 +19,6 @@ git+https://@github.com/djangoplicity/djangoplicity.git@develop
 
 # RSA > 4.0 does not support Python 3 (This is a django dependency)
 rsa==4.0
+
+# Faker
+Faker==3.0.1
