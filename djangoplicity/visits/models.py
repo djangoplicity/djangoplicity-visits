@@ -262,6 +262,7 @@ class Reservation(models.Model):
 
         translation.deactivate()
 
+
 class Showing(models.Model):
     activity = TranslationForeignKey('Activity', related_name='showings')
     start_time = models.DateTimeField()
