@@ -2,7 +2,9 @@ from djangoplicity.visits.models import Activity, ActivityProxy, Language, Reser
 from djangoplicity.media.models import Image
 from faker.factory import Factory
 from datetime import timedelta
+import pytz
 
+utc = pytz.timezone('UCT')
 Faker = Factory.create
 fake = Faker()
 
@@ -11,7 +13,7 @@ fake = Faker()
 def factory_activity(data):
 
     default = {
-        "id": "test-activity",
+        "id": fake.slug(),
         "lang": "en",
         "source": None,
         "translation_ready": False,
@@ -20,7 +22,7 @@ def factory_activity(data):
         "meeting_point": fake.street_name(),
         "travel_info_url": fake.url(),
         "map_url": fake.url(),
-        "duration": "00:06:00",
+        "duration": timedelta(hours=fake.random_element([1, 2, 3, 6])),
         "latest_reservation_time": 24,
         "min_participants": fake.random_element([5, 10]),
         "max_participants": fake.random_element([10, 15, 20]),
@@ -32,10 +34,6 @@ def factory_activity(data):
         "conduct_form_text": fake.text(),
         "key_visual_en": fake.random_element(Image.objects.all()),
         "key_visual_es": None,
-        "offered_languages": [
-            "en",
-            "es"
-        ]
     }
     if data is not None:
         default.update(data)
@@ -45,7 +43,7 @@ def factory_activity(data):
 # Factory to create random showing
 def factory_showing(activity, data=None):
 
-    start_time = fake.date_time()
+    start_time = fake.date_time(utc)
     end_time = start_time + timedelta(hours=6)
 
     default = {
