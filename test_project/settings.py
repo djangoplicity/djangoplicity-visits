@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+from distutils.sysconfig import get_python_lib
 
 # We can't use ugettext from django.utils.translation as it will itself
 # load the settings resulting in a ImproperlyConfigured error
@@ -18,6 +19,8 @@ ugettext = lambda s: s
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DJANGOPLICITY_ROOT = '{}/djangoplicity'.format(get_python_lib())
+DJANGOPLICITY_VISIT_ROOT = os.path.join(BASE_DIR, 'djangoplicity', 'visits')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp')
 
 # Quick-start development settings - unsuitable for production
@@ -70,7 +73,8 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'test_project',
-    'tinymce'
+    'tinymce',
+    'pipeline',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + DJANGOPLICITY_APPS + THIRD_PARTY_APPS
@@ -91,14 +95,29 @@ ROOT_URLCONF = 'test_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'test_project', 'templates'),
+            "{}/templates".format(DJANGOPLICITY_VISIT_ROOT),
+            "{}/templates".format(DJANGOPLICITY_ROOT)
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
+            'builtins': [
+                'djangoplicity.pages.templatetags.layout',
+            ],
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'djangoplicity.utils.context_processors.project_environment',
+                'djangoplicity.utils.context_processors.google_analytics_id',
+                'djangoplicity.utils.context_processors.djangoplicity_environment',
+                'djangoplicity.archives.context_processors.internal_request'
             ],
         },
     },
@@ -172,6 +191,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
+if USE_I18N:
+    INSTALLED_APPS += [
+        'djangoplicity.translation',
+    ]
+
+    MIDDLEWARE += [
+        # Sets local for request based on URL prefix.
+        'djangoplicity.translation.middleware.LocaleMiddleware',  # Request/Response
+    ]
+# STATIC FILES (CSS, JavaScript, Images)
+# See: https://docs.djangoproject.com/en/1.11/howto/static-files/
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 # JAVASCRIPT CUSTOM CONFIG
@@ -186,3 +217,100 @@ IMAGES_ARCHIVE_ROOT = 'archives/images/'
 VIDEOS_ARCHIVE_ROOT = 'archives/videos/'
 SCIENCEANNOUNCEMENTS_ARCHIVE_ROOT = 'archives/science/'
 RELEASE_ARCHIVE_ROOT = 'archives/releases/'
+
+# Hashids salt, used to encrype/decrypt Contacts' UIDs
+HASHIDS_SALT = 'UbKopIrheasdGiwrked'
+HASHIDS_ALPHABET = 'abcdefghijkmnopqrstuvwxyz123456789'
+HASHIDS_ALPHABET_UPPER = 'ABCDEFGHJKMNPQRSTUVWXYZ123456789'
+
+
+PIPELINE = {
+    'STYLESHEETS': {
+        'main': {
+            'source_filenames': (
+                'font-awesome/css/font-awesome.min.css',
+                'sprites/sprites.css',
+                'css/bootstrap.3.1.1.css',
+                'css/noirlab.css',
+                'css/app.css',
+            ),
+            'output_filename': 'css/main.css',
+        },
+        'extras': {
+            'source_filenames': (
+                'jquery-ui-1.12.1/jquery-ui.min.css',
+                'slick-1.5.0/slick/slick.css',
+                'justified/css/jquery.justified.css',
+                'magnific-popup/magnific-popup.css',
+            ),
+            'output_filename': 'css/extras.css',
+        },
+    },
+    'JAVASCRIPT': {
+        'main': {
+            'source_filenames': (
+                'jquery/jquery-1.11.1.min.js',
+                'jquery-ui-1.12.1/jquery-ui.min.js',
+                'bootstrap/bootstrap-3.1.1-dist/js/bootstrap.min.js',
+                'js/jquery.menu-aim.js',
+                'slick-1.5.0/slick/slick.min.js',
+                'djangoplicity/jwplayer/jwplayer.js',
+                'djangoplicity/js/jquery.beforeafter-1.4.js',
+                'js/masonry.pkgd.min.js',
+                'justified/js/jquery.justified.min.js',
+                'magnific-popup/jquery.magnific-popup.min.js',
+                'djangoplicity/js/widgets.js',
+                'djangoplicity/js/pages.js',
+                'djangoplicity/js/djp-jwplayer.js',
+                'js/picturefill.min.js',
+                'js/enquire/enquire.min.js',
+                'js/sorttable.js',
+                'js/noirlab.js',
+            ),
+            'output_filename': 'js/main.js',
+        },
+        'ie8compat': {
+            'source_filenames': (
+                'js/ie8compat/matchMedia/matchMedia.js',
+                'js/ie8compat/matchMedia/matchMedia.addListener.js',
+            ),
+            'output_filename': 'js/ie8compat.js',
+        },
+        'openseadragon': {
+            'source_filenames': (
+                'djangoplicity/openseadragon/openseadragon.min.js',
+            ),
+            'output_filename': 'js/openseadragon.js',
+        },
+    },
+    'CSS_COMPRESSOR': 'pipeline.compressors.cssmin.CSSMinCompressor',
+    'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
+    'DISABLE_WRAPPER': True,
+}
+
+# TINYMCE
+TINYMCE_DEFAULT_CONFIG = {
+    'height': 360,
+    'width': 'auto',
+    'cleanup_on_startup': True,
+    'custom_undo_redo_levels': 20,
+    'selector': 'textarea',
+    'theme': 'modern',
+    'plugins': '''
+        textcolor save link image media preview codesample table
+        code lists fullscreen  insertdatetime  nonbreaking contextmenu
+        directionality searchreplace wordcount visualblocks visualchars
+        code fullscreen autolink lists  charmap print  hr anchor pagebreak
+    ''',
+    'toolbar1': '''
+        fullscreen code | cut copy | searchreplace | alignleft aligncenter alignright alignjustify | formatselect forecolor backcolor | superscript subscript |
+     ''',
+    'toolbar2': '''
+        bold italic underline strikethrough | bullist numlist table hr | indent outdent | undo redo | link unlink anchor image media charmap | nonbreaking |
+    ''',
+    'contextmenu': 'formats | link image',
+    'menubar': False,
+    'statusbar': True,
+    'entity_encoding': 'raw',
+    'convert_urls': False,
+}
