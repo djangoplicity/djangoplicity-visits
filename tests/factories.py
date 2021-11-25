@@ -1,13 +1,16 @@
 from djangoplicity.visits.models import Activity, ActivityProxy, Language, Reservation, Showing
 from djangoplicity.media.models import Image
 from faker.factory import Factory
-from datetime import timedelta
+from datetime import timedelta, datetime
 import pytz
 
 utc = pytz.timezone('UCT')
 Faker = Factory.create
 fake = Faker()
 
+
+def create_datetime(year, month, day, hour, minute, second, microsecond):
+    return datetime(year, month, day,  hour, minute, second, microsecond, utc)
 
 # Factory to create a Activity
 def factory_activity(data):
@@ -43,8 +46,16 @@ def factory_activity(data):
 # Factory to create random showing
 def factory_showing(activity, data=None):
 
-    start_time = fake.date_time(utc)
-    end_time = start_time + timedelta(hours=6)
+    start_time = data.get('start_time', None)
+    end_time = data.get('end_time', None)
+    if not start_time:
+        # Add future date times between 1 and 7 months in the future
+        next_month = datetime.now(utc) + timedelta(30)
+        six_months_after = next_month + timedelta(180)
+        start_time = fake.date_time_between(next_month, six_months_after, utc)
+    # Set end time 6 hours after
+    if not end_time:
+        end_time = start_time + timedelta(hours=6)
 
     default = {
         "activity": activity,
