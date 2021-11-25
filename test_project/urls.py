@@ -16,6 +16,8 @@ Including another URLconf
 from django.conf.urls import url, include
 from test_project.admin import adminlogs_site
 from test_project.admin import admin_site
+from django.conf import settings
+
 
 urlpatterns = [
     url(r'^admin/', include(admin_site.urls)),
@@ -26,3 +28,9 @@ urlpatterns = [
     # djangoplicty visits
     url(r'^visits/', include('djangoplicity.visits.urls'), {'translate': True}),
 ]
+
+if settings.DEBUG_TOOLBAR:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]

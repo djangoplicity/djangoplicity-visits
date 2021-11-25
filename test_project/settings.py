@@ -75,6 +75,8 @@ THIRD_PARTY_APPS = [
     'test_project',
     'tinymce',
     'pipeline',
+    'debug_toolbar',
+    'crispy_forms',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + DJANGOPLICITY_APPS + THIRD_PARTY_APPS
@@ -88,6 +90,41 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+DEBUG_TOOLBAR = True
+
+def show_toolbar(request):
+    # The default callback checks if the IP is internal, but docker's IP
+    # addresses are not in INTERNAL_IPS, so we force the display in dev mode
+    return True
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+    'SHOW_TOOLBAR_CALLBACK': show_toolbar,
+    'SKIP_TEMPLATE_PREFIXES': (
+        'django/forms/widgets/',
+        'admin/widgets/',
+        'menus/',
+        'pipeline/',
+    ),
+}
+
+# DEBUG TOOLBAR
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    # 'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    # 'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
 
 ROOT_URLCONF = 'test_project.urls'
@@ -186,7 +223,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
@@ -314,3 +351,12 @@ TINYMCE_DEFAULT_CONFIG = {
     'entity_encoding': 'raw',
     'convert_urls': False,
 }
+
+# Crispy form
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+# mailtrap service
+EMAIL_HOST = 'smtp.mailtrap.io'
+EMAIL_HOST_USER = '9bf800ee730746'
+EMAIL_HOST_PASSWORD = 'f3162e99c9f248'
+EMAIL_PORT = '2525'
