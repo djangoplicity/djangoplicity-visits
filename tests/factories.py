@@ -80,7 +80,7 @@ def factory_reservation(showing, data=None):
         "phone": fake.phone_number(),
         "alternative_phone": fake.phone_number(),
         "email": fake.email(),
-        "country": fake.country(),
+        "country": str(fake.country())[:49],
         "language": fake.random_element(Language.objects.all()),
         "n_spaces": fake.random.randint(1, 6)
     }
