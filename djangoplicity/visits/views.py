@@ -211,17 +211,9 @@ class ShowingListView(ListView):
         return super(ShowingListView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
-
-        now = timezone.now()
-        ### COVID-19 ###
-        ### EXCEPTIONAL, close reservations until August because of Corona virus ###
-        now = datetime(2020, 8, 1)
-
         qs = self.activity.showings.filter(
-            private=False,
-            start_time__gt=now,
+            private=False
         )
-
         return (qs.order_by('start_time'))
 
 
