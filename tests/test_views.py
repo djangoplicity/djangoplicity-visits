@@ -1,5 +1,4 @@
 from django.test import Client
-from django.urls import reverse
 from django.test import TransactionTestCase
 from django.contrib.auth import get_user_model
 from .factories import factory_activity, factory_showing, factory_reservation, create_datetime
