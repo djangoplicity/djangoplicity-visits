@@ -1,0 +1,22 @@
+{% extends "empty.html" %}
+{% load static i18n pipeline pages %}
+
+{% block body_content %}
+<a class="skip-link" href="#content">Skip to main content</a>
+
+<div tabindex="-1" id="content">
+{% block content_area %}
+{% endblock %}
+</div>
+
+
+
+{% stylesheet 'extras' %}
+
+<script type="text/javascript">
+    var MEDIA_URL = "{{MEDIA_URL}}";
+    var STATIC_URL = "{{STATIC_URL}}";
+</script>
+{% javascript 'main' %}
+{% block extra_scripts %}{% endblock %}
+{% endblock %}

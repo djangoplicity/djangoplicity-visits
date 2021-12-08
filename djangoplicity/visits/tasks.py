@@ -17,13 +17,10 @@ logger = get_task_logger(__name__)
 
 @task
 def reservation_reminder():
-    '''
+    """
     Send a reminder for all visits happening the next day
     Send a reminder for all visits the day after last modification
-    '''
-
-    # EXCEPTIONAL Corona virus
-    return
+    """
 
     # Only in prod
     if settings.SITE_ENVIRONMENT != 'prod':
@@ -43,4 +40,3 @@ def reservation_reminder():
         reservation.send_reminder_email()
     for reservation in reservations_yesterday:
         reservation.send_reminder_email()
-

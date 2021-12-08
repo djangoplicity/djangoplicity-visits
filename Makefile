@@ -3,6 +3,8 @@ bash:
 
 test:
 	docker exec -it djangoplicity-visits coverage run --source='.' manage.py test
+	docker exec -it djangoplicity-visits coverage html
+	open ./htmlcov/index.html
 
 coverage-html:
 	docker exec -it djangoplicity-visits coverage html

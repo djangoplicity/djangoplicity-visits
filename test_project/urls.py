@@ -14,11 +14,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
-
+from test_project.admin import adminlogs_site
 from test_project.admin import admin_site
+from django.conf import settings
+
 
 urlpatterns = [
     url(r'^admin/', include(admin_site.urls)),
+    url(r'^admin/cache/', include('djangoplicity.cache.urls', namespace="admincache_site", app_name="cache")),
+    url(r'^admin/system/', include(adminlogs_site.urls), {'extra_context': {'ADMINLOGS_SITE': True}}),
+    url(r'^admin/history/', include('djangoplicity.adminhistory.urls', namespace="adminhistory_site", app_name="history")),
+    url(r'^tinymce/', include('tinymce.urls')),
     # djangoplicty visits
     url(r'^visits/', include('djangoplicity.visits.urls'), {'translate': True}),
 ]
+
+if settings.DEBUG_TOOLBAR:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]
