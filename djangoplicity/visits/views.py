@@ -211,8 +211,10 @@ class ShowingListView(ListView):
         return super(ShowingListView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
+        now = timezone.now()
         qs = self.activity.showings.filter(
-            private=False
+            private=False,
+            start_time__gt=now
         )
         return (qs.order_by('start_time'))
 
