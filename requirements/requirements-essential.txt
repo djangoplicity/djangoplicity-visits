@@ -5,9 +5,6 @@ hashids
 html2text
 trml2pdf==0.5.0
 
-# PostgreSQL python client
-psycopg2-binary==2.7.7
-
 # Asynchronous Task Queue
 celery==4.3.0
 
