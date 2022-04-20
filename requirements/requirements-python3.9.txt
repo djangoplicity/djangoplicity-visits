@@ -1,1 +1,5 @@
-# Nothing for now
+# Djangoplicity actions
+git+https://@github.com/djangoplicity/djangoplicity-actions@release/python3
+
+# Djangoplicity
+git+https://@github.com/djangoplicity/djangoplicity.git@release/python3

@@ -1,2 +1,8 @@
 # JSMin latest version doesn't support Python 2
 jsmin==2.2.2
+
+# Djangoplicity actions
+git+https://@github.com/djangoplicity/djangoplicity-actions@develop
+
+# Djangoplicity
+git+https://@github.com/djangoplicity/djangoplicity.git@develop
