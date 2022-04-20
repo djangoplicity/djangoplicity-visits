@@ -1,0 +1,2 @@
+# JSMin latest version doesn't support Python 2
+jsmin==2.2.2
