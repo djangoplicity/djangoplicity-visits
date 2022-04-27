@@ -31,11 +31,12 @@
 
 from __future__ import unicode_literals
 from __future__ import print_function
+import os
 import sys
-
+from django.core.files.storage import FileSystemStorage
+from django.core.validators import FileExtensionValidator
 from hashids import Hashids
 import html2text
-
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db import models, transaction
@@ -45,7 +46,6 @@ from django.template import loader
 from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
-
 from djangoplicity.archives.translation import TranslationProxyMixin
 from djangoplicity.media.models import Image
 from djangoplicity.metadata.archives import fields as metadatafields
@@ -53,8 +53,22 @@ from djangoplicity.translation.fields import TranslationForeignKey
 from djangoplicity.translation.models import TranslationModel, translation_reverse
 from django.contrib.sites.models import Site
 
+
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+
+
+def handle_uploaded_file(instance, filename):
+    """
+    Generate a new name for an uploaded filed.
+
+    Pattern used: <uuid>.<original extension>
+    """
+    dummy_base, ext = os.path.splitext(filename)
+    import uuid
+    name = "%s/%s%s" % ('visits', str(uuid.uuid1()), ext.lower())
+
+    return name
 
 
 class Activity(TranslationModel):
@@ -76,9 +90,12 @@ class Activity(TranslationModel):
     description = metadatafields.AVMDescriptionField()
     published = models.BooleanField(default=False)
 
-    safety_form_text  = metadatafields.AVMDescriptionField()
-    disclaimer_form_text = metadatafields.AVMDescriptionField()
-    conduct_form_text = metadatafields.AVMDescriptionField()
+    safety_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
+                                        validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
+    disclaimer_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
+                                            validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
+    conduct_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
+                                         validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
 
     key_visual_en = TranslationForeignKey(Image, blank=True, null=True,
         on_delete=models.SET_NULL, related_name='+',
