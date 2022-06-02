@@ -180,17 +180,20 @@ class Reservation(models.Model):
         super(Reservation, self).save(**kwargs)
         transaction.on_commit(self.showing.update_spaces_count)
 
-    def send_confirmation_email(self):
-        template = loader.get_template('visits/emails/reservation-confirm.html')
-
-        context = {
+    def get_context(self):
+        return {
+            'base_url': "{}://{}".format(getattr(settings, "URLS_SCHEME", "https"), Site.objects.get_current().domain),
+            'MEDIA_URL': settings.MEDIA_URL,
+            'STATIC_URL': settings.STATIC_URL,
             'reservation': self,
             'home': 'http://%s' % Site.objects.get_current().domain,
         }
 
+    def send_confirmation_email(self):
+        template = loader.get_template('visits/emails/reservation-confirm.html')
         translation.activate(self.language.code)
 
-        html_message = template.render(context)
+        html_message = template.render(self.get_context())
         txt_message = html2text.html2text(html_message)
 
         #  print('DEBUG')
@@ -210,14 +213,10 @@ class Reservation(models.Model):
 
     def send_reminder_email(self):
         template = loader.get_template('visits/emails/reservation-reminder.html')
-        context = {
-            'reservation': self,
-            'home': 'http://%s' % Site.objects.get_current().domain,
-        }
 
         translation.activate(self.language.code)
 
-        html_message = template.render(context)
+        html_message = template.render(self.get_context())
         txt_message = html2text.html2text(html_message)
 
         #  print('DEBUG')
@@ -237,14 +236,10 @@ class Reservation(models.Model):
 
     def send_deleted_email(self):
         template = loader.get_template('visits/emails/reservation-deleted.html')
-        context = {
-            'reservation': self,
-            'home': 'http://%s' % Site.objects.get_current().domain,
-        }
 
         translation.activate(self.language.code)
 
-        html_message = template.render(context)
+        html_message = template.render(self.get_context())
         txt_message = html2text.html2text(html_message)
 
         send_mail(
@@ -259,14 +254,10 @@ class Reservation(models.Model):
 
     def send_updated_email(self):
         template = loader.get_template('visits/emails/reservation-updated.html')
-        context = {
-            'reservation': self,
-            'home': 'http://%s' % Site.objects.get_current().domain,
-        }
 
         translation.activate(self.language.code)
 
-        html_message = template.render(context)
+        html_message = template.render(self.get_context())
         txt_message = html2text.html2text(html_message)
 
         send_mail(

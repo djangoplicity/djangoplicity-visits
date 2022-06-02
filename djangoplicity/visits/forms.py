@@ -85,15 +85,15 @@ class ReservationForm(forms.ModelForm):
         })
 
         self.fields['accept_safety_form'].widget.attrs.update({
-            'class': 'acceptConditions', 'data-target': '#safety_form', 'data-toggle': 'modal'})
+            'data-target': '#safety_form', 'data-toggle': 'modal'})
         self.fields['accept_safety_form'].label = _("I hereby accept the Safety conditions on behalf of all visitors in my party.")
 
         self.fields['accept_disclaimer_form'].widget.attrs.update({
-            'class': 'acceptConditions', 'data-target': '#disclaimer_form', 'data-toggle': 'modal'})
+            'data-target': '#disclaimer_form', 'data-toggle': 'modal'})
         self.fields['accept_disclaimer_form'].label = _("I hereby accept the Liability Disclaimer conditions on behalf of all visitors in my party.")
 
         self.fields['accept_conduct_form'].widget.attrs.update({
-            'class': 'acceptConditions', 'data-target': '#conduct_form', 'data-toggle': 'modal'})
+            'data-target': '#conduct_form', 'data-toggle': 'modal'})
         self.fields['accept_conduct_form'].label = _("I hereby accept the Standard of Workplace Conduct conditions on behalf of all visitors in my party.")
 
         # Setup crispyform
