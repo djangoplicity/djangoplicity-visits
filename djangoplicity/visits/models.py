@@ -71,6 +71,15 @@ def handle_uploaded_file(instance, filename):
     return name
 
 
+def get_default_from_email():
+    if hasattr(settings, 'VISITS_DEFAULT_FROM_EMAIL'):
+        return settings.VISITS_DEFAULT_FROM_EMAIL
+    elif hasattr(settings, 'DEFAULT_FROM_EMAIL'):
+        return settings.DEFAULT_FROM_EMAIL
+    else:
+        return None
+
+
 class Activity(TranslationModel):
     id = metadatafields.AVMIdField(primary_key=True, verbose_name='ID',
         help_text='ID of the activity, also used in URLs')
@@ -204,7 +213,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation confirmation'),
             txt_message,
-            settings.DEFAULT_FROM_EMAIL,
+            get_default_from_email(),
             [self.email],
             html_message=html_message,
         )
@@ -227,7 +236,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation reminder'),
             txt_message,
-            settings.DEFAULT_FROM_EMAIL,
+            get_default_from_email(),
             [self.email],
             html_message=html_message,
         )
@@ -245,7 +254,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation deleted'),
             txt_message,
-            settings.DEFAULT_FROM_EMAIL,
+            get_default_from_email(),
             [self.email],
             html_message=html_message,
         )
@@ -263,7 +272,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation updated'),
             txt_message,
-            settings.DEFAULT_FROM_EMAIL,
+            get_default_from_email(),
             [self.email],
             html_message=html_message,
         )
@@ -347,6 +356,7 @@ def generate_code(sender, instance, raw, **kwargs):
             salt=settings.HASHIDS_SALT, min_length=5)
         instance.code = hashids.encrypt(instance.pk)
         instance.save()
+
 
 post_save.connect(generate_code, sender=Reservation)
 post_delete.connect(Reservation.delete_notification, sender=Reservation)
