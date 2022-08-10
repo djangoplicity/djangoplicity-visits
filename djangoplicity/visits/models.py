@@ -33,6 +33,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 import os
 import sys
+import pytz
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import FileExtensionValidator
 from hashids import Hashids
@@ -79,6 +80,7 @@ def get_default_from_email():
     else:
         return None
 
+TIMEZONES_TZS = [(tz, tz) for tz in pytz.all_timezones]
 
 class Activity(TranslationModel):
     id = metadatafields.AVMIdField(primary_key=True, verbose_name='ID',
@@ -286,6 +288,7 @@ class Showing(models.Model):
     end_time = models.DateTimeField(blank=True, null=True,
         help_text='If left empty will be calculated from the activity '
         'duration')
+    timezone = models.CharField(max_length=40, choices=TIMEZONES_TZS, blank=True, null=True)
     private = models.BooleanField(default=False,
         help_text='Whether the showing if private.')
     offered_languages = models.ManyToManyField('Language')
@@ -296,6 +299,32 @@ class Showing(models.Model):
         '(based on selected activity)', blank=True)
     free_spaces = models.IntegerField(help_text='Current number of available '
         'seats (based on current resevations)', blank=True)
+
+    def get_date_timezone(self, date):
+        timezone_name = self.timezone if self.timezone else settings.TIME_ZONE
+        tz = pytz.timezone(timezone_name)
+        return tz.localize(date)
+
+    def _get_start_date_tz(self):
+        return self.get_date_timezone(self.start_time)
+
+    def _get_end_date_tz(self):
+        return self.get_date_timezone(self.end_time)
+
+    start_date_tz = property(_get_start_date_tz)
+    end_date_tz = property(_get_end_date_tz)
+
+    def get_timezone_abbr(self):
+        timezone_name = self.timezone if self.timezone else settings.TIME_ZONE
+        tz = pytz.timezone(timezone_name)
+        abbr = tz.localize(self.start_time, is_dst=None)
+        # Workaround to display CLT timezone no appear in pytz list
+        # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+        if abbr.tzname() == '-03':
+            return 'CLT'
+        return abbr.tzname()
+
+    timezone_abbreviation = property(get_timezone_abbr)
 
     def __unicode__(self):
         return '{} — {}'.format(

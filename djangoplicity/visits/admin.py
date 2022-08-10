@@ -83,7 +83,7 @@ class ReservationAdmin(dpadmin.DjangoplicityModelAdmin):
 
 class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
-    list_display = ('activity', 'start_time', 'private', 'total_spaces',
+    list_display = ('activity', 'start_time', 'private', 'total_spaces', 'timezone',
         'free_spaces', view_online, view_report)
     list_filter = ('activity', 'private')
     readonly_fields = ('total_spaces', 'free_spaces')
