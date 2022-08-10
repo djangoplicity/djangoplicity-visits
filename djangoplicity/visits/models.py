@@ -318,6 +318,8 @@ class Showing(models.Model):
         timezone_name = self.timezone if self.timezone else settings.TIME_ZONE
         tz = pytz.timezone(timezone_name)
         abbr = tz.localize(self.start_time, is_dst=None)
+        # Workaround to display CLT timezone no appear in pytz list
+        # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
         if abbr.tzname() == '-03':
             return 'CLT'
         return abbr.tzname()
