@@ -39,9 +39,42 @@ from django.conf import Settings
 from djangoplicity.visits.models import Reservation
 
 
+NOT_HAS_SYMPTOMS_LABEL = _("I declare that no one in my group has tested positive for COVID-19 or had any symptoms in "
+                           "the last 10 days: "
+                           "<ul class='list-unstyled'>"
+                               "<li>a. Cough</li>"
+                               "<li>b. Fever</li>"
+                               "<li>c. Sore throat</li>"
+                               "<li>d. Shortness of breath</li>"
+                               "<li>e. Fatigue</li>"
+                               "<li>f. Muscle or body aches</li>"
+                               "<li>g. Loss of taste or smell</li>"
+                               "<li>h. Nausea or vomiting</li>"
+                               "<li>i. Diarrhea</li>"
+                           "</ul>")
+
+HAS_VACCINATIONS_SET_OF_COVID_LABEL = _('I declare that everyone in my group has received a full set of COVID-19 '
+                                        'vaccinations including boosters (if applicable). (vaccination cards will be '
+                                        'checked at arrival)')
+
+
 class ReservationForm(forms.ModelForm):
 
     email_confirm = forms.EmailField(label=_('Confirm Email'))
+    not_has_tested_positive_for_covid = forms.BooleanField(label=NOT_HAS_SYMPTOMS_LABEL,
+                                                           required=False,
+                                                           widget=forms.CheckboxInput(
+                                                               attrs={
+                                                                'class': 'acceptConditions covid'
+                                                               })
+                                                           )
+    has_vaccination_set = forms.BooleanField(label=HAS_VACCINATIONS_SET_OF_COVID_LABEL,
+                                             required=False,
+                                             widget=forms.CheckboxInput(
+                                                 attrs={
+                                                    'class': 'acceptConditions covid'
+                                                 })
+                                             )
 
     field_order = ['name', 'phone', 'alternative_phone', 'email',
                    'email_confirm', 'country', 'language', 'n_spaces',
@@ -85,15 +118,15 @@ class ReservationForm(forms.ModelForm):
         })
 
         self.fields['accept_safety_form'].widget.attrs.update({
-            'data-target': '#safety_form', 'data-toggle': 'modal'})
+            'data-target': '#safety_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
         self.fields['accept_safety_form'].label = _("I hereby accept the Safety conditions on behalf of all visitors in my party.")
 
         self.fields['accept_disclaimer_form'].widget.attrs.update({
-            'data-target': '#disclaimer_form', 'data-toggle': 'modal'})
+            'data-target': '#disclaimer_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
         self.fields['accept_disclaimer_form'].label = _("I hereby accept the Liability Disclaimer conditions on behalf of all visitors in my party.")
 
         self.fields['accept_conduct_form'].widget.attrs.update({
-            'data-target': '#conduct_form', 'data-toggle': 'modal'})
+            'data-target': '#conduct_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
         self.fields['accept_conduct_form'].label = _("I hereby accept the Standard of Workplace Conduct conditions on behalf of all visitors in my party.")
 
         # Setup crispyform
