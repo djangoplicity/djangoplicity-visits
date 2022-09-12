@@ -32,7 +32,7 @@
 from datetime import datetime, time, timedelta
 import pytz
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone, translation
 from django.views.generic import (

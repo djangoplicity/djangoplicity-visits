@@ -32,7 +32,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.html import format_html
 from djangoplicity.contrib import admin as dpadmin
 

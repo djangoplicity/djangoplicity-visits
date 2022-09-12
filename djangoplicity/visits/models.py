@@ -131,13 +131,13 @@ class Language(models.Model):
 
 class Reservation(models.Model):
     code = models.CharField(max_length=50, blank=True)
-    showing = models.ForeignKey('Showing')
+    showing = models.ForeignKey('Showing', on_delete=models.RESTRICT)
     name = models.CharField(max_length=80, verbose_name=_('Full name'))
     phone = models.CharField(max_length=50, verbose_name=_('Phone'))
     alternative_phone = models.CharField(max_length=50, verbose_name=_('Alternative Phone'), blank=True, null=True)
     email = models.EmailField(verbose_name=_('Email'))
     country = models.CharField(max_length=50, verbose_name=_('Country'))
-    language = models.ForeignKey(Language, verbose_name=_('Preferred language'))
+    language = models.ForeignKey(Language, verbose_name=_('Preferred language'), on_delete=models.RESTRICT)
     n_spaces = models.SmallIntegerField(verbose_name=_('Number of '
         'places'))
     created = models.DateTimeField(default=timezone.now)
@@ -264,7 +264,7 @@ class Reservation(models.Model):
 
 
 class Showing(models.Model):
-    activity = TranslationForeignKey('Activity', related_name='showings')
+    activity = TranslationForeignKey('Activity', related_name='showings', on_delete=models.RESTRICT)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(blank=True, null=True,
         help_text='If left empty will be calculated from the activity '

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n staticfiles djangoplicity_utils pipeline menus djangoplicity_translation %}
+{% load i18n static djangoplicity_utils pipeline menus djangoplicity_translation %}
 {% block site_title %}{{ WEBSITE_NAME }}{% if LANGUAGE_CODE != 'en' %} {{ LANGUAGE_CODE|code_to_local_country }}{% endif %}{% endblock %}
 {% block extra_header %}
     {% spaceless %}
