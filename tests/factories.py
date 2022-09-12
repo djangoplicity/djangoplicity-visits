@@ -32,9 +32,6 @@ def factory_activity(data):
         "slogan": fake.text(),
         "description": "",
         "published": False,
-        "safety_form_text": fake.text(),
-        "disclaimer_form_text": fake.text(),
-        "conduct_form_text": fake.text(),
         "key_visual_en": fake.random_element(Image.objects.all()),
         "key_visual_es": None,
     }

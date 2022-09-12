@@ -31,11 +31,13 @@
 
 from __future__ import unicode_literals
 from __future__ import print_function
+import os
 import sys
-
+import pytz
+from django.core.files.storage import FileSystemStorage
+from django.core.validators import FileExtensionValidator
 from hashids import Hashids
 import html2text
-
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db import models, transaction
@@ -45,7 +47,6 @@ from django.template import loader
 from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
-
 from djangoplicity.archives.translation import TranslationProxyMixin
 from djangoplicity.media.models import Image
 from djangoplicity.metadata.archives import fields as metadatafields
@@ -53,9 +54,33 @@ from djangoplicity.translation.fields import TranslationForeignKey
 from djangoplicity.translation.models import TranslationModel, translation_reverse
 from django.contrib.sites.models import Site
 
+
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
+
+def handle_uploaded_file(instance, filename):
+    """
+    Generate a new name for an uploaded filed.
+
+    Pattern used: <uuid>.<original extension>
+    """
+    dummy_base, ext = os.path.splitext(filename)
+    import uuid
+    name = "%s/%s%s" % ('visits', str(uuid.uuid1()), ext.lower())
+
+    return name
+
+
+def get_default_from_email():
+    if hasattr(settings, 'VISITS_DEFAULT_FROM_EMAIL'):
+        return settings.VISITS_DEFAULT_FROM_EMAIL
+    elif hasattr(settings, 'DEFAULT_FROM_EMAIL'):
+        return settings.DEFAULT_FROM_EMAIL
+    else:
+        return None
+
+TIMEZONES_TZS = [(tz, tz) for tz in pytz.all_timezones]
 
 class Activity(TranslationModel):
     id = metadatafields.AVMIdField(primary_key=True, verbose_name='ID',
@@ -76,9 +101,12 @@ class Activity(TranslationModel):
     description = metadatafields.AVMDescriptionField()
     published = models.BooleanField(default=False)
 
-    safety_form_text  = metadatafields.AVMDescriptionField()
-    disclaimer_form_text = metadatafields.AVMDescriptionField()
-    conduct_form_text = metadatafields.AVMDescriptionField()
+    safety_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
+                                        validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
+    disclaimer_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
+                                            validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
+    conduct_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
+                                         validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
 
     key_visual_en = TranslationForeignKey(Image, blank=True, null=True,
         on_delete=models.SET_NULL, related_name='+',
@@ -163,17 +191,20 @@ class Reservation(models.Model):
         super(Reservation, self).save(**kwargs)
         transaction.on_commit(self.showing.update_spaces_count)
 
-    def send_confirmation_email(self):
-        template = loader.get_template('visits/emails/reservation-confirm.html')
-
-        context = {
+    def get_context(self):
+        return {
+            'base_url': "{}://{}".format(getattr(settings, "URLS_SCHEME", "https"), Site.objects.get_current().domain),
+            'MEDIA_URL': settings.MEDIA_URL,
+            'STATIC_URL': settings.STATIC_URL,
             'reservation': self,
             'home': 'http://%s' % Site.objects.get_current().domain,
         }
 
+    def send_confirmation_email(self):
+        template = loader.get_template('visits/emails/reservation-confirm.html')
         translation.activate(self.language.code)
 
-        html_message = template.render(context)
+        html_message = template.render(self.get_context())
         txt_message = html2text.html2text(html_message)
 
         #  print('DEBUG')
@@ -184,7 +215,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation confirmation'),
             txt_message,
-            settings.DEFAULT_FROM_EMAIL,
+            get_default_from_email(),
             [self.email],
             html_message=html_message,
         )
@@ -193,14 +224,10 @@ class Reservation(models.Model):
 
     def send_reminder_email(self):
         template = loader.get_template('visits/emails/reservation-reminder.html')
-        context = {
-            'reservation': self,
-            'home': 'http://%s' % Site.objects.get_current().domain,
-        }
 
         translation.activate(self.language.code)
 
-        html_message = template.render(context)
+        html_message = template.render(self.get_context())
         txt_message = html2text.html2text(html_message)
 
         #  print('DEBUG')
@@ -211,7 +238,7 @@ class Reservation(models.Model):
         send_mail(
             _('Reservation reminder'),
             txt_message,
-            settings.DEFAULT_FROM_EMAIL,
+            get_default_from_email(),
             [self.email],
             html_message=html_message,
         )
@@ -220,20 +247,16 @@ class Reservation(models.Model):
 
     def send_deleted_email(self):
         template = loader.get_template('visits/emails/reservation-deleted.html')
-        context = {
-            'reservation': self,
-            'home': 'http://%s' % Site.objects.get_current().domain,
-        }
 
         translation.activate(self.language.code)
 
-        html_message = template.render(context)
+        html_message = template.render(self.get_context())
         txt_message = html2text.html2text(html_message)
 
         send_mail(
             _('Reservation deleted'),
             txt_message,
-            settings.DEFAULT_FROM_EMAIL,
+            get_default_from_email(),
             [self.email],
             html_message=html_message,
         )
@@ -242,20 +265,16 @@ class Reservation(models.Model):
 
     def send_updated_email(self):
         template = loader.get_template('visits/emails/reservation-updated.html')
-        context = {
-            'reservation': self,
-            'home': 'http://%s' % Site.objects.get_current().domain,
-        }
 
         translation.activate(self.language.code)
 
-        html_message = template.render(context)
+        html_message = template.render(self.get_context())
         txt_message = html2text.html2text(html_message)
 
         send_mail(
             _('Reservation updated'),
             txt_message,
-            settings.DEFAULT_FROM_EMAIL,
+            get_default_from_email(),
             [self.email],
             html_message=html_message,
         )
@@ -269,6 +288,7 @@ class Showing(models.Model):
     end_time = models.DateTimeField(blank=True, null=True,
         help_text='If left empty will be calculated from the activity '
         'duration')
+    timezone = models.CharField(max_length=40, choices=TIMEZONES_TZS, blank=True, null=True)
     private = models.BooleanField(default=False,
         help_text='Whether the showing if private.')
     offered_languages = models.ManyToManyField('Language')
@@ -279,6 +299,32 @@ class Showing(models.Model):
         '(based on selected activity)', blank=True)
     free_spaces = models.IntegerField(help_text='Current number of available '
         'seats (based on current resevations)', blank=True)
+
+    def get_date_timezone(self, date):
+        timezone_name = self.timezone if self.timezone else settings.TIME_ZONE
+        tz = pytz.timezone(timezone_name)
+        return tz.localize(date)
+
+    def _get_start_date_tz(self):
+        return self.get_date_timezone(self.start_time)
+
+    def _get_end_date_tz(self):
+        return self.get_date_timezone(self.end_time)
+
+    start_date_tz = property(_get_start_date_tz)
+    end_date_tz = property(_get_end_date_tz)
+
+    def get_timezone_abbr(self):
+        timezone_name = self.timezone if self.timezone else settings.TIME_ZONE
+        tz = pytz.timezone(timezone_name)
+        abbr = tz.localize(self.start_time, is_dst=None)
+        # Workaround to display CLT timezone no appear in pytz list
+        # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+        if abbr.tzname() == '-03':
+            return 'CLT'
+        return abbr.tzname()
+
+    timezone_abbreviation = property(get_timezone_abbr)
 
     def __unicode__(self):
         return '{} — {}'.format(
@@ -339,6 +385,7 @@ def generate_code(sender, instance, raw, **kwargs):
             salt=settings.HASHIDS_SALT, min_length=5)
         instance.code = hashids.encrypt(instance.pk)
         instance.save()
+
 
 post_save.connect(generate_code, sender=Reservation)
 post_delete.connect(Reservation.delete_notification, sender=Reservation)
