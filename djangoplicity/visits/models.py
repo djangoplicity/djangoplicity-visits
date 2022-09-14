@@ -115,7 +115,7 @@ class Activity(TranslationModel):
         on_delete=models.SET_NULL, related_name='+',
         verbose_name='Spanish poster')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -150,7 +150,7 @@ class Language(models.Model):
     code = models.CharField(primary_key=True, max_length=10)
     name = models.CharField(max_length=100)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -175,7 +175,7 @@ class Reservation(models.Model):
     accept_disclaimer_form = models.BooleanField(verbose_name=_('Accept Disclaimer Form'), default=False)
     accept_conduct_form = models.BooleanField(verbose_name=_('Accept Conduct Form'), default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}, {} ({} spaces)'.format(self.email, self.showing,
             self.n_spaces)
 
@@ -326,7 +326,7 @@ class Showing(models.Model):
 
     timezone_abbreviation = property(get_timezone_abbr)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} — {}'.format(
             self.activity,
             self.start_time.strftime('%Y-%m-%d %H:%M'),
