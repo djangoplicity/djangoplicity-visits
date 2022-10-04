@@ -34,8 +34,6 @@ from __future__ import print_function
 import os
 import sys
 import pytz
-from django.core.files.storage import FileSystemStorage
-from django.core.validators import FileExtensionValidator
 from hashids import Hashids
 import html2text
 from django.conf import settings
@@ -53,6 +51,7 @@ from djangoplicity.metadata.archives import fields as metadatafields
 from djangoplicity.translation.fields import TranslationForeignKey
 from djangoplicity.translation.models import TranslationModel, translation_reverse
 from django.contrib.sites.models import Site
+from djangoplicity.products2.models import TechnicalDocument
 
 
 def eprint(*args, **kwargs):
@@ -88,6 +87,7 @@ class Activity(TranslationModel):
     name = models.CharField(max_length=100)
     observatory = models.CharField(max_length=50)
     meeting_point = models.CharField(max_length=100)
+    meeting_point_link = models.URLField(help_text='Link to Meeting point', blank=True, null=True)
     travel_info_url = models.URLField(help_text='Link to travel info page')
     map_url = models.URLField(help_text='Link to Google Maps')
     offered_languages = models.ManyToManyField('Language')
@@ -101,19 +101,26 @@ class Activity(TranslationModel):
     description = metadatafields.AVMDescriptionField()
     published = models.BooleanField(default=False)
 
-    safety_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
-                                        validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
-    disclaimer_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
-                                            validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
-    conduct_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
-                                         validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
-
     key_visual_en = TranslationForeignKey(Image, blank=True, null=True,
         on_delete=models.SET_NULL, related_name='+',
         verbose_name='English poster')
     key_visual_es = TranslationForeignKey(Image, blank=True, null=True,
         on_delete=models.SET_NULL, related_name='+',
         verbose_name='Spanish poster')
+
+    safety_tech_doc = TranslationForeignKey(TechnicalDocument, blank=True, null=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name='Safety Technical Doc')
+
+    conduct_tech_doc = TranslationForeignKey(TechnicalDocument, blank=True, null=True,
+                                            on_delete=models.SET_NULL, related_name='+',
+                                            verbose_name='Conduct Technical Doc')
+
+    liability_tech_doc = TranslationForeignKey(TechnicalDocument, blank=True, null=True,
+                                            on_delete=models.SET_NULL, related_name='+',
+                                            verbose_name='Liability Technical Doc')
+
+
 
     def __unicode__(self):
         return self.name
@@ -178,6 +185,30 @@ class Reservation(models.Model):
     def __unicode__(self):
         return '{}, {} ({} spaces)'.format(self.email, self.showing,
             self.n_spaces)
+
+    def get_safety_tech_doc_url(self):
+        if self.showing.activity.safety_tech_doc and self.showing.activity.safety_tech_doc.resource_pdf:
+            return self.showing.activity.safety_tech_doc.resource_pdf.absolute_url
+        else:
+            return '#'
+
+    def get_conduct_tech_doc_url(self):
+        if self.showing.activity.conduct_tech_doc and self.showing.activity.conduct_tech_doc.resource_pdf:
+            return self.showing.activity.conduct_tech_doc.resource_pdf.absolute_url
+        else:
+            return '#'
+
+    def get_liability_tech_doc_url(self):
+        if self.showing.activity.liability_tech_doc and self.showing.activity.liability_tech_doc.resource_pdf:
+            return self.showing.activity.liability_tech_doc.resource_pdf.absolute_url
+        else:
+            return '#'
+
+    def get_map_url(self):
+        if self.showing.activity.map_url:
+            return self.showing.activity.map_url
+        else:
+            return '#'
 
     @classmethod
     def delete_notification(cls, sender, instance, **kwargs):
