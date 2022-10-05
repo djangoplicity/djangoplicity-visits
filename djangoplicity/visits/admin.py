@@ -35,9 +35,15 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.html import format_html
 from djangoplicity.contrib import admin as dpadmin
-
+from django.conf import settings
 from djangoplicity.visits.models import Activity, ActivityProxy,\
     Language, Reservation, Showing
+
+if hasattr(settings, 'ADD_NOT_CACHE_URL_PARAMETER') and settings.ADD_NOT_CACHE_URL_PARAMETER:
+    CACHE_PARAMETER = '?nocache'
+else:
+    CACHE_PARAMETER = ''
+
 
 def view_online(obj):
     url = "."
@@ -45,17 +51,18 @@ def view_online(obj):
         url = reverse('visits-showings-list', args=[obj.id])
     elif isinstance(obj, Showing):
         url = reverse('visits-reservation-create', args=[obj.id])
-    return format_html('<a href="{}" target="_blank">View Online</a>', url)
+    return format_html('<a href="{}{}" target="_blank">View Online</a>', url, CACHE_PARAMETER)
+
 
 def view_report(obj):
-    return format_html('<a href="{}" target="_blank">View Report</a>',
-    reverse('visits-showings-reports-detail', args=[obj.id]))
+    return format_html('<a href="{}{}" target="_blank">View Report</a>',
+                       reverse('visits-showings-reports-detail', args=[obj.id]), CACHE_PARAMETER)
 
 
 class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
     list_display = ('id', 'name', view_online,)
-    raw_id_fields = ('key_visual_en', 'key_visual_es')
+    raw_id_fields = ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc')
     richtext_fields = ('description',)
 
     def get_readonly_fields(self, request, obj=None):
