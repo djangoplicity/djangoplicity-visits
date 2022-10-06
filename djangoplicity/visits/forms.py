@@ -94,6 +94,9 @@ class ReservationForm(forms.ModelForm):
             self.showing = self.instance.showing
 
         self.fields['showing'].widget = forms.HiddenInput()
+        languages = self.showing.activity.offered_languages.all()
+        if languages:
+            self.fields['language'].choices = [(language.code, language.name) for language in languages]
 
         max_value = self.showing.max_spaces_per_reservation
         if max_value == 0:
