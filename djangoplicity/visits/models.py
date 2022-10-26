@@ -351,7 +351,7 @@ class Showing(models.Model):
         abbr = tz.localize(self.start_time, is_dst=None)
         # Workaround to display CLT timezone no appear in pytz list
         # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-        if abbr.tzname() == '-03':
+        if abbr.tzname() == '-03' or abbr.tzname() == '-04':
             return 'CLT'
         return abbr.tzname()
 
