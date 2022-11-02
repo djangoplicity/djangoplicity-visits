@@ -38,6 +38,8 @@ from djangoplicity.contrib import admin as dpadmin
 from django.conf import settings
 from djangoplicity.visits.models import Activity, ActivityProxy,\
     Language, Reservation, Showing
+from django.utils.translation import gettext_lazy as _
+
 
 if hasattr(settings, 'ADD_NOT_CACHE_URL_PARAMETER') and settings.ADD_NOT_CACHE_URL_PARAMETER:
     CACHE_PARAMETER = '?nocache'
@@ -81,11 +83,30 @@ class ActivityProxyAdmin(dpadmin.DjangoplicityModelAdmin):
 
 
 class ReservationAdmin(dpadmin.DjangoplicityModelAdmin):
-    list_display = ('email', 'name', 'showing', 'n_spaces', 'created')
+    list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'phone', 'n_spaces', 'code',
+                    'language', 'created')
+    list_filter = ('showing__activity',)
     ordering = ['showing__start_time']
     raw_id_fields = ('showing', )
+    date_hierarchy = 'showing__start_time'
     readonly_fields = ('code', 'created', 'last_modified')
     search_fields = ('email', 'name')
+    list_select_related = ('showing', 'language')
+
+    def showing_date(self, obj):
+        return obj.showing.start_time.strftime('%Y-%m-%d'),
+    showing_date.short_description = _('Showing Date')
+
+    def showing_time(self, obj):
+        if obj.showing.timezone:
+            return '{} {}'.format(obj.showing.start_date_tz.strftime('%I:%M %p'), obj.showing.get_timezone_abbr())
+        else:
+            return '{}'.format(obj.showing.start_date_tz.strftime('%I:%M %p %Z'))
+    showing_time.short_description = _('Showing Time')
+
+    def activity_name(self, obj):
+        return obj.showing.activity.name
+    activity_name.short_description = _('Activity Name')
 
 
 class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
