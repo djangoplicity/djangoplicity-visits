@@ -1,0 +1,8 @@
+{% extends "admin/import_export/change_list.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+    {% include "admin/import_export/change_list_export_item.html" %}
+    <li><a href="{% url 'visits-showings-reports-list' %}" target="_blank">{% trans "View Visits Reports" %}</a></li>
+  {{ block.super }}
+{% endblock %}

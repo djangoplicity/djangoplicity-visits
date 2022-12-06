@@ -35,7 +35,7 @@ from setuptools import setup, find_packages
 setup(
     name='djangoplicity-visits',
     version='0.1',
-    packages=find_packages(include=['djangoplicity.*']),
+    packages=find_packages(include=['djangoplicity.visits']),
     include_package_data=True,
     zip_safe=False,
     install_requires=[
@@ -47,6 +47,7 @@ setup(
         'trml2pdf==0.5.0',
         'xlrd',
         'xlwt',
+        'django-import-export==1.2.0',
     ],
 
     # metadata for upload to PyPI

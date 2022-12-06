@@ -30,3 +30,6 @@ django-pipeline==1.6.14
 jsmin==2.2.2
 
 django-debug-toolbar==1.11
+
+#  Django application and library for importing and exporting data with included admin integration.
+django-import-export==1.2.0

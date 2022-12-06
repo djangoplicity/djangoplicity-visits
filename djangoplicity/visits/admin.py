@@ -39,6 +39,8 @@ from django.conf import settings
 from djangoplicity.visits.models import Activity, ActivityProxy,\
     Language, Reservation, Showing
 from django.utils.translation import gettext_lazy as _
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 
 
 if hasattr(settings, 'ADD_NOT_CACHE_URL_PARAMETER') and settings.ADD_NOT_CACHE_URL_PARAMETER:
@@ -82,16 +84,29 @@ class ActivityProxyAdmin(dpadmin.DjangoplicityModelAdmin):
     richtext_fields = ('description',)
 
 
-class ReservationAdmin(dpadmin.DjangoplicityModelAdmin):
+class ReservationResource(resources.ModelResource):
+
+    class Meta:
+        fields = ('id', 'code', 'showing', 'name', 'phone', 'alternative_phone', 'email', 'country', 'language',
+                  'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'accept_safety_form',
+                  'accept_disclaimer_form', 'accept_conduct_form')
+        model = Reservation
+
+    def dehydrate_showing(self, reservation): # noqa
+        return str(reservation.showing.activity)
+
+
+class ReservationAdmin(dpadmin.DjangoplicityModelAdmin, ImportExportModelAdmin):
     list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'phone', 'n_spaces', 'code',
-                    'language', 'created')
-    list_filter = ('showing__activity',)
+                    'vehicle_plate', 'language', 'created')
+    list_filter = ('showing__activity', 'showing__start_time')
     ordering = ['showing__start_time']
     raw_id_fields = ('showing', )
     date_hierarchy = 'showing__start_time'
     readonly_fields = ('code', 'created', 'last_modified')
     search_fields = ('email', 'name')
     list_select_related = ('showing', 'language')
+    resource_classes = [ReservationResource]
 
     def showing_date(self, obj):
         return obj.showing.start_time.strftime('%Y-%m-%d'),
