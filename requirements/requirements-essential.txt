@@ -17,6 +17,9 @@ git+https://@github.com/djangoplicity/djangoplicity-actions@develop
 # Djangoplicity
 git+https://@github.com/djangoplicity/djangoplicity.git@develop
 
+# Djangoplicity products
+git+https://github.com/djangoplicity/djangoplicity-products2.git@develop
+
 # RSA > 4.0 does not support Python 3 (This is a django dependency)
 rsa==4.0
 
@@ -30,3 +33,6 @@ django-pipeline==1.6.14
 jsmin==2.2.2
 
 django-debug-toolbar==1.11
+
+#  Django application and library for importing and exporting data with included admin integration.
+django-import-export==1.2.0
