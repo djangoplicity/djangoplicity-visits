@@ -35,7 +35,7 @@ from setuptools import setup, find_packages
 setup(
     name='djangoplicity-visits',
     version='0.1',
-    packages=find_packages(include=['djangoplicity.visits']),
+    packages=find_packages(include=['djangoplicity.*']),
     include_package_data=True,
     zip_safe=False,
     install_requires=[
