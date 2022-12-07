@@ -77,7 +77,7 @@ class ReservationForm(forms.ModelForm):
                                              )
 
     field_order = ['name', 'phone', 'alternative_phone', 'email',
-                   'email_confirm', 'country', 'language', 'n_spaces',
+                   'email_confirm', 'country', 'language', 'vehicle_plate', 'n_spaces',
                    'accept_safety_form', 'accept_disclaimer_form',
                    'accept_conduct_form']
     

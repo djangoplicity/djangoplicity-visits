@@ -12,3 +12,6 @@ coverage-html:
 
 test-python27:
 	docker exec -it djangoplicity-visits tox -e py27-django111
+
+make-messages:
+	docker exec -it djangoplicity-visits ./manage.py makemessages --locale=es --settings=test_project.settings

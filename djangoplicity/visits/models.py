@@ -178,6 +178,8 @@ class Reservation(models.Model):
     created = models.DateTimeField(default=timezone.now)
     last_modified = models.DateTimeField(default=timezone.now)
 
+    vehicle_plate = models.CharField(_('Vehicle Plate'), max_length=20, blank=True, null=True)
+
     accept_safety_form = models.BooleanField(verbose_name=_('Accept Safety Form'), default=False)
     accept_disclaimer_form = models.BooleanField(verbose_name=_('Accept Disclaimer Form'), default=False)
     accept_conduct_form = models.BooleanField(verbose_name=_('Accept Conduct Form'), default=False)

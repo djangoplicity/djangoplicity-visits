@@ -48,6 +48,7 @@ DJANGOPLICITY_APPS = [
     'djangoplicity.announcements',
     'djangoplicity.science',
     'djangoplicity.releases',
+    'djangoplicity.products2',
     'djangoplicity.metadata',
     'djangoplicity.adminhistory',
     'djangoplicity.utils',
@@ -351,6 +352,9 @@ TINYMCE_DEFAULT_CONFIG = {
     'entity_encoding': 'raw',
     'convert_urls': False,
 }
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'djangoplicity', 'visits'),
+)
 
 # Crispy form
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
