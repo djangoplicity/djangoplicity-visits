@@ -17,6 +17,9 @@ git+https://@github.com/djangoplicity/djangoplicity-actions@develop
 # Djangoplicity
 git+https://@github.com/djangoplicity/djangoplicity.git@develop
 
+# Djangoplicity products
+git+https://github.com/djangoplicity/djangoplicity-products2.git@develop
+
 # RSA > 4.0 does not support Python 3 (This is a django dependency)
 rsa==4.0
 

@@ -34,12 +34,14 @@ from __future__ import unicode_literals
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.html import format_html
+from import_export.widgets import ForeignKeyWidget
 from djangoplicity.contrib import admin as dpadmin
 from django.conf import settings
 from djangoplicity.visits.models import Activity, ActivityProxy,\
     Language, Reservation, Showing
 from django.utils.translation import gettext_lazy as _
 from import_export import resources
+from import_export.fields import Field
 from import_export.admin import ImportExportModelAdmin
 
 
@@ -85,18 +87,23 @@ class ActivityProxyAdmin(dpadmin.DjangoplicityModelAdmin):
 
 
 class ReservationResource(resources.ModelResource):
+    showing_full_name = Field()
+    showing = Field(
+        column_name='showing',
+        attribute='showing',
+        widget=ForeignKeyWidget(Showing, 'activity__name'))
 
     class Meta:
-        fields = ('id', 'code', 'showing', 'name', 'phone', 'alternative_phone', 'email', 'country', 'language',
+        model = Reservation
+        fields = ('id', 'name', 'code', 'phone', 'alternative_phone', 'email', 'country', 'language',
                   'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'accept_safety_form',
                   'accept_disclaimer_form', 'accept_conduct_form')
-        model = Reservation
 
-    def dehydrate_showing(self, reservation): # noqa
-        return str(reservation.showing.activity)
+    def dehydrate_showing_full_name(self, reservation): # noqa
+        return '%s' % reservation.showing.activity
 
 
-class ReservationAdmin(dpadmin.DjangoplicityModelAdmin, ImportExportModelAdmin):
+class ReservationAdmin(ImportExportModelAdmin):
     list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'phone', 'n_spaces', 'code',
                     'vehicle_plate', 'language', 'created')
     list_filter = ('showing__activity', 'showing__start_time')
