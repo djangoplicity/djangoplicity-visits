@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-12-07 00:07+0000\n"
-"PO-Revision-Date: 2022-12-06 17:58-0728\n"
+"PO-Revision-Date: 2023-01-11 09:44-0728\n"
 "Last-Translator:   <altix@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -130,14 +130,14 @@ msgstr "País"
 
 #: djangoplicity/visits/models.py:175
 msgid "Preferred language"
-msgstr "Lenguaje Preferido"
+msgstr "Idioma Preferido"
 
 #: djangoplicity/visits/models.py:176
 #: djangoplicity/visits/templates/visits/emails/reservation-details-reminder.html:10
 #: djangoplicity/visits/templates/visits/emails/reservation-details.html:10
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:18
 msgid "Number of places"
-msgstr "Número de plazas"
+msgstr "Número de Cupos"
 
 #: djangoplicity/visits/models.py:181
 msgid "Vehicle Plate"
