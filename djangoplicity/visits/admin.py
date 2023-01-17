@@ -136,7 +136,7 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     list_display = ('activity', 'start_time', 'private', 'total_spaces', 'timezone',
         'free_spaces', view_online, view_report)
     list_filter = ('activity', 'private')
-    readonly_fields = ('total_spaces', 'free_spaces')
+    readonly_fields = ('free_spaces',)
 
 
 def register_with_admin(admin_site):

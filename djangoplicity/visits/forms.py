@@ -80,7 +80,7 @@ class ReservationForm(forms.ModelForm):
                    'email_confirm', 'country', 'language', 'vehicle_plate', 'n_spaces',
                    'accept_safety_form', 'accept_disclaimer_form',
                    'accept_conduct_form']
-    
+
     class Meta:
         model = Reservation
         exclude = ['code', 'created', 'last_modified']
@@ -94,7 +94,8 @@ class ReservationForm(forms.ModelForm):
             self.showing = self.instance.showing
 
         self.fields['showing'].widget = forms.HiddenInput()
-        languages = self.showing.activity.offered_languages.all()
+        self.fields['language'].widget = forms.RadioSelect()
+        languages = self.showing.offered_languages.all()
         if languages:
             self.fields['language'].choices = [(language.code, language.name) for language in languages]
 
@@ -108,10 +109,15 @@ class ReservationForm(forms.ModelForm):
             max_value += self.instance.n_spaces
 
         self.fields['n_spaces'] = forms.IntegerField(
-            label = self.fields['n_spaces'].label,
+            label=self.fields['n_spaces'].label,
             min_value=1,
             max_value=max_value,
         )
+        if self.showing.max_spaces_per_reservation == 1:
+            self.fields['n_spaces'].initial = 1
+            self.fields['n_spaces'].widget.attrs.update({
+                'readonly': True
+            })
 
         self.fields['email'].widget.attrs.update({
             'class': 'nocopypaste'
@@ -153,9 +159,9 @@ class ReservationForm(forms.ModelForm):
                 raise forms.ValidationError(_('Email and Confirmation Email are different, please check!'))
 
         # Check if we already have the same reservation
-        res = Reservation.objects.filter(showing=self.showing, email=email, n_spaces=self.cleaned_data['n_spaces'])
-        if res:
-            raise forms.ValidationError(_('This reservation already exists. In case of issues with your reservation, please send an email'))
+        # res = Reservation.objects.filter(showing=self.showing, email=email, n_spaces=self.cleaned_data['n_spaces'])
+        # if res:
+        #     raise forms.ValidationError(_('This reservation already exists. In case of issues with your reservation, please send an email'))
 
         return cleaned_data
 
