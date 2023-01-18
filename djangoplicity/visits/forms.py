@@ -168,6 +168,11 @@ class ReservationForm(forms.ModelForm):
     def clean_n_spaces(self):
         n_spaces = self.cleaned_data['n_spaces']
 
+        if n_spaces > self.showing.max_spaces_per_reservation:
+            raise forms.ValidationError(_('The maximum number of spaces per person is '
+                                          '({max_spaces_per_reservation}).').format(
+                max_spaces_per_reservation=self.showing.max_spaces_per_reservation))
+
         if self.instance.pk:
             # Updating existing reservation
             if self.showing.free_spaces + self.instance.n_spaces - n_spaces < 0:

@@ -40,8 +40,7 @@ from django.conf import settings
 from djangoplicity.visits.models import Activity, ActivityProxy,\
     Language, Reservation, Showing
 from django.utils.translation import gettext_lazy as _
-from import_export import resources
-from import_export.fields import Field
+from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
 
 
@@ -68,7 +67,8 @@ def view_report(obj):
 class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
     list_display = ('id', 'name', view_online,)
-    raw_id_fields = ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc')
+    raw_id_fields = ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc',
+                     'safety_tech_doc_es', 'conduct_tech_doc_es', 'liability_tech_doc_es')
     richtext_fields = ('description',)
 
     def get_readonly_fields(self, request, obj=None):
@@ -87,20 +87,31 @@ class ActivityProxyAdmin(dpadmin.DjangoplicityModelAdmin):
 
 
 class ReservationResource(resources.ModelResource):
-    showing_full_name = Field()
-    showing = Field(
+    showing = fields.Field(
         column_name='showing',
         attribute='showing',
         widget=ForeignKeyWidget(Showing, 'activity__name'))
+
+    date = fields.Field()
+    time = fields.Field()
+
+    def dehydrate_date(self, reservation): # noqa
+        return reservation.showing.start_time.strftime('%Y-%m-%d'),
+
+    def dehydrate_time(self, reservation): # noqa
+        if reservation.showing.timezone:
+            return '{} {}'.format(reservation.showing.start_date_tz.strftime('%I:%M %p'), reservation.showing.get_timezone_abbr())
+        else:
+            return '{}'.format(reservation.showing.start_date_tz.strftime('%I:%M %p %Z'))
 
     class Meta:
         model = Reservation
         fields = ('id', 'name', 'code', 'phone', 'alternative_phone', 'email', 'country', 'language',
                   'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'accept_safety_form',
                   'accept_disclaimer_form', 'accept_conduct_form')
-
-    def dehydrate_showing_full_name(self, reservation): # noqa
-        return '%s' % reservation.showing.activity
+        export_order = ('id', 'showing', 'showing_date', 'showing_time',  'name', 'code', 'phone', 'alternative_phone',
+                        'email', 'country', 'language', 'n_spaces', 'created', 'last_modified', 'vehicle_plate',
+                        'accept_safety_form', 'accept_disclaimer_form', 'accept_conduct_form')
 
 
 class ReservationAdmin(ImportExportModelAdmin):
@@ -113,7 +124,7 @@ class ReservationAdmin(ImportExportModelAdmin):
     readonly_fields = ('code', 'created', 'last_modified')
     search_fields = ('email', 'name')
     list_select_related = ('showing', 'language')
-    resource_classes = [ReservationResource]
+    resource_class = ReservationResource
 
     def showing_date(self, obj):
         return obj.showing.start_time.strftime('%Y-%m-%d'),
