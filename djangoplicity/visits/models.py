@@ -120,7 +120,18 @@ class Activity(TranslationModel):
                                             on_delete=models.SET_NULL, related_name='+',
                                             verbose_name='Liability Technical Doc')
 
+    # Technical Document Spanish versions
+    safety_tech_doc_es = TranslationForeignKey(
+        TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
+        verbose_name='Spanish Safety Technical Doc')
 
+    conduct_tech_doc_es = TranslationForeignKey(
+        TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
+        verbose_name='Spanish Conduct Technical Doc')
+
+    liability_tech_doc_es = TranslationForeignKey(
+        TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
+        verbose_name='Spanish Liability Technical Doc')
 
     def __unicode__(self):
         return self.name
@@ -189,19 +200,25 @@ class Reservation(models.Model):
             self.n_spaces)
 
     def get_safety_tech_doc_url(self):
-        if self.showing.activity.safety_tech_doc and self.showing.activity.safety_tech_doc.resource_pdf:
+        if self.language.code == 'es' and self.showing.activity.safety_tech_doc_es and self.showing.activity.safety_tech_doc_es.resource_pdf:
+            return self.showing.activity.safety_tech_doc_es.resource_pdf.absolute_url
+        elif self.showing.activity.safety_tech_doc and self.showing.activity.safety_tech_doc.resource_pdf:
             return self.showing.activity.safety_tech_doc.resource_pdf.absolute_url
         else:
             return '#'
 
     def get_conduct_tech_doc_url(self):
-        if self.showing.activity.conduct_tech_doc and self.showing.activity.conduct_tech_doc.resource_pdf:
+        if self.language.code == 'es' and self.showing.activity.conduct_tech_doc_es and self.showing.activity.conduct_tech_doc_es.resource_pdf:
+            return self.showing.activity.conduct_tech_doc_es.resource_pdf.absolute_url
+        elif self.showing.activity.conduct_tech_doc and self.showing.activity.conduct_tech_doc.resource_pdf:
             return self.showing.activity.conduct_tech_doc.resource_pdf.absolute_url
         else:
             return '#'
 
     def get_liability_tech_doc_url(self):
-        if self.showing.activity.liability_tech_doc and self.showing.activity.liability_tech_doc.resource_pdf:
+        if self.language.code == 'es' and self.showing.activity.liability_tech_doc_es and self.showing.activity.liability_tech_doc_es.resource_pdf:
+            return self.showing.activity.liability_tech_doc_es.resource_pdf.absolute_url
+        elif self.showing.activity.liability_tech_doc and self.showing.activity.liability_tech_doc.resource_pdf:
             return self.showing.activity.liability_tech_doc.resource_pdf.absolute_url
         else:
             return '#'
