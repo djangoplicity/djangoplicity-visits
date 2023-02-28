@@ -109,7 +109,7 @@ class ReservationResource(resources.ModelResource):
         fields = ('id', 'name', 'code', 'phone', 'alternative_phone', 'email', 'country', 'language',
                   'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'accept_safety_form',
                   'accept_disclaimer_form', 'accept_conduct_form')
-        export_order = ('id', 'showing', 'showing_date', 'showing_time',  'name', 'code', 'phone', 'alternative_phone',
+        export_order = ('id', 'showing', 'date', 'time',  'name', 'code', 'phone', 'alternative_phone',
                         'email', 'country', 'language', 'n_spaces', 'created', 'last_modified', 'vehicle_plate',
                         'accept_safety_form', 'accept_disclaimer_form', 'accept_conduct_form')
 
@@ -117,7 +117,7 @@ class ReservationResource(resources.ModelResource):
 class ReservationAdmin(ImportExportModelAdmin):
     list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'phone', 'n_spaces', 'code',
                     'vehicle_plate', 'language', 'created')
-    list_filter = ('showing__activity', 'showing__start_time')
+    list_filter = ('showing__activity', 'showing__start_time', 'created')
     ordering = ['showing__start_time']
     raw_id_fields = ('showing', )
     date_hierarchy = 'showing__start_time'
