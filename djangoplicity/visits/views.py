@@ -166,6 +166,10 @@ class ReservationUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(ReservationUpdateView, self).get_context_data(**kwargs)
+        reservation = self.get_object()
+        showing = reservation.showing
+        other_reservations = showing.reservation_set.filter(email=reservation.email).exclude(code=reservation.code)
+        context['other_reservations'] = other_reservations
         context['activity'] = self.get_object().showing.get_activity()
 
         return context
@@ -177,6 +181,14 @@ class ReservationUpdateView(UpdateView):
             'visits-reservation-confirm',
             args=[self.object.code],
             lang=self.object.language.code)
+
+
+class ReservationCancelView(ReservationUpdateView):
+
+    def get_context_data(self, **kwargs):
+        context = super(ReservationCancelView, self).get_context_data(**kwargs)
+        context['cancel'] = True
+        return context
 
 
 class ShowingListView(ListView):
