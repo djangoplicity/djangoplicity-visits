@@ -26,17 +26,29 @@ def reservation_reminder():
     if settings.SITE_ENVIRONMENT != 'prod':
         return
 
-    tomorrow = date.today() + timedelta(days=1)
-    yesterday = date.today() - timedelta(days=1)
+    reservations = []
+    days_reminder = getattr(settings, 'SEND_RESERVATION_REMINDER_IN_DAYS', 1)
 
-    reservations_tomorrow = Reservation.objects.filter(
-        showing__start_time__date=tomorrow
-    )
+    if days_reminder > 1:
+        # Get reservations that start within a specified day
+        day_to_start = date.today() + timedelta(days=days_reminder)
+        reservations = Reservation.objects.filter(
+            showing__start_time__date=day_to_start
+        )
+    elif days_reminder == 1:
+        # Get reservations starting tomorrow
+        tomorrow = date.today() + timedelta(days=days_reminder)
+        reservations = Reservation.objects.filter(
+            showing__start_time__date=tomorrow
+        )
+
+    # Get the reservations that were modified yesterday
+    yesterday = date.today() - timedelta(days=1)
     reservations_yesterday = Reservation.objects.filter(
         last_modified__date=yesterday
     )
 
-    for reservation in reservations_tomorrow:
+    for reservation in reservations:
         reservation.send_reminder_email()
     for reservation in reservations_yesterday:
         reservation.send_reminder_email()
