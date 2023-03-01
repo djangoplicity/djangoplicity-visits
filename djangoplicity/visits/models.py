@@ -345,6 +345,8 @@ class Showing(models.Model):
     max_spaces_per_reservation = models.SmallIntegerField(default=0,
         help_text='Maximum number of spaces per reservation, 0 for no maximum')
 
+    vehicle_plate_required = models.BooleanField(_('Vehicle Plate is Required?'), default=False)
+
     total_spaces = models.IntegerField(help_text='Total number of seats '
         '(based on selected activity)', blank=True)
     free_spaces = models.IntegerField(help_text='Current number of available '
