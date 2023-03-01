@@ -53,10 +53,6 @@ NOT_HAS_SYMPTOMS_LABEL = _("I declare that no one in my group has tested positiv
                                "<li>i. Diarrhea</li>"
                            "</ul>")
 
-HAS_VACCINATIONS_SET_OF_COVID_LABEL = _('I declare that everyone in my group has received a full set of COVID-19 '
-                                        'vaccinations including boosters (if applicable). (vaccination cards will be '
-                                        'checked at arrival)')
-
 
 class ReservationForm(forms.ModelForm):
 
@@ -68,13 +64,6 @@ class ReservationForm(forms.ModelForm):
                                                                 'class': 'acceptConditions covid'
                                                                })
                                                            )
-    has_vaccination_set = forms.BooleanField(label=HAS_VACCINATIONS_SET_OF_COVID_LABEL,
-                                             required=False,
-                                             widget=forms.CheckboxInput(
-                                                 attrs={
-                                                    'class': 'acceptConditions covid'
-                                                 })
-                                             )
 
     field_order = ['name', 'phone', 'alternative_phone', 'email',
                    'email_confirm', 'country', 'language', 'vehicle_plate', 'n_spaces',
@@ -118,6 +107,9 @@ class ReservationForm(forms.ModelForm):
             self.fields['n_spaces'].widget.attrs.update({
                 'readonly': True
             })
+
+        if self.showing.vehicle_plate_required:
+            self.fields['vehicle_plate'].required = True
 
         self.fields['email'].widget.attrs.update({
             'class': 'nocopypaste'

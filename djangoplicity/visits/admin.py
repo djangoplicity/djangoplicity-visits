@@ -144,9 +144,10 @@ class ReservationAdmin(ImportExportModelAdmin):
 
 class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
-    list_display = ('activity', 'start_time', 'private', 'total_spaces', 'timezone',
-        'free_spaces', view_online, view_report)
-    list_filter = ('activity', 'private')
+    list_display = ('activity', 'start_time', 'private', 'total_spaces', 'timezone', 'vehicle_plate_required',
+                    'free_spaces', view_online, view_report)
+    list_filter = ('activity', 'private', 'vehicle_plate_required')
+    list_editable = ['vehicle_plate_required']
     readonly_fields = ('free_spaces',)
 
 
