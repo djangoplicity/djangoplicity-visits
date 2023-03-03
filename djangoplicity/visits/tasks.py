@@ -26,7 +26,7 @@ def reservation_reminder():
     if settings.SITE_ENVIRONMENT != 'prod':
         return
 
-    if getattr(settings, 'DP_VISITS_SEND_REMINDERS', True):
+    if not getattr(settings, 'DP_VISITS_SEND_REMINDERS', True):
         return
 
     tomorrow = date.today() + timedelta(days=1)
