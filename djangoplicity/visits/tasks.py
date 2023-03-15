@@ -26,6 +26,9 @@ def reservation_reminder():
     if settings.SITE_ENVIRONMENT != 'prod':
         return
 
+    if not getattr(settings, 'DP_VISITS_SEND_REMINDERS', True):
+        return
+
     reservations = []
     # Set the filter date for sending reminders by default to 1 day (tomorrow)
     days_reminder = getattr(settings, 'SEND_RESERVATION_REMINDER_IN_DAYS', 1)
