@@ -31,7 +31,8 @@
 
 from datetime import datetime, time, timedelta
 import pytz
-
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone, translation
@@ -85,6 +86,25 @@ class ReservationCreateView(CreateView):
 
         return context
 
+    def subscribe_contact(self, data): # noqa
+        try:
+            from djangoplicity.contacts.models import Contact, ContactGroup
+            email = data.get('email')
+            group_name = getattr(settings, 'VISIT_SUBSCRIBE_GROUP', 'Public NL')
+            group = ContactGroup.objects.get(name=group_name)
+
+            if not Contact.objects.filter(email=email, groups__in=[group.id]):
+                contact_data = {
+                    'first_name': data.get('name'),
+                    'phone': data.get('phone'),
+                    'email': data.get('email')
+                }
+                Contact.create_object(groups=[group.id], **contact_data)
+        except ImportError:
+            pass
+        except ObjectDoesNotExist:
+            pass
+
     def get_form_kwargs(self):
         kwargs = super(ReservationCreateView, self).get_form_kwargs()
         kwargs['showing'] = self.get_showing()
@@ -128,6 +148,13 @@ class ReservationCreateView(CreateView):
             'visits-reservation-confirm',
             args=[self.object.code],
             lang=self.object.language.code)
+
+    def form_valid(self, form):
+        reservation = form.save(commit=False)
+        reservation.save()
+        if form.cleaned_data.get('subscribe_checkbox', False):
+            self.subscribe_contact(form.cleaned_data)
+        return super(ReservationCreateView, self).form_valid(form)
 
 
 class ReservationDeleteView(DeleteView):
