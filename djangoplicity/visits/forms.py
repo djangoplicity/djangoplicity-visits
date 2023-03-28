@@ -31,11 +31,9 @@
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from django.conf import Settings
-
+from django.conf import Settings, settings
 from djangoplicity.visits.models import Reservation
 
 
@@ -53,17 +51,26 @@ NOT_HAS_SYMPTOMS_LABEL = _("I declare that no one in my group has tested positiv
                                "<li>i. Diarrhea</li>"
                            "</ul>")
 
+SUBSCRIBE_CHECKBOX_LABEL = _('Subscribe to news from our observatories')
+
 
 class ReservationForm(forms.ModelForm):
 
     email_confirm = forms.EmailField(label=_('Confirm Email'))
-    not_has_tested_positive_for_covid = forms.BooleanField(label=NOT_HAS_SYMPTOMS_LABEL,
-                                                           required=False,
-                                                           widget=forms.CheckboxInput(
-                                                               attrs={
-                                                                'class': 'acceptConditions covid'
-                                                               })
-                                                           )
+
+    if getattr(settings, 'VISITS_COVID_CONDITIONS', False):
+        not_has_tested_positive_for_covid = forms.BooleanField(
+            label=NOT_HAS_SYMPTOMS_LABEL,
+            required=False,
+            widget=forms.CheckboxInput(attrs={'class': 'acceptConditions covid'})
+        )
+
+    if getattr(settings, 'DISPLAY_VISITS_SUBSCRIBE_CHECKOUT', True):
+        subscribe_checkbox = forms.BooleanField(
+            label=SUBSCRIBE_CHECKBOX_LABEL,
+            required=False,
+            widget=forms.CheckboxInput()
+        )
 
     field_order = ['name', 'phone', 'alternative_phone', 'email',
                    'email_confirm', 'country', 'language', 'vehicle_plate', 'n_spaces',
