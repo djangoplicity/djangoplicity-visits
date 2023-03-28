@@ -74,8 +74,10 @@ class ReservationForm(forms.ModelForm):
 
     field_order = ['name', 'phone', 'alternative_phone', 'email',
                    'email_confirm', 'country', 'language', 'vehicle_plate', 'n_spaces',
-                   'accept_safety_form', 'accept_disclaimer_form',
-                   'accept_conduct_form']
+                   'accept_safety_form', 'accept_disclaimer_form',]
+
+    if getattr(settings, 'VISITS_DISPLAY_ACCEPT_CONDUCT_FORM', False):
+        field_order.append('accept_conduct_form')
 
     class Meta:
         model = Reservation
@@ -133,10 +135,13 @@ class ReservationForm(forms.ModelForm):
             'data-target': '#disclaimer_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
         self.fields['accept_disclaimer_form'].label = _("I hereby accept the Liability Disclaimer conditions on behalf of all visitors in my party.*")
 
-        self.fields['accept_conduct_form'].widget.attrs.update({
-            'data-target': '#conduct_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
-        self.fields['accept_conduct_form'].label = _("I hereby accept the Standard of Workplace Conduct conditions on behalf of all visitors in my party.*")
-
+        if getattr(settings, 'VISITS_DISPLAY_ACCEPT_CONDUCT_FORM', False):
+            self.fields['accept_conduct_form'].widget.attrs.update({
+                'data-target': '#conduct_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
+            self.fields['accept_conduct_form'].label = _("I hereby accept the Standard of Workplace Conduct conditions on behalf of all visitors in my party.*")
+        else:
+            self.fields['accept_conduct_form'].widget = forms.HiddenInput()
+            
         # Setup crispyform
         self.helper = FormHelper()
         self.helper.form_method = 'post'
