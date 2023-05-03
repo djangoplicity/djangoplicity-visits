@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     libsasl2-dev \
     libssl-dev \
     libpq-dev \
-    python-dev
+    python-dev \
+    gettext
 
 RUN mkdir /app
 WORKDIR /app

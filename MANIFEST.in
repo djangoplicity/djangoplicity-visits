@@ -33,3 +33,4 @@ include *.txt
 recursive-include docs *
 recursive-include djangoplicity/visits/templates *
 recursive-include djangoplicity/visits/static *
+recursive-include djangoplicity/visits/locale *

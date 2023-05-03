@@ -31,11 +31,9 @@
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from django.conf import Settings
-
+from django.conf import Settings, settings
 from djangoplicity.visits.models import Reservation
 
 
@@ -53,34 +51,34 @@ NOT_HAS_SYMPTOMS_LABEL = _("I declare that no one in my group has tested positiv
                                "<li>i. Diarrhea</li>"
                            "</ul>")
 
-HAS_VACCINATIONS_SET_OF_COVID_LABEL = _('I declare that everyone in my group has received a full set of COVID-19 '
-                                        'vaccinations including boosters (if applicable). (vaccination cards will be '
-                                        'checked at arrival)')
+SUBSCRIBE_CHECKBOX_LABEL = _('Subscribe to news from our observatories')
 
 
 class ReservationForm(forms.ModelForm):
 
     email_confirm = forms.EmailField(label=_('Confirm Email'))
-    not_has_tested_positive_for_covid = forms.BooleanField(label=NOT_HAS_SYMPTOMS_LABEL,
-                                                           required=False,
-                                                           widget=forms.CheckboxInput(
-                                                               attrs={
-                                                                'class': 'acceptConditions covid'
-                                                               })
-                                                           )
-    has_vaccination_set = forms.BooleanField(label=HAS_VACCINATIONS_SET_OF_COVID_LABEL,
-                                             required=False,
-                                             widget=forms.CheckboxInput(
-                                                 attrs={
-                                                    'class': 'acceptConditions covid'
-                                                 })
-                                             )
+
+    if getattr(settings, 'VISITS_COVID_CONDITIONS', False):
+        not_has_tested_positive_for_covid = forms.BooleanField(
+            label=NOT_HAS_SYMPTOMS_LABEL,
+            required=False,
+            widget=forms.CheckboxInput(attrs={'class': 'acceptConditions covid'})
+        )
+
+    if getattr(settings, 'DISPLAY_VISITS_SUBSCRIBE_CHECKOUT', True):
+        subscribe_checkbox = forms.BooleanField(
+            label=SUBSCRIBE_CHECKBOX_LABEL,
+            required=False,
+            widget=forms.CheckboxInput()
+        )
 
     field_order = ['name', 'phone', 'alternative_phone', 'email',
-                   'email_confirm', 'country', 'language', 'n_spaces',
-                   'accept_safety_form', 'accept_disclaimer_form',
-                   'accept_conduct_form']
-    
+                   'email_confirm', 'country', 'language', 'vehicle_plate', 'n_spaces',
+                   'accept_safety_form', 'accept_disclaimer_form',]
+
+    if getattr(settings, 'VISITS_DISPLAY_ACCEPT_CONDUCT_FORM', False):
+        field_order.append('accept_conduct_form')
+
     class Meta:
         model = Reservation
         exclude = ['code', 'created', 'last_modified']
@@ -94,6 +92,10 @@ class ReservationForm(forms.ModelForm):
             self.showing = self.instance.showing
 
         self.fields['showing'].widget = forms.HiddenInput()
+        self.fields['language'].widget = forms.RadioSelect()
+        languages = self.showing.offered_languages.all()
+        if languages:
+            self.fields['language'].choices = [(language.code, language.name) for language in languages]
 
         max_value = self.showing.max_spaces_per_reservation
         if max_value == 0:
@@ -105,10 +107,18 @@ class ReservationForm(forms.ModelForm):
             max_value += self.instance.n_spaces
 
         self.fields['n_spaces'] = forms.IntegerField(
-            label = self.fields['n_spaces'].label,
+            label=self.fields['n_spaces'].label,
             min_value=1,
             max_value=max_value,
         )
+        if self.showing.max_spaces_per_reservation == 1:
+            self.fields['n_spaces'].initial = 1
+            self.fields['n_spaces'].widget.attrs.update({
+                'readonly': True
+            })
+
+        if self.showing.vehicle_plate_required:
+            self.fields['vehicle_plate'].required = True
 
         self.fields['email'].widget.attrs.update({
             'class': 'nocopypaste'
@@ -119,16 +129,19 @@ class ReservationForm(forms.ModelForm):
 
         self.fields['accept_safety_form'].widget.attrs.update({
             'data-target': '#safety_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
-        self.fields['accept_safety_form'].label = _("I hereby accept the Safety conditions on behalf of all visitors in my party.")
+        self.fields['accept_safety_form'].label = _("I hereby accept the Safety conditions on behalf of all visitors in my party.*")
 
         self.fields['accept_disclaimer_form'].widget.attrs.update({
             'data-target': '#disclaimer_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
-        self.fields['accept_disclaimer_form'].label = _("I hereby accept the Liability Disclaimer conditions on behalf of all visitors in my party.")
+        self.fields['accept_disclaimer_form'].label = _("I hereby accept the Liability Disclaimer conditions on behalf of all visitors in my party.*")
 
-        self.fields['accept_conduct_form'].widget.attrs.update({
-            'data-target': '#conduct_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
-        self.fields['accept_conduct_form'].label = _("I hereby accept the Standard of Workplace Conduct conditions on behalf of all visitors in my party.")
-
+        if getattr(settings, 'VISITS_DISPLAY_ACCEPT_CONDUCT_FORM', False):
+            self.fields['accept_conduct_form'].widget.attrs.update({
+                'data-target': '#conduct_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
+            self.fields['accept_conduct_form'].label = _("I hereby accept the Standard of Workplace Conduct conditions on behalf of all visitors in my party.*")
+        else:
+            self.fields['accept_conduct_form'].widget = forms.HiddenInput()
+            
         # Setup crispyform
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -150,14 +163,19 @@ class ReservationForm(forms.ModelForm):
                 raise forms.ValidationError(_('Email and Confirmation Email are different, please check!'))
 
         # Check if we already have the same reservation
-        res = Reservation.objects.filter(showing=self.showing, email=email, n_spaces=self.cleaned_data['n_spaces'])
-        if res:
-            raise forms.ValidationError(_('This reservation already exists. In case of issues with your reservation, please send an email'))
+        # res = Reservation.objects.filter(showing=self.showing, email=email, n_spaces=self.cleaned_data['n_spaces'])
+        # if res:
+        #     raise forms.ValidationError(_('This reservation already exists. In case of issues with your reservation, please send an email'))
 
         return cleaned_data
 
     def clean_n_spaces(self):
         n_spaces = self.cleaned_data['n_spaces']
+
+        if n_spaces > self.showing.max_spaces_per_reservation:
+            raise forms.ValidationError(_('The maximum number of spaces per person is '
+                                          '({max_spaces_per_reservation}).').format(
+                max_spaces_per_reservation=self.showing.max_spaces_per_reservation))
 
         if self.instance.pk:
             # Updating existing reservation

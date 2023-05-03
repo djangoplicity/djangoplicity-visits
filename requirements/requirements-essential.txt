@@ -8,6 +8,15 @@ trml2pdf==0.5.0
 # Asynchronous Task Queue
 celery==4.3.0
 
+# Djangoplicity actions
+git+https://@github.com/djangoplicity/djangoplicity-actions@release/django3
+
+# Djangoplicity
+git+https://@github.com/djangoplicity/djangoplicity.git@release/django3
+
+# Djangoplicity products
+git+https://github.com/djangoplicity/djangoplicity-products2.git@release/django3
+
 # RSA > 4.0 does not support Python 3 (This is a django dependency)
 rsa==4.0
 
@@ -18,3 +27,6 @@ Faker==3.0.1
 django-pipeline==1.6.14
 
 django-debug-toolbar==1.11
+
+#  Django application and library for importing and exporting data with included admin integration.
+django-import-export==1.2.0
