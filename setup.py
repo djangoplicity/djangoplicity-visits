@@ -47,6 +47,7 @@ setup(
         'trml2pdf==0.5.0',
         'xlrd',
         'xlwt',
+        'django-import-export==2.7.0',
     ],
 
     # metadata for upload to PyPI

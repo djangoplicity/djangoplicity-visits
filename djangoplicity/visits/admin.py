@@ -34,10 +34,21 @@ from __future__ import unicode_literals
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
+from import_export.widgets import ForeignKeyWidget
 from djangoplicity.contrib import admin as dpadmin
-
+from django.conf import settings
 from djangoplicity.visits.models import Activity, ActivityProxy,\
     Language, Reservation, Showing
+from django.utils.translation import gettext_lazy as _
+from import_export import resources, fields
+from import_export.admin import ImportExportModelAdmin
+
+
+if hasattr(settings, 'ADD_NOT_CACHE_URL_PARAMETER') and settings.ADD_NOT_CACHE_URL_PARAMETER:
+    CACHE_PARAMETER = '?nocache'
+else:
+    CACHE_PARAMETER = ''
+
 
 def view_online(obj):
     url = "."
@@ -45,17 +56,19 @@ def view_online(obj):
         url = reverse('visits-showings-list', args=[obj.id])
     elif isinstance(obj, Showing):
         url = reverse('visits-reservation-create', args=[obj.id])
-    return format_html('<a href="{}" target="_blank">View Online</a>', url)
+    return format_html('<a href="{}{}" target="_blank">View Online</a>', url, CACHE_PARAMETER)
+
 
 def view_report(obj):
-    return format_html('<a href="{}" target="_blank">View Report</a>',
-    reverse('visits-showings-reports-detail', args=[obj.id]))
+    return format_html('<a href="{}{}" target="_blank">View Report</a>',
+                       reverse('visits-showings-reports-detail', args=[obj.id]), CACHE_PARAMETER)
 
 
 class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
     list_display = ('id', 'name', view_online,)
-    raw_id_fields = ('key_visual_en', 'key_visual_es')
+    raw_id_fields = ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc',
+                     'safety_tech_doc_es', 'conduct_tech_doc_es', 'liability_tech_doc_es')
     richtext_fields = ('description',)
 
     def get_readonly_fields(self, request, obj=None):
@@ -73,20 +86,69 @@ class ActivityProxyAdmin(dpadmin.DjangoplicityModelAdmin):
     richtext_fields = ('description',)
 
 
-class ReservationAdmin(dpadmin.DjangoplicityModelAdmin):
-    list_display = ('email', 'name', 'showing', 'n_spaces', 'created')
+class ReservationResource(resources.ModelResource):
+    showing = fields.Field(
+        column_name='showing',
+        attribute='showing',
+        widget=ForeignKeyWidget(Showing, 'activity__name'))
+
+    date = fields.Field()
+    time = fields.Field()
+
+    def dehydrate_date(self, reservation): # noqa
+        return reservation.showing.start_time.strftime('%Y-%m-%d'),
+
+    def dehydrate_time(self, reservation): # noqa
+        if reservation.showing.timezone:
+            return '{} {}'.format(reservation.showing.start_date_tz.strftime('%I:%M %p'), reservation.showing.get_timezone_abbr())
+        else:
+            return '{}'.format(reservation.showing.start_date_tz.strftime('%I:%M %p %Z'))
+
+    class Meta:
+        model = Reservation
+        fields = ('id', 'name', 'code', 'phone', 'alternative_phone', 'email', 'country', 'language',
+                  'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'accept_safety_form',
+                  'accept_disclaimer_form', 'accept_conduct_form')
+        export_order = ('id', 'showing', 'date', 'time',  'name', 'code', 'phone', 'alternative_phone',
+                        'email', 'country', 'language', 'n_spaces', 'created', 'last_modified', 'vehicle_plate',
+                        'accept_safety_form', 'accept_disclaimer_form', 'accept_conduct_form')
+
+
+class ReservationAdmin(ImportExportModelAdmin):
+    list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'phone', 'n_spaces', 'code',
+                    'vehicle_plate', 'language', 'created')
+    list_filter = ('showing__activity', 'showing__start_time', 'created')
     ordering = ['showing__start_time']
     raw_id_fields = ('showing', )
+    date_hierarchy = 'showing__start_time'
     readonly_fields = ('code', 'created', 'last_modified')
     search_fields = ('email', 'name')
+    list_select_related = ('showing', 'language')
+    resource_class = ReservationResource
+
+    def showing_date(self, obj):
+        return obj.showing.start_time.strftime('%Y-%m-%d'),
+    showing_date.short_description = _('Showing Date')
+
+    def showing_time(self, obj):
+        if obj.showing.timezone:
+            return '{} {}'.format(obj.showing.start_date_tz.strftime('%I:%M %p'), obj.showing.get_timezone_abbr())
+        else:
+            return '{}'.format(obj.showing.start_date_tz.strftime('%I:%M %p %Z'))
+    showing_time.short_description = _('Showing Time')
+
+    def activity_name(self, obj):
+        return obj.showing.activity.name
+    activity_name.short_description = _('Activity Name')
 
 
 class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
-    list_display = ('activity', 'start_time', 'private', 'total_spaces', 'timezone',
-        'free_spaces', view_online, view_report)
-    list_filter = ('activity', 'private')
-    readonly_fields = ('total_spaces', 'free_spaces')
+    list_display = ('activity', 'start_time', 'private', 'total_spaces', 'timezone', 'vehicle_plate_required',
+                    'free_spaces', view_online, view_report)
+    list_filter = ('activity', 'private', 'vehicle_plate_required')
+    list_editable = ['vehicle_plate_required']
+    readonly_fields = ('free_spaces',)
 
 
 def register_with_admin(admin_site):

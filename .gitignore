@@ -5,6 +5,8 @@
 .ssh/gitlab_key
 temp/
 local/*
+djangoplicity_visits.egg-info
+dist
 !local/README.md
 config/youtube/*
 !config/youtube/README.md

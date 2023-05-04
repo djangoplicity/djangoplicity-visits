@@ -34,8 +34,6 @@ from __future__ import print_function
 import os
 import sys
 import pytz
-from django.core.files.storage import FileSystemStorage
-from django.core.validators import FileExtensionValidator
 from hashids import Hashids
 import html2text
 from django.conf import settings
@@ -53,6 +51,7 @@ from djangoplicity.metadata.archives import fields as metadatafields
 from djangoplicity.translation.fields import TranslationForeignKey
 from djangoplicity.translation.models import TranslationModel, translation_reverse
 from django.contrib.sites.models import Site
+from djangoplicity.products2.models import TechnicalDocument
 
 
 def eprint(*args, **kwargs):
@@ -88,6 +87,7 @@ class Activity(TranslationModel):
     name = models.CharField(max_length=100)
     observatory = models.CharField(max_length=50)
     meeting_point = models.CharField(max_length=100)
+    meeting_point_link = models.URLField(help_text='Link to Meeting point', blank=True, null=True)
     travel_info_url = models.URLField(help_text='Link to travel info page')
     map_url = models.URLField(help_text='Link to Google Maps')
     offered_languages = models.ManyToManyField('Language')
@@ -101,13 +101,6 @@ class Activity(TranslationModel):
     description = metadatafields.AVMDescriptionField()
     published = models.BooleanField(default=False)
 
-    safety_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
-                                        validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
-    disclaimer_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
-                                            validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
-    conduct_form_file = models.FileField(upload_to=handle_uploaded_file, blank=True, null=True,
-                                         validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
-
     key_visual_en = TranslationForeignKey(Image, blank=True, null=True,
         on_delete=models.SET_NULL, related_name='+',
         verbose_name='English poster')
@@ -115,7 +108,32 @@ class Activity(TranslationModel):
         on_delete=models.SET_NULL, related_name='+',
         verbose_name='Spanish poster')
 
-    def __unicode__(self):
+    safety_tech_doc = TranslationForeignKey(TechnicalDocument, blank=True, null=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name='Safety Technical Doc')
+
+    conduct_tech_doc = TranslationForeignKey(TechnicalDocument, blank=True, null=True,
+                                            on_delete=models.SET_NULL, related_name='+',
+                                            verbose_name='Conduct Technical Doc')
+
+    liability_tech_doc = TranslationForeignKey(TechnicalDocument, blank=True, null=True,
+                                            on_delete=models.SET_NULL, related_name='+',
+                                            verbose_name='Liability Technical Doc')
+
+    # Technical Document Spanish versions
+    safety_tech_doc_es = TranslationForeignKey(
+        TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
+        verbose_name='Spanish Safety Technical Doc')
+
+    conduct_tech_doc_es = TranslationForeignKey(
+        TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
+        verbose_name='Spanish Conduct Technical Doc')
+
+    liability_tech_doc_es = TranslationForeignKey(
+        TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
+        verbose_name='Spanish Liability Technical Doc')
+
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -150,7 +168,7 @@ class Language(models.Model):
     code = models.CharField(primary_key=True, max_length=10)
     name = models.CharField(max_length=100)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -171,13 +189,45 @@ class Reservation(models.Model):
     created = models.DateTimeField(default=timezone.now)
     last_modified = models.DateTimeField(default=timezone.now)
 
+    vehicle_plate = models.CharField(_('Vehicle Plate'), max_length=20, blank=True, null=True)
+
     accept_safety_form = models.BooleanField(verbose_name=_('Accept Safety Form'), default=False)
     accept_disclaimer_form = models.BooleanField(verbose_name=_('Accept Disclaimer Form'), default=False)
     accept_conduct_form = models.BooleanField(verbose_name=_('Accept Conduct Form'), default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}, {} ({} spaces)'.format(self.email, self.showing,
             self.n_spaces)
+
+    def get_safety_tech_doc_url(self):
+        if self.language.code == 'es' and self.showing.activity.safety_tech_doc_es and self.showing.activity.safety_tech_doc_es.resource_pdf:
+            return self.showing.activity.safety_tech_doc_es.resource_pdf.absolute_url
+        elif self.showing.activity.safety_tech_doc and self.showing.activity.safety_tech_doc.resource_pdf:
+            return self.showing.activity.safety_tech_doc.resource_pdf.absolute_url
+        else:
+            return '#'
+
+    def get_conduct_tech_doc_url(self):
+        if self.language.code == 'es' and self.showing.activity.conduct_tech_doc_es and self.showing.activity.conduct_tech_doc_es.resource_pdf:
+            return self.showing.activity.conduct_tech_doc_es.resource_pdf.absolute_url
+        elif self.showing.activity.conduct_tech_doc and self.showing.activity.conduct_tech_doc.resource_pdf:
+            return self.showing.activity.conduct_tech_doc.resource_pdf.absolute_url
+        else:
+            return '#'
+
+    def get_liability_tech_doc_url(self):
+        if self.language.code == 'es' and self.showing.activity.liability_tech_doc_es and self.showing.activity.liability_tech_doc_es.resource_pdf:
+            return self.showing.activity.liability_tech_doc_es.resource_pdf.absolute_url
+        elif self.showing.activity.liability_tech_doc and self.showing.activity.liability_tech_doc.resource_pdf:
+            return self.showing.activity.liability_tech_doc.resource_pdf.absolute_url
+        else:
+            return '#'
+
+    def get_map_url(self):
+        if self.showing.activity.map_url:
+            return self.showing.activity.map_url
+        else:
+            return '#'
 
     @classmethod
     def delete_notification(cls, sender, instance, **kwargs):
@@ -295,6 +345,8 @@ class Showing(models.Model):
     max_spaces_per_reservation = models.SmallIntegerField(default=0,
         help_text='Maximum number of spaces per reservation, 0 for no maximum')
 
+    vehicle_plate_required = models.BooleanField(_('Vehicle Plate is Required?'), default=False)
+
     total_spaces = models.IntegerField(help_text='Total number of seats '
         '(based on selected activity)', blank=True)
     free_spaces = models.IntegerField(help_text='Current number of available '
@@ -320,13 +372,13 @@ class Showing(models.Model):
         abbr = tz.localize(self.start_time, is_dst=None)
         # Workaround to display CLT timezone no appear in pytz list
         # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-        if abbr.tzname() == '-03':
+        if abbr.tzname() == '-03' or abbr.tzname() == '-04':
             return 'CLT'
         return abbr.tzname()
 
     timezone_abbreviation = property(get_timezone_abbr)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} — {}'.format(
             self.activity,
             self.start_time.strftime('%Y-%m-%d %H:%M'),
