@@ -119,6 +119,8 @@ class ReservationForm(forms.ModelForm):
 
         if self.showing.vehicle_plate_required:
             self.fields['vehicle_plate'].required = True
+        else:
+            self.fields['vehicle_plate'].widget = forms.HiddenInput()
 
         self.fields['email'].widget.attrs.update({
             'class': 'nocopypaste'
@@ -127,15 +129,21 @@ class ReservationForm(forms.ModelForm):
             'class': 'nocopypaste'
         })
 
-        self.fields['accept_safety_form'].widget.attrs.update({
-            'data-target': '#safety_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
-        self.fields['accept_safety_form'].label = _("I hereby accept the Safety conditions on behalf of all visitors in my party.*")
+        if self.showing.activity.safety_tech_doc:
+            self.fields['accept_safety_form'].widget.attrs.update({
+                'data-target': '#safety_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
+            self.fields['accept_safety_form'].label = _("I hereby accept the Safety conditions on behalf of all visitors in my party.*")
+        else:
+            self.fields['accept_safety_form'].widget = forms.HiddenInput()
 
-        self.fields['accept_disclaimer_form'].widget.attrs.update({
-            'data-target': '#disclaimer_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
-        self.fields['accept_disclaimer_form'].label = _("I hereby accept the Liability Disclaimer conditions on behalf of all visitors in my party.*")
+        if self.showing.activity.liability_tech_doc:
+            self.fields['accept_disclaimer_form'].widget.attrs.update({
+                'data-target': '#disclaimer_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
+            self.fields['accept_disclaimer_form'].label = _("I hereby accept the Liability Disclaimer conditions on behalf of all visitors in my party.*")
+        else:
+            self.fields['accept_disclaimer_form'].widget = forms.HiddenInput()
 
-        if getattr(settings, 'VISITS_DISPLAY_ACCEPT_CONDUCT_FORM', False):
+        if self.showing.activity.conduct_tech_doc:
             self.fields['accept_conduct_form'].widget.attrs.update({
                 'data-target': '#conduct_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
             self.fields['accept_conduct_form'].label = _("I hereby accept the Standard of Workplace Conduct conditions on behalf of all visitors in my party.*")
