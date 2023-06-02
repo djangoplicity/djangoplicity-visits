@@ -119,9 +119,14 @@ class ReservationCreateView(CreateView):
 
     def get_other_showings(self):
         showing = self.get_showing()
+
+        now = timezone.now()
+        hours_ago = showing.activity.latest_reservation_time
+        time_ago = now + timedelta(hours=hours_ago)
+
         return showing.activity.showings.filter(
             private=False,
-            start_time__gt=timezone.now(),
+            start_time__gt=time_ago,
         ).order_by('start_time')
 
     def get_showing(self):
@@ -236,9 +241,8 @@ class ShowingListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(ShowingListView, self).get_context_data(**kwargs)
-        context['activity']  = self.activity
+        context['activity'] = self.activity
         return context
-
 
     def get(self, request, *args, **kwargs):
         pk = self.kwargs.pop('pk')
@@ -252,9 +256,12 @@ class ShowingListView(ListView):
 
     def get_queryset(self):
         now = timezone.now()
+        hours_ago = self.activity.latest_reservation_time
+
+        time_ago = now + timedelta(hours=hours_ago)
         qs = self.activity.showings.filter(
             private=False,
-            start_time__gt=now
+            start_time__gt=time_ago
         )
         return (qs.order_by('start_time'))
 
