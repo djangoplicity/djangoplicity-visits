@@ -167,7 +167,7 @@ class Activity(TranslationModel):
         TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
         verbose_name='Spanish Liability Technical Doc')
 
-    restrictions_and_recommendations = TranslationManyToManyField(RestrictionRecommendation)
+    restrictions_and_recommendations = TranslationManyToManyField(RestrictionRecommendation, blank=True, null=True)
 
     def __str__(self):
         return self.name
