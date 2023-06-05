@@ -379,7 +379,7 @@ class Showing(models.Model):
         help_text='Whether the showing if private.')
     offered_languages = models.ManyToManyField('Language')
     max_spaces_per_reservation = models.SmallIntegerField(default=0,
-        help_text='Maximum number of spaces per reservation, 0 for no maximum')
+        help_text='Maximum number of spaces per reservation')
 
     vehicle_plate_required = models.BooleanField(_('Vehicle Plate is Required?'), default=False)
 
