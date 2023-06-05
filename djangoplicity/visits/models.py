@@ -48,7 +48,7 @@ from django.utils.translation import gettext_lazy as _
 from djangoplicity.archives.translation import TranslationProxyMixin
 from djangoplicity.media.models import Image
 from djangoplicity.metadata.archives import fields as metadatafields
-from djangoplicity.translation.fields import TranslationForeignKey
+from djangoplicity.translation.fields import TranslationForeignKey, TranslationManyToManyField
 from djangoplicity.translation.models import TranslationModel, translation_reverse
 from django.contrib.sites.models import Site
 from djangoplicity.products2.models import TechnicalDocument
@@ -80,6 +80,40 @@ def get_default_from_email():
         return None
 
 TIMEZONES_TZS = [(tz, tz) for tz in pytz.all_timezones]
+
+
+class RestrictionRecommendation(TranslationModel):
+    id = models.SlugField(primary_key=True, max_length=10)
+    name = models.CharField(max_length=100)
+    icon_name = models.CharField(max_length=30)
+    caption = models.CharField(max_length=256, verbose_name=_('Icon Caption'))
+
+    class Translation:
+        excludes = []
+        fields = ['icon_name', 'caption']
+
+    class Meta:
+        ordering = ['name',]
+
+    def __str__(self):
+        return self.name
+
+
+class RestrictionRecommendationProxy(RestrictionRecommendation, TranslationProxyMixin):
+    objects = RestrictionRecommendation.translation_objects
+
+    def clean(self):
+        # Note: For some reason it's not possible to
+        # to define clean/validate_unique in TranslationProxyMixin
+        # so we have to do this trick, where we add the methods and
+        # call into translation proxy mixin.
+        self.id_clean()
+
+    class Meta:
+        proxy = True
+        verbose_name = 'Restriction or Recommendation translation'
+        verbose_name_plural = 'Restrictions and Recommendations translations'
+
 
 class Activity(TranslationModel):
     id = metadatafields.AVMIdField(primary_key=True, verbose_name='ID',
@@ -132,6 +166,8 @@ class Activity(TranslationModel):
     liability_tech_doc_es = TranslationForeignKey(
         TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
         verbose_name='Spanish Liability Technical Doc')
+
+    restrictions_and_recommendations = TranslationManyToManyField(RestrictionRecommendation)
 
     def __str__(self):
         return self.name

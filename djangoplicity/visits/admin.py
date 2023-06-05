@@ -37,8 +37,8 @@ from django.utils.html import format_html
 from import_export.widgets import ForeignKeyWidget
 from djangoplicity.contrib import admin as dpadmin
 from django.conf import settings
-from djangoplicity.visits.models import Activity, ActivityProxy,\
-    Language, Reservation, Showing
+from djangoplicity.visits.models import Activity, ActivityProxy, \
+    Language, Reservation, Showing, RestrictionRecommendation, RestrictionRecommendationProxy
 from django.utils.translation import gettext_lazy as _
 from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
@@ -64,12 +64,21 @@ def view_report(obj):
                        reverse('visits-showings-reports-detail', args=[obj.id]), CACHE_PARAMETER)
 
 
+class RestrictionRecommendationAdmin(dpadmin.DjangoplicityModelAdmin):
+    list_display = ('id', 'name', 'icon_name', 'caption')
+
+
+class RestrictionRecommendationProxyAdmin(RestrictionRecommendationAdmin):
+    pass
+
+
 class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
     list_display = ('id', 'name', view_online,)
     raw_id_fields = ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc',
                      'safety_tech_doc_es', 'conduct_tech_doc_es', 'liability_tech_doc_es')
     richtext_fields = ('description',)
+    filter_horizontal = ('restrictions_and_recommendations',)
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
@@ -157,6 +166,8 @@ def register_with_admin(admin_site):
     admin_site.register(Language)
     admin_site.register(Reservation, ReservationAdmin)
     admin_site.register(Showing, ShowingAdmin)
+    admin_site.register(RestrictionRecommendation, RestrictionRecommendationAdmin)
+    admin_site.register(RestrictionRecommendationProxy, RestrictionRecommendationProxyAdmin)
 
 
 register_with_admin(admin.site)
