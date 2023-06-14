@@ -278,5 +278,5 @@ class ShowingReportListView(ListView):
     def get_queryset(self):
         return (
             super(ShowingReportListView, self).get_queryset()
-            .order_by('activity__name', 'start_time')
+            .order_by('activity__name', '-start_time')
         )

@@ -134,6 +134,18 @@ class Activity(TranslationModel):
     slogan = models.CharField(max_length=255, blank=True)
     description = metadatafields.AVMDescriptionField()
     published = models.BooleanField(default=False)
+    required_vehicle_plate = models.BooleanField(
+        default=False,
+        help_text=_('Vehicle Plate required on the reservation form')
+    )
+    require_age = models.BooleanField(
+        default=False,
+        help_text=_('Age range required on the reservation form')
+    )
+    require_rut_number = models.BooleanField(
+        default=False,
+        help_text=_('RUT number required on the reservation form')
+    )
 
     key_visual_en = TranslationForeignKey(Image, blank=True, null=True,
         on_delete=models.SET_NULL, related_name='+',
@@ -167,7 +179,7 @@ class Activity(TranslationModel):
         TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
         verbose_name='Spanish Liability Technical Doc')
 
-    restrictions_and_recommendations = TranslationManyToManyField(RestrictionRecommendation, blank=True, null=True)
+    restrictions_and_recommendations = TranslationManyToManyField(RestrictionRecommendation, blank=True)
 
     def __str__(self):
         return self.name
@@ -212,6 +224,18 @@ class Language(models.Model):
 
 
 class Reservation(models.Model):
+    RANGE_UNKNOWN = 'Unknown'
+    RANGE_6_12 = '6-12'
+    RANGE_13_18 = '13-18'
+    RANGE_18_PLUS = '18+'
+
+    AGE_RANGES = [
+        (RANGE_UNKNOWN, _('Unknown')),
+        (RANGE_6_12, _('6-12 years old')),
+        (RANGE_13_18, _('13-18 years old')),
+        (RANGE_18_PLUS, _('18+ years old')),
+    ]
+
     code = models.CharField(max_length=50, blank=True)
     showing = models.ForeignKey('Showing', on_delete=models.RESTRICT)
     name = models.CharField(max_length=80, verbose_name=_('Full name'))
@@ -224,12 +248,19 @@ class Reservation(models.Model):
         'places'))
     created = models.DateTimeField(default=timezone.now)
     last_modified = models.DateTimeField(default=timezone.now)
+    rut = models.IntegerField('RUT Number', blank=True, null=True, default=0)
 
     vehicle_plate = models.CharField(_('Vehicle Plate'), max_length=20, blank=True, null=True)
 
     accept_safety_form = models.BooleanField(verbose_name=_('Accept Safety Form'), default=False)
     accept_disclaimer_form = models.BooleanField(verbose_name=_('Accept Disclaimer Form'), default=False)
     accept_conduct_form = models.BooleanField(verbose_name=_('Accept Conduct Form'), default=False)
+
+    age_range = models.CharField(
+        max_length=10,
+        choices=AGE_RANGES,
+        default='Unknown',
+    )
 
     def __str__(self):
         return '{}, {} ({} spaces)'.format(self.email, self.showing,
@@ -367,6 +398,9 @@ class Reservation(models.Model):
 
         translation.deactivate()
 
+    class Meta:
+        ordering = ('-created', )
+
 
 class Showing(models.Model):
     activity = TranslationForeignKey('Activity', related_name='showings', on_delete=models.RESTRICT)
@@ -380,8 +414,6 @@ class Showing(models.Model):
     offered_languages = models.ManyToManyField('Language')
     max_spaces_per_reservation = models.SmallIntegerField(default=0,
         help_text='Maximum number of spaces per reservation')
-
-    vehicle_plate_required = models.BooleanField(_('Vehicle Plate is Required?'), default=False)
 
     total_spaces = models.IntegerField(help_text='Total number of seats '
         '(based on selected activity)', blank=True)
@@ -457,6 +489,9 @@ class Showing(models.Model):
 
         # We use "update" so as not to trigger signals
         Showing.objects.filter(pk=self.pk).update(free_spaces=free_spaces)
+
+    class Meta:
+        ordering = ('-start_time',)
 
 
 def generate_code(sender, instance, raw, **kwargs):

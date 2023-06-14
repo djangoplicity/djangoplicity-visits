@@ -115,17 +115,17 @@ class ReservationResource(resources.ModelResource):
 
     class Meta:
         model = Reservation
-        fields = ('id', 'name', 'code', 'phone', 'alternative_phone', 'email', 'country', 'language',
+        fields = ('id', 'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone', 'email', 'country', 'language',
                   'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'accept_safety_form',
                   'accept_disclaimer_form', 'accept_conduct_form')
-        export_order = ('id', 'showing', 'date', 'time',  'name', 'code', 'phone', 'alternative_phone',
+        export_order = ('id', 'showing', 'date', 'time',  'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone',
                         'email', 'country', 'language', 'n_spaces', 'created', 'last_modified', 'vehicle_plate',
                         'accept_safety_form', 'accept_disclaimer_form', 'accept_conduct_form')
 
 
 class ReservationAdmin(ImportExportModelAdmin):
     list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'phone', 'n_spaces', 'code',
-                    'vehicle_plate', 'language', 'created')
+                    'rut', 'vehicle_plate', 'language', 'created', 'age_range', )
     list_filter = ('showing__activity', 'showing__start_time', 'created')
     ordering = ['showing__start_time']
     raw_id_fields = ('showing', )
@@ -153,10 +153,9 @@ class ReservationAdmin(ImportExportModelAdmin):
 
 class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     filter_horizontal = ('offered_languages', )
-    list_display = ('activity', 'start_time', 'private', 'total_spaces', 'timezone', 'vehicle_plate_required',
+    list_display = ('activity', 'start_time', 'private', 'total_spaces', 'timezone',
                     'free_spaces', view_online, view_report)
-    list_filter = ('activity', 'private', 'vehicle_plate_required')
-    list_editable = ['vehicle_plate_required']
+    list_filter = ('activity', 'private')
     readonly_fields = ('free_spaces',)
 
 
