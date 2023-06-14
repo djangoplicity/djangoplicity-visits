@@ -117,17 +117,29 @@ class ReservationForm(forms.ModelForm):
                 'readonly': True
             })
 
-        if self.showing.vehicle_plate_required:
-            self.fields['vehicle_plate'].required = True
-        else:
-            self.fields['vehicle_plate'].widget = forms.HiddenInput()
-
         self.fields['email'].widget.attrs.update({
             'class': 'nocopypaste'
         })
         self.fields['email_confirm'].widget.attrs.update({
             'class': 'nocopypaste'
         })
+
+        if self.showing.activity.required_vehicle_plate:
+            self.fields['vehicle_plate'].required = True
+        else:
+            self.fields.pop('vehicle_plate')
+
+        if self.showing.activity.require_rut_number:
+            self.fields['rut'].required = False
+        else:
+            self.fields.pop('rut')
+
+
+        if self.showing.activity.require_age:
+            choices = list(filter(lambda item: item[1] != Reservation.RANGE_UNKNOWN, Reservation.AGE_RANGES))
+            self.fields['age_range'].choices = choices
+        else:
+            self.fields.pop('age_range')
 
         if self.showing.activity.safety_tech_doc:
             self.fields['accept_safety_form'].widget.attrs.update({
