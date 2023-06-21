@@ -32,6 +32,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
+from django import forms
 from django.urls import reverse
 from django.utils.html import format_html
 from import_export.widgets import ForeignKeyWidget
@@ -72,13 +73,24 @@ class RestrictionRecommendationProxyAdmin(RestrictionRecommendationAdmin):
     pass
 
 
+class ActivityAdminForm(forms.ModelForm):
+    class Meta:
+        model = Activity
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields['related_activities'].queryset = Activity.objects.exclude(pk=self.instance.pk)
+
+
 class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
-    filter_horizontal = ('offered_languages', )
     list_display = ('id', 'name', view_online,)
     raw_id_fields = ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc',
                      'safety_tech_doc_es', 'conduct_tech_doc_es', 'liability_tech_doc_es')
     richtext_fields = ('description',)
-    filter_horizontal = ('restrictions_and_recommendations',)
+    filter_horizontal = ('offered_languages', 'restrictions_and_recommendations', 'related_activities')
+    form = ActivityAdminForm
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
