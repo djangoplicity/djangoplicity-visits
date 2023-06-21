@@ -263,6 +263,14 @@ class ShowingListView(ListView):
             private=False,
             start_time__gt=time_ago
         )
+
+        related_showings = Showing.objects.filter(
+            activity__in=self.activity.related_activities.all(),
+            private=False,
+            start_time__gt=time_ago
+        )
+
+        qs = qs | related_showings
         return (qs.order_by('start_time'))
 
 

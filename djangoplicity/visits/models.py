@@ -181,6 +181,8 @@ class Activity(TranslationModel):
 
     restrictions_and_recommendations = TranslationManyToManyField(RestrictionRecommendation, blank=True)
 
+    related_activities = models.ManyToManyField('self', verbose_name='Join with Activities', blank=True)
+
     def __str__(self):
         return self.name
 
