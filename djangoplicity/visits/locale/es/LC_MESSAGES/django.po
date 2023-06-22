@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-01-18 00:24+0000\n"
-"PO-Revision-Date: 2023-01-17 17:29-0728\n"
-"Last-Translator:   <altix@gmail.com>\n"
+"PO-Revision-Date: 2023-06-22 11:45-0728\n"
+"Last-Translator: b'  <altix@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -198,7 +198,7 @@ msgstr ""
 
 #: djangoplicity/visits/templates/visits/emails/reservation-deleted.html:6
 msgid "Your reservation has been successfully deleted."
-msgstr ""
+msgstr "Su reservación ha sido eliminada exitosamente"
 
 #: djangoplicity/visits/templates/visits/emails/reservation-details-reminder.html:4
 #, python-format
@@ -206,21 +206,23 @@ msgid ""
 "This is a reminder for your guided tour at %(observatory)s!<br>The meeting "
 "point is the Security Gate."
 msgstr ""
+"Este es un recordatorio para su visita guiada en %(observatory)s!<br>El "
+"punto de encuentro es la Puerta de Seguridad."
 
 #: djangoplicity/visits/templates/visits/emails/reservation-details-reminder.html:8
 #: djangoplicity/visits/templates/visits/emails/reservation-details.html:8
 msgid "Date"
-msgstr ""
+msgstr "Fecha"
 
 #: djangoplicity/visits/templates/visits/emails/reservation-details-reminder.html:9
 #: djangoplicity/visits/templates/visits/emails/reservation-details.html:9
 msgid "Time"
-msgstr ""
+msgstr "Hora"
 
 #: djangoplicity/visits/templates/visits/emails/reservation-details-reminder.html:13
 #: djangoplicity/visits/templates/visits/emails/reservation-details.html:13
 msgid "Reservation number: "
-msgstr ""
+msgstr "Código de reserva:"
 
 #: djangoplicity/visits/templates/visits/emails/reservation-details-reminder.html:15
 #: djangoplicity/visits/templates/visits/emails/reservation-details.html:15
@@ -228,11 +230,13 @@ msgid ""
 "\n"
 "Please bring this message with you to the Observatory in electronic or paper form.\n"
 msgstr ""
+"\n"
+"Por favor, traiga este mensaje con usted a [Observatorio] en formato electrónico o impreso.\n"
 
 #: djangoplicity/visits/templates/visits/emails/reservation-details-reminder.html:19
 #: djangoplicity/visits/templates/visits/emails/reservation-details.html:19
 msgid "Important"
-msgstr ""
+msgstr "Importante"
 
 #: djangoplicity/visits/templates/visits/emails/reservation-details-reminder.html:23
 #: djangoplicity/visits/templates/visits/emails/reservation-details.html:23
@@ -305,10 +309,12 @@ msgid ""
 "Your reservation was completed successfully, you will receive a confirmation"
 " email at "
 msgstr ""
+"Su reserva se ha completado con éxito, recibirá un correo electrónico de "
+"confirmación en"
 
 #: djangoplicity/visits/templates/visits/reservation_confirm.html:10
 msgid "Please, check your spam folder!"
-msgstr ""
+msgstr "Por favor, revise su carpeta de spam."
 
 #: djangoplicity/visits/templates/visits/reservation_confirm.html:12
 #, python-format
@@ -319,31 +325,35 @@ msgid ""
 "new reservation on this page. Cancellations and changes can only be made up "
 "until 13:00 of the Friday before your visit."
 msgstr ""
+"Si deseas cancelar o modificar tu reserva, <a "
+"href=\"%(SITE_DOMAIN)s%(url)s\">haz clic aquí</a>. Si deseas cambiar la "
+"fecha u hora de tu reserva, por favor cancela tu reserva anterior y realiza "
+"una nueva en esta página."
 
 #: djangoplicity/visits/templates/visits/reservation_confirm.html:14
 #: djangoplicity/visits/templates/visits/reservation_delete_confirm.html:7
 msgid "Back to visits page"
-msgstr ""
+msgstr "Volver a la página de visitas"
 
 #: djangoplicity/visits/templates/visits/reservation_delete_confirm.html:6
 msgid "Your reservation was cancelled successfully."
-msgstr ""
+msgstr "Su reserva fue cancelada correctamente."
 
 #: djangoplicity/visits/templates/visits/reservation_form.html:17
 msgid "Date/Time"
-msgstr ""
+msgstr "Fecha/Hora"
 
 #: djangoplicity/visits/templates/visits/reservation_form.html:18
 msgid "Location"
-msgstr ""
+msgstr "Localización"
 
 #: djangoplicity/visits/templates/visits/reservation_form.html:19
 msgid "Meeting point"
-msgstr ""
+msgstr "Punto de encuentro."
 
 #: djangoplicity/visits/templates/visits/reservation_form.html:19
 msgid "Security Gate"
-msgstr ""
+msgstr "Puerta de seguridad"
 
 #: djangoplicity/visits/templates/visits/reservation_form.html:20
 msgid "Duration"
@@ -352,7 +362,7 @@ msgstr ""
 #: djangoplicity/visits/templates/visits/reservation_form.html:21
 #: djangoplicity/visits/templates/visits/showing_list.html:25
 msgid "Available places"
-msgstr ""
+msgstr "Plazas disponibles"
 
 #: djangoplicity/visits/templates/visits/reservation_form.html:27
 msgid ""
@@ -370,12 +380,12 @@ msgstr ""
 
 #: djangoplicity/visits/templates/visits/reservation_form.html:41
 msgid "Other showings"
-msgstr ""
+msgstr "Otros tours:"
 
 #: djangoplicity/visits/templates/visits/reservation_form.html:49
 #: djangoplicity/visits/templates/visits/showing_list.html:25
 msgid "Fully booked"
-msgstr ""
+msgstr "Completamente reservado"
 
 #: djangoplicity/visits/templates/visits/reservation_update.html:10
 msgid "Update your reservation"
@@ -389,55 +399,57 @@ msgstr ""
 msgid ""
 "Click the button below to cancel your reservation, this cannot be undone!"
 msgstr ""
+"Haga clic en el botón de abajo para cancelar su reserva, ¡esto no se puede "
+"deshacer!"
 
 #: djangoplicity/visits/templates/visits/reservation_update.html:19
 msgid "Cancel the reservation"
-msgstr ""
+msgstr "Cancelar la reserva"
 
 #: djangoplicity/visits/templates/visits/showing_list.html:7
 msgid "Public Visits Observatories"
-msgstr ""
+msgstr "Visitas públicas a los observatorios"
 
 #: djangoplicity/visits/templates/visits/showing_list.html:13
 msgid "Edit"
-msgstr ""
+msgstr "Editar"
 
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:7
 #: djangoplicity/visits/templates/visits/showing_report_list.html:7
 msgid "Public Visits Reports"
-msgstr ""
+msgstr "Informes de las visitas públicas"
 
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:13
 msgid "Name"
-msgstr ""
+msgstr "Nombre"
 
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:15
 msgid "Phone number"
-msgstr ""
+msgstr "Numero de teléfono"
 
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:16
 msgid "Alternative Phone number"
-msgstr ""
+msgstr "Teléfono alternativo"
 
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:19
 msgid "Language"
-msgstr ""
+msgstr "Idioma"
 
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:20
 msgid "Reservation code"
-msgstr ""
+msgstr "Código de reserva"
 
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:21
 msgid "Reservation date"
-msgstr ""
+msgstr "Fecha de reserva"
 
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:41
 msgid "Back to list"
-msgstr ""
+msgstr "Volver a la lista"
 
 #: djangoplicity/visits/templates/visits/visits-base.html:14
 msgid "Archive"
-msgstr ""
+msgstr "Archivo"
 
 #~ msgid ""
 #~ "This reservation already exists. In case of issues with your reservation, "
