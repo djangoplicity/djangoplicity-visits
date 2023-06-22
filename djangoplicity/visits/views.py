@@ -263,13 +263,16 @@ class ShowingListView(ListView):
             private=False,
             start_time__gt=time_ago
         )
+        if self.activity.is_translation():
+            related_activities = self.activity.source.related_activities.all()
+        else:
+            related_activities = self.activity.related_activities.all()
 
         related_showings = Showing.objects.filter(
-            activity__in=self.activity.related_activities.all(),
+            activity__in=related_activities,
             private=False,
             start_time__gt=time_ago
         )
-
         qs = qs | related_showings
         return (qs.order_by('start_time'))
 
