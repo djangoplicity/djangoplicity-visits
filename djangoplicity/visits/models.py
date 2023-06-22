@@ -119,6 +119,8 @@ class Activity(TranslationModel):
     id = metadatafields.AVMIdField(primary_key=True, verbose_name='ID',
         help_text='ID of the activity, also used in URLs')
     name = models.CharField(max_length=100)
+    title = models.CharField(max_length=100, blank=True, null=True,
+        help_text='title to be displayed in the activity description when the activity is joined with other activities')
     observatory = models.CharField(max_length=50)
     meeting_point = models.CharField(max_length=100)
     meeting_point_link = models.URLField(help_text='Link to Meeting point', blank=True, null=True)
@@ -183,6 +185,9 @@ class Activity(TranslationModel):
 
     related_activities = models.ManyToManyField('self', verbose_name='Join with Activities', blank=True)
 
+    showing_list_title = models.CharField(max_length=100, blank=True, null=True)
+    showing_list_title_es = models.CharField(max_length=100, blank=True, null=True)
+
     def __str__(self):
         return self.name
 
@@ -192,7 +197,7 @@ class Activity(TranslationModel):
 
     class Translation:
         excludes = []
-        fields = ['name', 'meeting_point', 'slogan', 'description']
+        fields = ['name', 'title', 'meeting_point', 'slogan', 'description']
 
     def get_absolute_url(self):
         return translation_reverse('visits-showings-list', args=[str( self.id if self.is_source() else self.source.id )], lang=self.lang )
