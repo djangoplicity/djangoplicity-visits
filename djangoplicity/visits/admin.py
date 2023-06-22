@@ -100,7 +100,7 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
 
 
 class ActivityProxyAdmin(dpadmin.DjangoplicityModelAdmin):
-    fields = ('lang', 'source', 'translation_ready', 'name', 'meeting_point',
+    fields = ('lang', 'source', 'translation_ready', 'name', 'title', 'meeting_point',
               'slogan', 'description')
     list_display = ('pk', 'name')
     raw_id_fields = ('source', )
