@@ -254,7 +254,7 @@ class Reservation(models.Model):
     n_spaces = models.SmallIntegerField(verbose_name=_('Number of places'))
     created = models.DateTimeField(default=timezone.now)
     last_modified = models.DateTimeField(default=timezone.now)
-    rut = models.IntegerField(_('RUT Number'), blank=True, null=True, default=0)
+    rut = models.CharField(_('RUT Number'), max_length=50, blank=True, null=True, default='')
 
     vehicle_plate = models.CharField(_('Vehicle Plate'), max_length=20, blank=True, null=True)
 
