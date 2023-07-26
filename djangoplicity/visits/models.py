@@ -251,11 +251,10 @@ class Reservation(models.Model):
     email = models.EmailField(verbose_name=_('Email'))
     country = models.CharField(max_length=50, verbose_name=_('Country'))
     language = models.ForeignKey(Language, verbose_name=_('Preferred language'), on_delete=models.RESTRICT)
-    n_spaces = models.SmallIntegerField(verbose_name=_('Number of '
-        'places'))
+    n_spaces = models.SmallIntegerField(verbose_name=_('Number of places'))
     created = models.DateTimeField(default=timezone.now)
     last_modified = models.DateTimeField(default=timezone.now)
-    rut = models.IntegerField('RUT Number', blank=True, null=True, default=0)
+    rut = models.IntegerField(_('RUT Number'), blank=True, null=True, default=0)
 
     vehicle_plate = models.CharField(_('Vehicle Plate'), max_length=20, blank=True, null=True)
 

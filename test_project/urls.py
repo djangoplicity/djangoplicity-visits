@@ -20,10 +20,10 @@ from django.conf import settings
 
 
 urlpatterns = [
-    url(r'^admin/', include(admin_site.urls)),
-    url(r'^admin/cache/', include('djangoplicity.cache.urls', namespace="admincache_site", app_name="cache")),
-    url(r'^admin/system/', include(adminlogs_site.urls), {'extra_context': {'ADMINLOGS_SITE': True}}),
-    url(r'^admin/history/', include('djangoplicity.adminhistory.urls', namespace="adminhistory_site", app_name="history")),
+    url(r'^admin/', admin_site.urls),
+    url(r'^admin/cache/', include(('djangoplicity.cache.urls', "cache"), namespace="admincache_site")),
+    url(r'^admin/system/', adminlogs_site.urls, {'extra_context': {'ADMINLOGS_SITE': True}}),
+    url(r'^admin/history/', include(('djangoplicity.adminhistory.urls', "history"), namespace="adminhistory_site")),
     url(r'^tinymce/', include('tinymce.urls')),
     # djangoplicty visits
     url(r'^visits/', include('djangoplicity.visits.urls'), {'translate': True}),

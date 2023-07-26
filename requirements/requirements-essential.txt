@@ -30,3 +30,6 @@ django-debug-toolbar==1.11
 
 #  Django application and library for importing and exporting data with included admin integration.
 django-import-export==2.7.0
+
+# PostgreSQL python client
+psycopg2-binary==2.8.5

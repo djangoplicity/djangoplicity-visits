@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-18 00:24+0000\n"
-"PO-Revision-Date: 2023-06-22 11:45-0728\n"
+"POT-Creation-Date: 2023-07-26 15:27+0000\n"
+"PO-Revision-Date: 2023-07-26 08:32-0728\n"
 "Last-Translator: b'  <altix@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -19,19 +19,19 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Translated-Using: django-rosetta 0.9.3\n"
 
-#: djangoplicity/visits/admin.py:131
+#: djangoplicity/visits/admin.py:152
 msgid "Showing Date"
 msgstr "Fecha del Tour"
 
-#: djangoplicity/visits/admin.py:138
+#: djangoplicity/visits/admin.py:159
 msgid "Showing Time"
 msgstr "Hora del Tour"
 
-#: djangoplicity/visits/admin.py:142
+#: djangoplicity/visits/admin.py:163
 msgid "Activity Name"
 msgstr "Nombre de la Actividad"
 
-#: djangoplicity/visits/forms.py:42
+#: djangoplicity/visits/forms.py:40
 msgid ""
 "I declare that no one in my group has tested positive for COVID-19 or had "
 "any symptoms in the last 10 days: <ul class='list-unstyled'><li>a. "
@@ -46,130 +46,162 @@ msgstr ""
 "corporales</li><li>g. Pérdida del gusto o del olfato</li><li>h. Náuseas o "
 "vómitos</li><li>i. Diarrea</li></ul>"
 
-#: djangoplicity/visits/forms.py:56
-msgid ""
-"I declare that everyone in my group has received a full set of COVID-19 "
-"vaccinations including boosters (if applicable). (vaccination cards will be "
-"checked at arrival)"
-msgstr ""
-"Declaro que todos en mi grupo han recibido un conjunto completo de vacunas "
-"COVID-19, incluidos los refuerzos (si corresponde). (Las tarjetas de "
-"vacunación se comprobarán a la llegada)"
+#: djangoplicity/visits/forms.py:54
+msgid "Subscribe to news from our observatories"
+msgstr "Suscríbase a las noticias de nuestros observatorios"
 
-#: djangoplicity/visits/forms.py:63
+#: djangoplicity/visits/forms.py:59
 msgid "Confirm Email"
 msgstr "Confirmar correo electrónico"
 
-#: djangoplicity/visits/forms.py:131
+#: djangoplicity/visits/forms.py:147
 msgid ""
-"I hereby accept the Safety conditions on behalf of all visitors in my party."
+"I hereby accept the Safety conditions on behalf of all visitors in my "
+"party.*"
 msgstr ""
-"Acepto las condiciones de seguridad en nombre de todos los visitantes de mi "
-"grupo."
+"Acepto las condiciones de Seguridad en nombre de todos los visitantes que "
+"vienen conmigo.*"
 
-#: djangoplicity/visits/forms.py:135
+#: djangoplicity/visits/forms.py:154
 msgid ""
 "I hereby accept the Liability Disclaimer conditions on behalf of all "
-"visitors in my party."
+"visitors in my party.*"
 msgstr ""
-"Por la presente, acepto las condiciones de exención de responsabilidad en "
-"nombre de todos los visitantes de mi grupo."
+"Acepto las condiciones de Renuncia de Responsabilidad en nombre de todos los"
+" visitantes que vienen conmigo.*"
 
-#: djangoplicity/visits/forms.py:139
+#: djangoplicity/visits/forms.py:161
 msgid ""
 "I hereby accept the Standard of Workplace Conduct conditions on behalf of "
-"all visitors in my party."
+"all visitors in my party.*"
 msgstr ""
-"Por la presente, acepto las condiciones de la Norma de conducta en el lugar "
-"de trabajo en nombre de todos los visitantes de mi grupo."
+"Acepto las condiciones de la Norma de conducta en el lugar de Tour en nombre"
+" de todos los visitantes de mi grupo.*"
 
-#: djangoplicity/visits/forms.py:147
+#: djangoplicity/visits/forms.py:171
 msgid "Submit"
 msgstr "Enviar"
 
-#: djangoplicity/visits/forms.py:159
+#: djangoplicity/visits/forms.py:183
 msgid "Email and Confirmation Email are different, please check!"
 msgstr ""
 "El correo electrónico y el correo electrónico de confirmación son "
 "diferentes, ¡verifíquelo!"
 
-#: djangoplicity/visits/forms.py:172
+#: djangoplicity/visits/forms.py:196
 #, python-brace-format
 msgid ""
 "The maximum number of spaces per person is ({max_spaces_per_reservation})."
 msgstr ""
 "El número máximo de cupos por persona es de ({max_spaces_per_reservation})."
 
-#: djangoplicity/visits/forms.py:179 djangoplicity/visits/forms.py:185
+#: djangoplicity/visits/forms.py:203 djangoplicity/visits/forms.py:209
 #, python-brace-format
 msgid "Only {number} spaces are currently available"
 msgstr "Solo {number} espacios están disponibles actualmente"
 
-#: djangoplicity/visits/models.py:181
+#: djangoplicity/visits/models.py:89
+#| msgid "Location"
+msgid "Icon Caption"
+msgstr "Icono Leyenda"
+
+#: djangoplicity/visits/models.py:141
+msgid "Vehicle Plate required on the reservation form"
+msgstr "Placa del vehículo requerida en el formulario de reserva"
+
+#: djangoplicity/visits/models.py:145
+msgid "Age range required on the reservation form"
+msgstr "Edad requerida en el formulario de reserva"
+
+#: djangoplicity/visits/models.py:149
+msgid "RUT number required on the reservation form"
+msgstr "Número RUT obligatorio en el formulario de reserva"
+
+#: djangoplicity/visits/models.py:240
+msgid "Unknown"
+msgstr "Desconocido"
+
+#: djangoplicity/visits/models.py:241
+msgid "6-12 years old"
+msgstr "6-12 años"
+
+#: djangoplicity/visits/models.py:242
+msgid "13-18 years old"
+msgstr "13-18 años"
+
+#: djangoplicity/visits/models.py:243
+msgid "18+ years old"
+msgstr "Mayores de 18 años"
+
+#: djangoplicity/visits/models.py:248
 msgid "Full name"
 msgstr "Nombre Completo"
 
-#: djangoplicity/visits/models.py:182
+#: djangoplicity/visits/models.py:249
 msgid "Phone"
 msgstr "Teléfono "
 
-#: djangoplicity/visits/models.py:183
+#: djangoplicity/visits/models.py:250
 msgid "Alternative Phone"
 msgstr "Teléfono alternativo"
 
-#: djangoplicity/visits/models.py:184
+#: djangoplicity/visits/models.py:251
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:14
 msgid "Email"
 msgstr "Email"
 
-#: djangoplicity/visits/models.py:185
+#: djangoplicity/visits/models.py:252
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:17
 msgid "Country"
 msgstr "País"
 
-#: djangoplicity/visits/models.py:186
+#: djangoplicity/visits/models.py:253
 msgid "Preferred language"
 msgstr "Idioma Preferido"
 
-#: djangoplicity/visits/models.py:187
+#: djangoplicity/visits/models.py:254
 #: djangoplicity/visits/templates/visits/emails/reservation-details-reminder.html:10
 #: djangoplicity/visits/templates/visits/emails/reservation-details.html:10
 #: djangoplicity/visits/templates/visits/showing_report_detail.html:18
 msgid "Number of places"
 msgstr "Número de Cupos"
 
-#: djangoplicity/visits/models.py:192
+#: djangoplicity/visits/models.py:257
+msgid "RUT Number"
+msgstr "Número de RUT"
+
+#: djangoplicity/visits/models.py:259
 msgid "Vehicle Plate"
 msgstr "Placa patente/Matrícula del vehículo"
 
-#: djangoplicity/visits/models.py:194
+#: djangoplicity/visits/models.py:261
 msgid "Accept Safety Form"
 msgstr "Aceptar formulario de seguridad"
 
-#: djangoplicity/visits/models.py:195
+#: djangoplicity/visits/models.py:262
 msgid "Accept Disclaimer Form"
 msgstr "Aceptar formulario de exención de responsabilidad"
 
-#: djangoplicity/visits/models.py:196
+#: djangoplicity/visits/models.py:263
 msgid "Accept Conduct Form"
 msgstr "Aceptar formulario de conducta"
 
-#: djangoplicity/visits/models.py:266
+#: djangoplicity/visits/models.py:339
 #: djangoplicity/visits/templates/visits/emails/reservation-confirm.html:5
 msgid "Reservation confirmation"
 msgstr "Confirmación de reservación"
 
-#: djangoplicity/visits/models.py:289
+#: djangoplicity/visits/models.py:362
 #: djangoplicity/visits/templates/visits/emails/reservation-reminder.html:5
 msgid "Reservation reminder"
 msgstr "Recordatorio de reserva"
 
-#: djangoplicity/visits/models.py:307
+#: djangoplicity/visits/models.py:380
 #: djangoplicity/visits/templates/visits/emails/reservation-deleted.html:5
 msgid "Reservation deleted"
 msgstr "Reserva eliminada"
 
-#: djangoplicity/visits/models.py:325
+#: djangoplicity/visits/models.py:398
 #: djangoplicity/visits/templates/visits/emails/reservation-updated.html:5
 msgid "Reservation updated"
 msgstr "Reserva actualizada"
@@ -222,7 +254,7 @@ msgstr "Hora"
 #: djangoplicity/visits/templates/visits/emails/reservation-details-reminder.html:13
 #: djangoplicity/visits/templates/visits/emails/reservation-details.html:13
 msgid "Reservation number: "
-msgstr "Código de reserva:"
+msgstr "Código de reserva: "
 
 #: djangoplicity/visits/templates/visits/emails/reservation-details-reminder.html:15
 #: djangoplicity/visits/templates/visits/emails/reservation-details.html:15
@@ -450,6 +482,15 @@ msgstr "Volver a la lista"
 #: djangoplicity/visits/templates/visits/visits-base.html:14
 msgid "Archive"
 msgstr "Archivo"
+
+#~ msgid ""
+#~ "I declare that everyone in my group has received a full set of COVID-19 "
+#~ "vaccinations including boosters (if applicable). (vaccination cards will be "
+#~ "checked at arrival)"
+#~ msgstr ""
+#~ "Declaro que todos en mi grupo han recibido un conjunto completo de vacunas "
+#~ "COVID-19, incluidos los refuerzos (si corresponde). (Las tarjetas de "
+#~ "vacunación se comprobarán a la llegada)"
 
 #~ msgid ""
 #~ "This reservation already exists. In case of issues with your reservation, "
