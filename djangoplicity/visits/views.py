@@ -52,37 +52,25 @@ class ReservationCreateView(CreateView):
     form_class = ReservationForm
 
     def get_context_data(self, **kwargs):
-        showing = self.get_showing()
         context = super(ReservationCreateView, self).get_context_data(**kwargs)
+        showing = self.get_showing()
+        activity = showing.get_activity()
         context['showing'] = showing
-        context['activity'] = showing.get_activity()
+        context['activity'] = activity
         context['other_showings'] = self.get_other_showings()
 
-        berlintz = pytz.timezone('Europe/Berlin')
-        santiagotz = pytz.timezone('America/Santiago')
-        berlinnow = berlintz.localize(datetime.now())
-        santiagonow = berlinnow.astimezone(santiagotz)
-        #  dt = santiagotz.localize(showing.start_time) - santiagonow
-        #  context['time_remaining'] = dt.days * 24 + dt.seconds / 3600.
+        # Get the user's timezone from the request (if available)
+        user_timezone = pytz.timezone(self.request.session.get('timezone', settings.TIME_ZONE))
 
-        #  context['too_late'] = showing.start_time - timedelta(
-        #      hours=showing.activity.latest_reservation_time) < timezone.now()
+        # Convert the user's current time to the timezone of the activity
+        activity_timezone = pytz.timezone(activity.timezone if activity.timezone else settings.TIME_ZONE)
+        user_now = datetime.now(user_timezone)
+        activity_now = user_now.astimezone(activity_timezone)
 
-        # <latest_reservation_time> before start
-        #  context['too_late'] = dt < timedelta(
-        #      hours=showing.activity.latest_reservation_time)
-
-        # Friday noon
-        #  print 'DEBUG'
-        #  print santiagonow.date()
-        #  print santiagotz.localize(showing.start_time).date()
-        #  print santiagotz.localize(showing.start_time).date() - timedelta(days=1)
-        #  print santiagonow.time()
-        #  print 'DEBUG'
-
+        # Determine if it's too late to make a reservation
         context['too_late'] = (
-            santiagonow.date() >= santiagotz.localize(showing.start_time).date() - timedelta(days=1)
-            and santiagonow.time() > time(hour=13)
+            activity_now.date() >= activity_timezone.localize(showing.start_time).date() - timedelta(days=1)
+            and activity_now.time() > time(hour=13)
         )
 
         return context

@@ -120,10 +120,15 @@ class ReservationResource(resources.ModelResource):
         return reservation.showing.start_time.strftime('%Y-%m-%d'),
 
     def dehydrate_time(self, reservation): # noqa
-        if reservation.showing.timezone:
-            return '{} {}'.format(reservation.showing.start_date_tz.strftime('%I:%M %p'), reservation.showing.get_timezone_abbr())
+        if reservation.showing.activity.timezone:
+            return '{} {}'.format(
+                reservation.showing.start_date_tz.strftime('%I:%M %p'),
+                reservation.showing.activity.timezone_abbreviation
+            )
         else:
-            return '{}'.format(reservation.showing.start_date_tz.strftime('%I:%M %p %Z'))
+            return '{}'.format(
+                reservation.showing.start_date_tz.strftime('%I:%M %p %Z')
+            )
 
     class Meta:
         model = Reservation
@@ -152,8 +157,11 @@ class ReservationAdmin(ImportExportModelAdmin):
     showing_date.short_description = _('Showing Date')
 
     def showing_time(self, obj):
-        if obj.showing.timezone:
-            return '{} {}'.format(obj.showing.start_date_tz.strftime('%I:%M %p'), obj.showing.get_timezone_abbr())
+        if obj.showing.activity.timezone:
+            return '{} {}'.format(
+                obj.showing.start_date_tz.strftime('%I:%M %p'),
+                obj.showing.activity.timezone_abbreviation
+            )
         else:
             return '{}'.format(obj.showing.start_date_tz.strftime('%I:%M %p %Z'))
     showing_time.short_description = _('Showing Time')
@@ -163,9 +171,23 @@ class ReservationAdmin(ImportExportModelAdmin):
     activity_name.short_description = _('Activity Name')
 
 
+class ShowingAdminForm(forms.ModelForm):
+    class Meta:
+        model = Showing
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(ShowingAdminForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.activity:
+            timezone_name = self.instance.activity.timezone if self.instance.activity.timezone else settings.TIME_ZONE
+            self.fields['start_time'].help_text = f"Start time (timezone: {timezone_name})"
+            self.fields['end_time'].help_text = f"End time (timezone: {timezone_name})"
+
+
 class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
+    form = ShowingAdminForm
     filter_horizontal = ('offered_languages', )
-    list_display = ('activity', 'start_time', 'private', 'total_spaces', 'timezone',
+    list_display = ('activity', 'start_time', 'private', 'total_spaces',
                     'free_spaces', view_online, view_report)
     list_filter = ('activity', 'private')
     readonly_fields = ('free_spaces',)
