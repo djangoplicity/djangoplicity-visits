@@ -201,6 +201,10 @@ class Activity(TranslationModel):
             return 'CLT'
         return abbr.tzname()
 
+    @property
+    def pytz_timezone(self):
+        return pytz.timezone(self.timezone if self.timezone else settings.TIME_ZONE)
+
     def __str__(self):
         return self.name
 
@@ -438,24 +442,23 @@ class Showing(models.Model):
     free_spaces = models.IntegerField(help_text='Current number of available '
         'seats (based on current resevations)', blank=True)
 
-    def get_date_timezone(self, date):
-        timezone_name = self.activity.timezone if self.activity.timezone else settings.TIME_ZONE
-        tz = pytz.timezone(timezone_name)
-        return tz.localize(date)
+    @property
+    def pytz_timezone(self):
+        return self.activity.pytz_timezone
 
-    def _get_start_date_tz(self):
-        return self.get_date_timezone(self.start_time)
+    @property
+    def start_date_tz(self):
+        return self.start_time.astimezone(self.pytz_timezone)
 
-    def _get_end_date_tz(self):
-        return self.get_date_timezone(self.end_time)
-
-    start_date_tz = property(_get_start_date_tz)
-    end_date_tz = property(_get_end_date_tz)
+    @property
+    def end_date_tz(self):
+        return self.end_time.astimezone(self.pytz_timezone)
 
     def __str__(self):
-        return '{} — {}'.format(
+        return '{} — {} {}'.format(
             self.activity,
-            self.start_time.strftime('%Y-%m-%d %H:%M'),
+            self.start_date_tz.strftime('%Y-%m-%d %H:%M'),
+            self.activity.timezone_abbreviation
         )
 
     def get_absolute_url(self):
@@ -518,3 +521,21 @@ def generate_code(sender, instance, raw, **kwargs):
 
 post_save.connect(generate_code, sender=Reservation)
 post_delete.connect(Reservation.delete_notification, sender=Reservation)
+
+
+def update_showing_timezones():
+    # Iterate over all Showing objects
+    for showing in Showing.objects.all():
+        # Get the timezone associated with the activity of the current showing
+        activity_timezone = showing.activity.pytz_timezone
+
+        # If start_time is not None, localize it to the activity's timezone
+        if showing.start_time is not None:
+            showing.start_time = activity_timezone.localize(showing.start_time)
+
+        # If end_time is not None, localize it to the activity's timezone
+        if showing.end_time is not None:
+            showing.end_time = activity_timezone.localize(showing.end_time)
+
+        # Save the changes to the Showing object
+        showing.save()

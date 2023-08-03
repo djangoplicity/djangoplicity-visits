@@ -29,9 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE
 
-from datetime import datetime, time, timedelta
-import pytz
-
+from datetime import datetime, timedelta
 from django.urls import reverse
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -40,10 +38,8 @@ from django.utils import timezone, translation
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 )
-
 from djangoplicity.visits.forms import ReservationForm
 from djangoplicity.visits.models import Activity, Reservation, Showing
-
 from djangoplicity.translation.models import translation_reverse
 
 
@@ -59,19 +55,20 @@ class ReservationCreateView(CreateView):
         context['activity'] = activity
         context['other_showings'] = self.get_other_showings()
 
-        # Get the user's timezone from the request (if available)
-        user_timezone = pytz.timezone(self.request.session.get('timezone', settings.TIME_ZONE))
+        # Get the maximum time before to make a booking in hours
+        max_reservation_delta = timedelta(hours=activity.latest_reservation_time)
 
-        # Convert the user's current time to the timezone of the activity
-        activity_timezone = pytz.timezone(activity.timezone if activity.timezone else settings.TIME_ZONE)
-        user_now = datetime.now(user_timezone)
-        activity_now = user_now.astimezone(activity_timezone)
+        # Convert the server's current time to the timezone of the activity
+        showing_timezone = activity.pytz_timezone
+        showing_now = datetime.now(showing_timezone)
+
+        showing_start = showing_timezone.localize(showing.start_time)
+
+        # Calculate the latest time at which a reservation can be made
+        latest_reservation_time = showing_start - max_reservation_delta
 
         # Determine if it's too late to make a reservation
-        context['too_late'] = (
-            activity_now.date() >= activity_timezone.localize(showing.start_time).date() - timedelta(days=1)
-            and activity_now.time() > time(hour=13)
-        )
+        context['too_late'] = (latest_reservation_time < showing_now)
 
         return context
 
@@ -107,8 +104,8 @@ class ReservationCreateView(CreateView):
 
     def get_other_showings(self):
         showing = self.get_showing()
-
-        now = timezone.now()
+        activity_timezone = showing.pytz_timezone
+        now = datetime.now(activity_timezone)
         hours_ago = showing.activity.latest_reservation_time
         time_ago = now + timedelta(hours=hours_ago)
 
@@ -237,13 +234,12 @@ class ShowingListView(ListView):
         activity = self.get_activity(pk)
 
         if not activity:
-            return HttpResponseRedirect(reverse('visits-reservation-create',
-                args=[pk]))
+            return HttpResponseRedirect(reverse('visits-reservation-create', args=[pk]))
 
         return super(ShowingListView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
-        now = timezone.now()
+        now = datetime.now(self.activity.pytz_timezone)
         hours_ago = self.activity.latest_reservation_time
 
         time_ago = now + timedelta(hours=hours_ago)
