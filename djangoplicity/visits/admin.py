@@ -34,6 +34,7 @@ from __future__ import unicode_literals
 from django.contrib import admin
 from django import forms
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import format_html
 from import_export.widgets import ForeignKeyWidget
 from djangoplicity.contrib import admin as dpadmin
@@ -85,7 +86,7 @@ class ActivityAdminForm(forms.ModelForm):
 
 
 class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
-    list_display = ('id', 'name', view_online,)
+    list_display = ('id', 'name', 'timezone', view_online,)
     raw_id_fields = ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc',
                      'safety_tech_doc_es', 'conduct_tech_doc_es', 'liability_tech_doc_es')
     richtext_fields = ('description',)
@@ -120,10 +121,15 @@ class ReservationResource(resources.ModelResource):
         return reservation.showing.start_time.strftime('%Y-%m-%d'),
 
     def dehydrate_time(self, reservation): # noqa
-        if reservation.showing.timezone:
-            return '{} {}'.format(reservation.showing.start_date_tz.strftime('%I:%M %p'), reservation.showing.get_timezone_abbr())
+        if reservation.showing.activity.timezone:
+            return '{} {}'.format(
+                reservation.showing.start_date_tz.strftime('%I:%M %p'),
+                reservation.showing.activity.timezone_abbreviation
+            )
         else:
-            return '{}'.format(reservation.showing.start_date_tz.strftime('%I:%M %p %Z'))
+            return '{}'.format(
+                reservation.showing.start_date_tz.strftime('%I:%M %p %Z')
+            )
 
     class Meta:
         model = Reservation
@@ -152,8 +158,11 @@ class ReservationAdmin(ImportExportModelAdmin):
     showing_date.short_description = _('Showing Date')
 
     def showing_time(self, obj):
-        if obj.showing.timezone:
-            return '{} {}'.format(obj.showing.start_date_tz.strftime('%I:%M %p'), obj.showing.get_timezone_abbr())
+        if obj.showing.activity.timezone:
+            return '{} {}'.format(
+                obj.showing.start_date_tz.strftime('%I:%M %p'),
+                obj.showing.activity.timezone_abbreviation
+            )
         else:
             return '{}'.format(obj.showing.start_date_tz.strftime('%I:%M %p %Z'))
     showing_time.short_description = _('Showing Time')
@@ -163,12 +172,54 @@ class ReservationAdmin(ImportExportModelAdmin):
     activity_name.short_description = _('Activity Name')
 
 
+class ShowingAdminForm(forms.ModelForm):
+    class Meta:
+        model = Showing
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(ShowingAdminForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.activity:
+            timezone_name = self.instance.activity.timezone if self.instance.activity.timezone else settings.TIME_ZONE
+            self.fields['start_time'].help_text = _("Start time (timezone: {timezone_name})").format(
+                timezone_name=timezone_name)
+            self.fields['end_time'].help_text = _("End time (timezone: {timezone_name})").format(
+                timezone_name=timezone_name)
+
+        if self.instance.id is not None:
+            tz = timezone.pytz.timezone(self.instance.activity.timezone)
+            self.initial['start_time'] = self.instance.start_time.astimezone(tz)
+            self.initial['end_time'] = self.instance.end_time.astimezone(tz)
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        activity_timezone = instance.activity.pytz_timezone
+        if instance.start_time is not None:
+            instance.start_time = activity_timezone.localize(instance.start_time)
+        if instance.end_time is not None:
+            instance.end_time = activity_timezone.localize(instance.end_time)
+        if commit:
+            instance.save()
+        return instance
+
+
 class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
+    form = ShowingAdminForm
     filter_horizontal = ('offered_languages', )
-    list_display = ('activity', 'start_time', 'private', 'total_spaces', 'timezone',
+    list_display = ('activity', 'get_start_time_tz', 'private', 'total_spaces',
                     'free_spaces', view_online, view_report)
     list_filter = ('activity', 'private')
     readonly_fields = ('free_spaces',)
+
+    def get_start_time_tz(self, obj):
+        """
+        This method returns the start time of the Showing instance, converted
+        to the timezone of the associated Activity.
+        """
+        return f"{obj.start_date_tz.strftime('%A %d %b %Y, %I:%M %p')} {obj.activity.timezone_abbreviation}"
+
+    get_start_time_tz.short_description = 'Start time (TZ)'
+    get_start_time_tz.admin_order_field = 'start_time'
 
 
 def register_with_admin(admin_site):

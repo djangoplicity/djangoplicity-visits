@@ -29,9 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE
 
-from datetime import datetime, time, timedelta
-import pytz
-
+from datetime import datetime, timedelta
 from django.urls import reverse
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -40,10 +38,8 @@ from django.utils import timezone, translation
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 )
-
 from djangoplicity.visits.forms import ReservationForm
 from djangoplicity.visits.models import Activity, Reservation, Showing
-
 from djangoplicity.translation.models import translation_reverse
 
 
@@ -52,38 +48,27 @@ class ReservationCreateView(CreateView):
     form_class = ReservationForm
 
     def get_context_data(self, **kwargs):
-        showing = self.get_showing()
         context = super(ReservationCreateView, self).get_context_data(**kwargs)
+        showing = self.get_showing()
+        activity = showing.get_activity()
         context['showing'] = showing
-        context['activity'] = showing.get_activity()
+        context['activity'] = activity
         context['other_showings'] = self.get_other_showings()
 
-        berlintz = pytz.timezone('Europe/Berlin')
-        santiagotz = pytz.timezone('America/Santiago')
-        berlinnow = berlintz.localize(datetime.now())
-        santiagonow = berlinnow.astimezone(santiagotz)
-        #  dt = santiagotz.localize(showing.start_time) - santiagonow
-        #  context['time_remaining'] = dt.days * 24 + dt.seconds / 3600.
+        # Get the maximum time before to make a booking in hours
+        max_reservation_delta = timedelta(hours=activity.latest_reservation_time)
 
-        #  context['too_late'] = showing.start_time - timedelta(
-        #      hours=showing.activity.latest_reservation_time) < timezone.now()
+        # Convert the server's current time to the timezone of the activity
+        showing_timezone = activity.pytz_timezone
+        showing_now = datetime.now(showing_timezone)
 
-        # <latest_reservation_time> before start
-        #  context['too_late'] = dt < timedelta(
-        #      hours=showing.activity.latest_reservation_time)
+        showing_start = showing_timezone.localize(showing.start_time)
 
-        # Friday noon
-        #  print 'DEBUG'
-        #  print santiagonow.date()
-        #  print santiagotz.localize(showing.start_time).date()
-        #  print santiagotz.localize(showing.start_time).date() - timedelta(days=1)
-        #  print santiagonow.time()
-        #  print 'DEBUG'
+        # Calculate the latest time at which a reservation can be made
+        latest_reservation_time = showing_start - max_reservation_delta
 
-        context['too_late'] = (
-            santiagonow.date() >= santiagotz.localize(showing.start_time).date() - timedelta(days=1)
-            and santiagonow.time() > time(hour=13)
-        )
+        # Determine if it's too late to make a reservation
+        context['too_late'] = (latest_reservation_time < showing_now)
 
         return context
 
@@ -119,8 +104,8 @@ class ReservationCreateView(CreateView):
 
     def get_other_showings(self):
         showing = self.get_showing()
-
-        now = timezone.now()
+        activity_timezone = showing.pytz_timezone
+        now = datetime.now(activity_timezone)
         hours_ago = showing.activity.latest_reservation_time
         time_ago = now + timedelta(hours=hours_ago)
 
@@ -249,13 +234,12 @@ class ShowingListView(ListView):
         activity = self.get_activity(pk)
 
         if not activity:
-            return HttpResponseRedirect(reverse('visits-reservation-create',
-                args=[pk]))
+            return HttpResponseRedirect(reverse('visits-reservation-create', args=[pk]))
 
         return super(ShowingListView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
-        now = timezone.now()
+        now = datetime.now(self.activity.pytz_timezone)
         hours_ago = self.activity.latest_reservation_time
 
         time_ago = now + timedelta(hours=hours_ago)

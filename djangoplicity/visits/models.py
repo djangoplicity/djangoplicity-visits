@@ -31,6 +31,7 @@
 
 from __future__ import unicode_literals
 from __future__ import print_function
+import datetime
 import os
 import sys
 import pytz
@@ -122,6 +123,7 @@ class Activity(TranslationModel):
     title = models.CharField(max_length=100, blank=True, null=True,
         help_text='title to be displayed in the activity description when the activity is joined with other activities')
     observatory = models.CharField(max_length=50)
+    timezone = models.CharField(max_length=40, choices=TIMEZONES_TZS, blank=True, null=True)
     meeting_point = models.CharField(max_length=100)
     meeting_point_link = models.URLField(help_text='Link to Meeting point', blank=True, null=True)
     travel_info_url = models.URLField(help_text='Link to travel info page')
@@ -187,6 +189,21 @@ class Activity(TranslationModel):
 
     showing_list_title = models.CharField(max_length=100, blank=True, null=True)
     showing_list_title_es = models.CharField(max_length=100, blank=True, null=True)
+
+    @property
+    def timezone_abbreviation(self):
+        timezone_name = self.timezone if self.timezone else settings.TIME_ZONE
+        tz = pytz.timezone(timezone_name)
+        abbr = tz.localize(datetime.datetime.now(), is_dst=None)
+        # Workaround to display CLT timezone no appear in pytz list
+        # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+        if abbr.tzname() == '-03' or abbr.tzname() == '-04':
+            return 'CLT'
+        return abbr.tzname()
+
+    @property
+    def pytz_timezone(self):
+        return pytz.timezone(self.timezone if self.timezone else settings.TIME_ZONE)
 
     def __str__(self):
         return self.name
@@ -414,7 +431,6 @@ class Showing(models.Model):
     end_time = models.DateTimeField(blank=True, null=True,
         help_text='If left empty will be calculated from the activity '
         'duration')
-    timezone = models.CharField(max_length=40, choices=TIMEZONES_TZS, blank=True, null=True)
     private = models.BooleanField(default=False,
         help_text='Whether the showing if private.')
     offered_languages = models.ManyToManyField('Language')
@@ -426,36 +442,23 @@ class Showing(models.Model):
     free_spaces = models.IntegerField(help_text='Current number of available '
         'seats (based on current resevations)', blank=True)
 
-    def get_date_timezone(self, date):
-        timezone_name = self.timezone if self.timezone else settings.TIME_ZONE
-        tz = pytz.timezone(timezone_name)
-        return tz.localize(date)
+    @property
+    def pytz_timezone(self):
+        return self.activity.pytz_timezone
 
-    def _get_start_date_tz(self):
-        return self.get_date_timezone(self.start_time)
+    @property
+    def start_date_tz(self):
+        return self.start_time.astimezone(self.pytz_timezone)
 
-    def _get_end_date_tz(self):
-        return self.get_date_timezone(self.end_time)
-
-    start_date_tz = property(_get_start_date_tz)
-    end_date_tz = property(_get_end_date_tz)
-
-    def get_timezone_abbr(self):
-        timezone_name = self.timezone if self.timezone else settings.TIME_ZONE
-        tz = pytz.timezone(timezone_name)
-        abbr = tz.localize(self.start_time, is_dst=None)
-        # Workaround to display CLT timezone no appear in pytz list
-        # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-        if abbr.tzname() == '-03' or abbr.tzname() == '-04':
-            return 'CLT'
-        return abbr.tzname()
-
-    timezone_abbreviation = property(get_timezone_abbr)
+    @property
+    def end_date_tz(self):
+        return self.end_time.astimezone(self.pytz_timezone)
 
     def __str__(self):
-        return '{} — {}'.format(
+        return '{} — {} {}'.format(
             self.activity,
-            self.start_time.strftime('%Y-%m-%d %H:%M'),
+            self.start_date_tz.strftime('%Y-%m-%d %H:%M'),
+            self.activity.timezone_abbreviation
         )
 
     def get_absolute_url(self):
@@ -518,3 +521,21 @@ def generate_code(sender, instance, raw, **kwargs):
 
 post_save.connect(generate_code, sender=Reservation)
 post_delete.connect(Reservation.delete_notification, sender=Reservation)
+
+
+def update_showing_timezones():
+    # Iterate over all Showing objects
+    for showing in Showing.objects.all():
+        # Get the timezone associated with the activity of the current showing
+        activity_timezone = showing.activity.pytz_timezone
+
+        # If start_time is not None, localize it to the activity's timezone
+        if showing.start_time is not None:
+            showing.start_time = activity_timezone.localize(showing.start_time)
+
+        # If end_time is not None, localize it to the activity's timezone
+        if showing.end_time is not None:
+            showing.end_time = activity_timezone.localize(showing.end_time)
+
+        # Save the changes to the Showing object
+        showing.save()
