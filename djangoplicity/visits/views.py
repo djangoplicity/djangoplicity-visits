@@ -76,6 +76,9 @@ class ReservationCreateView(CreateView):
         try:
             from djangoplicity.contacts.models import Contact, ContactGroup
             email = data.get('email')
+            if not email:
+                return
+            email = email.lower()
             group_name = getattr(settings, 'VISIT_SUBSCRIBE_GROUP', 'Public NL')
             group = ContactGroup.objects.get(name=group_name)
 
