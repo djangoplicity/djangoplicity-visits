@@ -179,7 +179,7 @@ class ShowingAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ShowingAdminForm, self).__init__(*args, **kwargs)
-        if self.instance and self.instance.activity:
+        if self.instance and self.instance.activity_id is not None:
             timezone_name = self.instance.activity.timezone if self.instance.activity.timezone else settings.TIME_ZONE
             self.fields['start_time'].help_text = _("Start time (timezone: {timezone_name})").format(
                 timezone_name=timezone_name)
@@ -187,7 +187,9 @@ class ShowingAdminForm(forms.ModelForm):
                 timezone_name=timezone_name)
 
         if self.instance.id is not None:
-            tz = timezone.pytz.timezone(self.instance.activity.timezone)
+            timezone_name = self.instance.activity.timezone if self.instance.activity.timezone is not None \
+                else settings.TIME_ZONE
+            tz = timezone.pytz.timezone(timezone_name)
             self.initial['start_time'] = self.instance.start_time.astimezone(tz)
             self.initial['end_time'] = self.instance.end_time.astimezone(tz)
 
