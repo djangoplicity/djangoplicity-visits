@@ -2,140 +2,277 @@
 {% load i18n crispy_forms_tags %}
 
 {% block content %}
+    <style>
+        .checkbox label {
+            text-decoration: underline;
+            color: #2b669a;
+        }
+    </style>
     <div class="row">
-        <div class="page-header">
-            <h1>{% trans 'Special Group Visits' %}</h1>
-
-            <h3>{% trans 'Guidelines for Special Group Visits to NOIRLab Facilities' %}</h3>
-            <p>
-                {% blocktrans %}
-                    NSF’s NOIRLab welcomes special groups interested in visiting our sites in the US and Chile. Our
-                    Communications, Education & Engagement (CEE) team may decline visit requests, for practical reasons
-                    and due to the significant investment of resources required from NOIRLab.
-                {% endblocktrans %}
-            </p>
-            <h3>{% translate 'How to apply for a Special Group visit' %}</h3>
-            <ul>
-                <li>
-                    <p>{% blocktrans %}Complete the form below.{% endblocktrans %}</p>
-                </li>
-                <li>
-                    <p>{% blocktrans %}Once you have submitted the form, you should receive an automated email that we
-                        have received
-                        your request and that it will be under review; if you do not receive this notification please
-                        check your spam folder and if still not found send an email to our <a
-                            href="mailto:visits@noirlab.edu">Visits Coordinator</a>.{% endblocktrans %}</p>
-                </li>
-                <li>
-                    <p>{% blocktrans %}Your request will be evaluated by the CEE team with the following
-                        considerations:{% endblocktrans %}</p>
-                </li>
-                <ul>
-                    <li>The nature and purpose of the project (please include as much information as possible like
-                        synopsis or scripts).
-                    </li>
-                    <li>
-                        <p>{% blocktrans %}The complexity of the logistics involved and any impact on regular operations
-                            at the
-                            sites.{% endblocktrans %}</p>
-                    </li>
-                    <li>
-                        <p>{% blocktrans %}The amount of time available for planning the visit (at least 4 weeks are
-                            needed for the
-                            permissions and planning).{% endblocktrans %}</p>
-                    </li>
-                    <li>
-                        <p>{% blocktrans %}All proper documentation and required permits (if any) are submitted in a
-                            timely fashion.{% endblocktrans %}</p>
-                    </li>
-                </ul>
-                <li>
-                    <p>{% blocktrans %}You will be notified of our initial evaluation regarding your visit within 2
-                        weeks of applying;
-                        If your visit is tentatively approved, NOIRLab will send a proposed site visit
-                        itinerary.{% endblocktrans %}</p>
-                </li>
-                <li>
-                    <p>{% blocktrans %}Once both parties agree to the itinerary, NOIRLab will start the internal
-                        approval process. It is
-                        recommended that you do not confirm any travel reservations until we receive the final approvals
-                        from the observatories.{% endblocktrans %}</p>
-                </li>
-                <li>
-                    <p>{% blocktrans %}You will be notified of the final approval or rejection of your visit within a
-                        reasonable time
-                        period. If you have a deadline please state it clearly in the form.{% endblocktrans %}</p>
-                </li>
-                <li>
-                    <p>{% blocktrans %}Site visit costs that are incurred as a result of your visit (meal and lodging
-                        requests etc) must
-                        be reimbursed to the programs visited, an invoice can be requested.{% endblocktrans %}</p>
-                </li>
-                <li>
-                    <p>{% blocktrans %}Please note, that every effort will be made to follow through with your planned
-                        visit, however
-                        certain circumstances may prevent us from being able to conduct the visit as planned. It is
-                        advisable to come up with a plan B or a secondary site (such as base facilities) in case a
-                        summit visit is precluded. (This can occur when the mountain sites become inaccessible due to
-                        weather, earthquake or if there is an unplanned engineering event etc). If we need to cancel the
-                        visit we will let you know as soon as we become aware of the potential
-                        issue.{% endblocktrans %}</p>
-                </li>
-                <li>
-                    <p>{% blocktrans %}The sites you are visiting are active worksites and each have requirements about
-                        proper attire
-                        and the appropriate safety protocols to be observed. Depending on which site you intend to
-                        visit, additional requirements (in regards to high altitude for example) may
-                        apply.{% endblocktrans %}</p>
-                </li>
-                <li>
-                    <p>{% blocktrans %}For site-specific information, requirements, and safety notices please see the
-                        appropriate
-                        section below.{% endblocktrans %}</p>
-                </li>
-            </ul>
-        </div>
-        <div class="row">
-            <div class="well info clearfix" style="margin: 0 4rem">
+        <div class="col-sm-12">
+            <div class="page-header">
+                <h1>{% trans 'Visitor Registration Form' %}</h1>
+            </div>
+            <div class="info clearfix">
                 <div class="col-sm-12">
                     <form method="post" class="form-horizontal">
                         {% csrf_token %}
-                        {% crispy form %}
+                        {{ form|crispy }}
+                        <div class="form-group">
+                            <label class="control-label" for="guestInput">{% trans 'Add Guest' %}</label>
+                            <div class="controls">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="guestInput">
+                                    <span class="input-group-btn">
+                                    <button type="button" class="btn btn-success" key
+                                            onclick="addGuest()">{% trans 'Add Guest' %}</button>
+                                    </span>
+                                </div>
+                                <div class="help-block">
+                                    {% trans 'Type a guest name and press enter or click "Add Guest" to include them in the guest list below.' %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <table class="table table-striped table-bordered table-hover m-0" id="guestList">
+                                <thead>
+                                <tr>
+                                    <th class="text-primary">{% translate 'Guest Names' %}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for member in members %}
+                                    <tr>
+                                        <td style="width: 90%">{{ member }}
+                                            <i class="fa fa-times text-danger" style="float: right; cursor: pointer;"
+                                               onclick="removeGuest(this, '{{ member }}')"></i>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr class="empty-row">
+                                        <td colspan="3" class="text-center">No guests yet.</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">{% trans 'Submit' %}</button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+    <div class="modal fade" id="modal_form" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="modal-body">
+
+                    <embed src="{{ modal_content.resource_pdf.absolute_url }}#toolbar=0&navpanes=0&scrollbar=0"
+                           width="100%" height="900px" type="application/pdf">
+                </div>
+                <div class="modal-footer">
+                    <button aria-label="{% trans 'Decline' %}" type="button"
+                            class="btn btn-secondary">{% trans "Decline" %}</button>
+                    <button aria-label="{% trans 'Accept' %}" type="button"
+                            class="btn btn-primary">{% trans "Accept" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block extra_scripts %}
     <script>
+        function removeGuest(element, guestName) {
+            element.closest('tr').remove();
+            updateGuestsField(guestName);
+            toggleEmptyRow();
+        }
+
+        function updateGuestsField(removedName) {
+            const hiddenGuestField = document.querySelector('input[name="guests"]');
+            let currentGuests = hiddenGuestField.value.split(';');
+            let index = currentGuests.indexOf(removedName);
+            if (index > -1) {
+                currentGuests.splice(index, 1);
+                hiddenGuestField.value = currentGuests.join(';');
+            }
+        }
+
+        function toggleEmptyRow() {
+            const guestListBody = document.querySelector('#guestList tbody');
+            const hasGuests = guestListBody.querySelectorAll('tr').length > 0;
+            const emptyRow = document.querySelector('.empty-row');
+            if (!hasGuests && !emptyRow) {
+                const row = guestListBody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = "3";
+                cell.textContent = "No guests yet.";
+                cell.className = "text-center";
+                row.className = "empty-row";
+            } else if (hasGuests && emptyRow) {
+                emptyRow.remove();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
-            const activitySelect = document.querySelector('select[name="activity"]');
-            const showingSelect = document.querySelector('select[name="showing"]');
+            const form = document.querySelector('.form-horizontal');
+            const divToSafety = document.getElementById('div_id_accept_safety_form').parentNode;
+            const divToDisclaimer = document.getElementById('div_id_accept_disclaimer_form').parentNode;
+            const submitButton = form.querySelector('button[type="submit"]').parentNode;
+
+            if (form && divToSafety) {
+                form.insertBefore(divToSafety, submitButton);
+            }
+            if (form && divToDisclaimer) {
+                form.insertBefore(divToDisclaimer, submitButton);
+            }
+
+
+            // Open modal logic
+            const activitySelect = document.querySelector('select[name="location"]');
+            const openModalButtons = document.querySelectorAll('.open-modal');
+            const checkboxSafety = document.querySelector('input[name="accept_safety_form"]');
+            const checkboxLiability = document.querySelector('input[name="accept_disclaimer_form"]');
+
+            if (!activitySelect.value) {
+                checkboxSafety.closest('.form-group').style.display = 'none';
+                checkboxLiability.closest('.form-group').style.display = 'none';
+            }
 
             activitySelect.addEventListener('change', function () {
                 const activityId = this.value;
-                fetch(`/public/api/v2/visits/showings/?activity=${activityId}`)
+                if (!activityId) {
+                    // Si no hay selección, oculta los checkboxes
+                    checkboxSafety.closest('.form-group').style.display = 'none';
+                    checkboxLiability.closest('.form-group').style.display = 'none';
+                    return;
+                }
+
+                fetch(`/public/api/v2/visits/activities/${activityId}/`)
                     .then(response => response.json())
                     .then(data => {
-                        showingSelect.innerHTML = '';
-                        showingSelect.appendChild(new Option('---------', ''));
-                        if (data.length > 0) {
-                            data.forEach(showing => {
-                                const option = new Option(
-                                    `${showing.formatted_start_time} - Available spaces: ${showing.free_spaces}`,
-                                    showing.id
-                                );
-                                showingSelect.appendChild(option);
-                            });
-                            showingSelect.selectedIndex = 0;
+                        // Verificar y mostrar los checkboxes según la existencia de documentos
+                        if (data.safety_tech_doc || data.safety_tech_doc_es) {
+                            checkboxSafety.closest('.form-group').style.display = '';
+                            checkboxSafety.checked = false;
+                            checkboxSafety.required = true;
+                        } else {
+                            checkboxSafety.closest('.form-group').style.display = 'none';
+                            checkboxSafety.required = false;
+                        }
+
+                        if (data.liability_tech_doc || data.liability_tech_doc_es) {
+                            checkboxLiability.closest('.form-group').style.display = '';
+                            checkboxLiability.required = true;
+                            checkboxLiability.checked = false;
+                        } else {
+                            checkboxLiability.closest('.form-group').style.display = 'none';
+                            checkboxLiability.required = false;
                         }
                     })
-                    .catch(error => {
-                        console.error('Error loading the showings:', error);
-                    });
+                    .catch(error => console.error('Error loading activity details:', error));
             });
+
+
+            openModalButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const docType = this.getAttribute('data-doc-type');
+                    const language = '{{ LANGUAGE_CODE }}';
+                    const activityId = activitySelect.value;
+
+                    fetch(`/public/api/v2/visits/activities/${activityId}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let docUrl;
+                            switch (docType) {
+                                case 'safety':
+                                    docUrl = language === 'es' ? data.safety_tech_doc_es : data.safety_tech_doc;
+                                    break;
+                                case 'liability':
+                                    docUrl = language === 'es' ? data.liability_tech_doc_es : data.liability_tech_doc;
+                                    break;
+                            }
+                            if (docUrl) {
+                                const embed = document.querySelector('#modal-body embed');
+                                embed.src = docUrl + "#toolbar=0&navpanes=0&scrollbar=0";
+                                $(button.getAttribute('data-target')).modal('show');
+                            }
+                        })
+                        .catch(error => console.error('Error loading the document:', error));
+                });
+            });
+
+            // Handle accept and decline actions
+            const modalAcceptButton = document.querySelector('#modal_form .btn-primary');
+            const modalDeclineButton = document.querySelector('#modal_form .btn-secondary');
+            let currentCheckbox;
+
+            document.querySelectorAll('.open-modal').forEach(button => {
+                button.addEventListener('click', function () {
+                    currentCheckbox = document.querySelector(`input[name="${this.getAttribute('data-form-field')}"]`);
+                    // Ensure checkbox is unchecked and disabled initially when modal opens
+                    currentCheckbox.checked = false;
+                });
+            });
+
+            modalAcceptButton.addEventListener('click', function () {
+                if (currentCheckbox) {
+                    currentCheckbox.checked = true;
+                    $('#modal_form').modal('hide');
+                }
+            });
+
+            modalDeclineButton.addEventListener('click', function () {
+                if (currentCheckbox) {
+                    currentCheckbox.checked = false;
+                    $('#modal_form').modal('hide');
+                }
+            });
+
+            // Add Guest logic
+            const guestInput = document.getElementById('guestInput');
+            const guestList = document.querySelector('#guestList tbody');
+            const hiddenGuestField = document.querySelector('input[name="guests"]');
+
+            function addGuest() {
+                const name = guestInput.value.trim();
+                if (name) {
+
+                    const row = guestList.insertRow();
+                    const cellName = row.insertCell(0);
+                    cellName.textContent = name;
+                    cellName.style.width = '90%'; // Ajustar según necesites
+
+                    const deleteIcon = document.createElement('i');
+                    deleteIcon.className = 'fa fa-times text-danger';
+                    deleteIcon.style.float = 'right';
+                    deleteIcon.style.cursor = 'pointer';
+                    deleteIcon.onclick = function () {
+                        removeGuest(row, name);
+                    };
+
+                    cellName.appendChild(document.createTextNode(''));
+                    cellName.appendChild(deleteIcon);
+
+                    hiddenGuestField.value += (hiddenGuestField.value ? ';' : '') + name;
+                    updateGuestsField();
+                    guestInput.value = '';
+                    toggleEmptyRow();
+                }
+            }
+
+            guestInput.addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addGuest();
+                }
+            });
+
+            window.addGuest = addGuest;
         });
     </script>
 {% endblock %}

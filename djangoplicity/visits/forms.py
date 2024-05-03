@@ -217,27 +217,48 @@ class ReservationForm(forms.ModelForm):
 
 class GroupReservationForm(forms.ModelForm):
     email_confirm = forms.EmailField(label=_('Confirm Email'))
-    group_size = forms.IntegerField(label=_('Group Size'), min_value=1)
-    activity = forms.ModelChoiceField(queryset=Activity.objects.all(), label=_('Activity'))
-    showing = forms.CharField(widget=forms.Select())
+    location = forms.ModelChoiceField(
+        queryset=Activity.objects.filter(group_enable=True),
+        label=_('location'))
+    guests = forms.CharField(widget=forms.HiddenInput())
 
     class Meta:
         model = GroupReservation
-        fields = ['name', 'phone', 'email', 'email_confirm', 'activity', 'showing', 'group_size']
+        fields = ['name', 'phone', 'email', 'email_confirm', 'location', 'guests',
+                  'accept_safety_form', 'accept_disclaimer_form']
 
     def __init__(self, *args, **kwargs):
         super(GroupReservationForm, self).__init__(*args, **kwargs)
         self.fields['email'].widget.attrs.update({'class': 'nocopypaste'})
         self.fields['email_confirm'].widget.attrs.update({'class': 'nocopypaste'})
-        self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', _('Submit Group Reservation')))
 
-    def clean_showing(self):
-        showing_id = self.cleaned_data.get('showing')
-        if showing_id:
-            return Showing.objects.get(pk=showing_id)
-        else:
-            raise forms.ValidationError(_('Showing not exit.'))
+        self.fields['accept_safety_form'].label = _(
+            "I hereby accept the Safety conditions on behalf of all visitors in my party.*")
+
+        self.fields['accept_safety_form'].widget.attrs.update({
+            'data-form-field': 'accept_safety_form',
+            'class': 'acceptConditions open-modal',
+            'data-toggle': 'modal',
+            'data-target': '#modal_form',
+            'data-doc-type': 'safety'
+        })
+
+        self.fields['accept_disclaimer_form'].label = _(
+            "I hereby accept the Liability Disclaimer conditions on behalf of all visitors in my party.*")
+
+        self.fields['accept_disclaimer_form'].widget.attrs.update({
+            'data-form-field': 'accept_disclaimer_form',
+            'class': 'acceptConditions open-modal',
+            'data-toggle': 'modal',
+            'data-target': '#modal_form',
+            'data-doc-type': 'liability'
+        })
+
+    def clean_guests(self):
+        guests = self.cleaned_data.get('guests')
+        if guests:
+            return guests
+        return ''
 
     def clean_email_confirm(self):
         email = self.cleaned_data.get('email')
@@ -246,35 +267,3 @@ class GroupReservationForm(forms.ModelForm):
             raise forms.ValidationError(_('Email and Confirmation Email do not match.'))
         return email_confirm
 
-    def clean_group_size(self):
-        group_size = self.cleaned_data['group_size']
-        showing = self.cleaned_data.get('showing')
-
-        if not showing:
-            raise forms.ValidationError(_('Please select a showing first.'))
-
-        if group_size > showing.free_spaces:
-            raise forms.ValidationError(
-                _('There are only {spaces} spaces available').format(spaces=showing.free_spaces))
-        return group_size
-
-    def clean(self):
-        cleaned_data = super(GroupReservationForm, self).clean()
-        # Ensure showing is valid for the selected activity
-        activity = cleaned_data.get('activity')
-        showing = cleaned_data.get('showing')
-        if showing and showing.activity != activity:
-            self.add_error('showing', _('The selected showing does not match the activity.'))
-        return cleaned_data
-
-
-class MemberForm(ReservationForm):
-
-    def __init__(self, *args, **kwargs):
-        super(MemberForm, self).__init__(*args, **kwargs)
-        if self.fields.get('vehicle_plate'):
-            self.fields.pop('vehicle_plate')
-        if self.fields.get('rut'):
-            self.fields.pop('rut')
-        if self.fields.get('subscribe_checkbox'):
-            self.fields.pop('subscribe_checkbox')

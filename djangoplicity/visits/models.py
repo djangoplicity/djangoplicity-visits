@@ -118,10 +118,10 @@ class RestrictionRecommendationProxy(RestrictionRecommendation, TranslationProxy
 
 class Activity(TranslationModel):
     id = metadatafields.AVMIdField(primary_key=True, verbose_name='ID',
-        help_text='ID of the activity, also used in URLs')
+                                   help_text='ID of the activity, also used in URLs')
     name = models.CharField(max_length=100)
     title = models.CharField(max_length=100, blank=True, null=True,
-        help_text='title to be displayed in the activity description when the activity is joined with other activities')
+                             help_text='title to be displayed in the activity description when the activity is joined with other activities')
     observatory = models.CharField(max_length=50)
     timezone = models.CharField(max_length=40, choices=TIMEZONES_TZS, blank=True, null=True)
     meeting_point = models.CharField(max_length=100)
@@ -130,11 +130,12 @@ class Activity(TranslationModel):
     map_url = models.URLField(help_text='Link to Google Maps')
     offered_languages = models.ManyToManyField('Language')
     duration = models.DurationField(help_text='Format: HH:MM')
-    latest_reservation_time = models.IntegerField(default=24, help_text='Until how many hours before the start do we accept reservations')
+    latest_reservation_time = models.IntegerField(default=24,
+                                                  help_text='Until how many hours before the start do we accept reservations')
     min_participants = models.IntegerField(help_text='Min. no of participants',
-        default=5)
+                                           default=5)
     max_participants = models.IntegerField(help_text='Max. no of participants',
-        default=150)
+                                           default=150)
     slogan = models.CharField(max_length=255, blank=True)
     description = metadatafields.AVMDescriptionField()
     published = models.BooleanField(default=False)
@@ -152,23 +153,23 @@ class Activity(TranslationModel):
     )
 
     key_visual_en = TranslationForeignKey(Image, blank=True, null=True,
-        on_delete=models.SET_NULL, related_name='+',
-        verbose_name='English poster')
+                                          on_delete=models.SET_NULL, related_name='+',
+                                          verbose_name='English poster')
     key_visual_es = TranslationForeignKey(Image, blank=True, null=True,
-        on_delete=models.SET_NULL, related_name='+',
-        verbose_name='Spanish poster')
+                                          on_delete=models.SET_NULL, related_name='+',
+                                          verbose_name='Spanish poster')
 
     safety_tech_doc = TranslationForeignKey(TechnicalDocument, blank=True, null=True,
-        on_delete=models.SET_NULL, related_name='+',
-        verbose_name='Safety Technical Doc')
+                                            on_delete=models.SET_NULL, related_name='+',
+                                            verbose_name='Safety Technical Doc')
 
     conduct_tech_doc = TranslationForeignKey(TechnicalDocument, blank=True, null=True,
-                                            on_delete=models.SET_NULL, related_name='+',
-                                            verbose_name='Conduct Technical Doc')
+                                             on_delete=models.SET_NULL, related_name='+',
+                                             verbose_name='Conduct Technical Doc')
 
     liability_tech_doc = TranslationForeignKey(TechnicalDocument, blank=True, null=True,
-                                            on_delete=models.SET_NULL, related_name='+',
-                                            verbose_name='Liability Technical Doc')
+                                               on_delete=models.SET_NULL, related_name='+',
+                                               verbose_name='Liability Technical Doc')
 
     # Technical Document Spanish versions
     safety_tech_doc_es = TranslationForeignKey(
@@ -183,12 +184,54 @@ class Activity(TranslationModel):
         TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
         verbose_name='Spanish Liability Technical Doc')
 
+    group_safety_tech_doc = TranslationForeignKey(
+        TechnicalDocument,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        verbose_name='Group Safety Technical Doc'
+    )
+
+    group_liability_tech_doc = TranslationForeignKey(
+        TechnicalDocument,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        verbose_name='Group Liability Technical Doc'
+    )
+
+    # Technical Document Spanish versions
+    group_safety_tech_doc_es = TranslationForeignKey(
+        TechnicalDocument,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        verbose_name='Spanish Group Safety Technical Doc'
+    )
+
+    group_liability_tech_doc_es = TranslationForeignKey(
+        TechnicalDocument,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        verbose_name='Spanish Group Liability Technical Doc'
+    )
+
     restrictions_and_recommendations = TranslationManyToManyField(RestrictionRecommendation, blank=True)
 
     related_activities = models.ManyToManyField('self', verbose_name='Join with Activities', blank=True)
 
     showing_list_title = models.CharField(max_length=100, blank=True, null=True)
     showing_list_title_es = models.CharField(max_length=100, blank=True, null=True)
+
+    group_enable = models.BooleanField(
+        default=False,
+        help_text=_('Enable in group registration')
+    )
 
     @property
     def timezone_abbreviation(self):
@@ -217,7 +260,8 @@ class Activity(TranslationModel):
         fields = ['name', 'title', 'meeting_point', 'slogan', 'description']
 
     def get_absolute_url(self):
-        return translation_reverse('visits-showings-list', args=[str( self.id if self.is_source() else self.source.id )], lang=self.lang )
+        return translation_reverse('visits-showings-list', args=[str(self.id if self.is_source() else self.source.id)],
+                                   lang=self.lang)
 
 
 class ActivityProxy(Activity, TranslationProxyMixin):
@@ -287,7 +331,7 @@ class Reservation(models.Model):
 
     def __str__(self):
         return '{}, {} ({} spaces)'.format(self.email, self.showing,
-            self.n_spaces)
+                                           self.n_spaces)
 
     def get_safety_tech_doc_url(self):
         if self.language.code == 'es' and self.showing.activity.safety_tech_doc_es and self.showing.activity.safety_tech_doc_es.resource_pdf:
@@ -422,25 +466,25 @@ class Reservation(models.Model):
         translation.deactivate()
 
     class Meta:
-        ordering = ('-created', )
+        ordering = ('-created',)
 
 
 class Showing(models.Model):
     activity = TranslationForeignKey('Activity', related_name='showings', on_delete=models.RESTRICT)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(blank=True, null=True,
-        help_text='If left empty will be calculated from the activity '
-        'duration')
+                                    help_text='If left empty will be calculated from the activity '
+                                              'duration')
     private = models.BooleanField(default=False,
-        help_text='Whether the showing if private.')
+                                  help_text='Whether the showing if private.')
     offered_languages = models.ManyToManyField('Language')
     max_spaces_per_reservation = models.SmallIntegerField(default=0,
-        help_text='Maximum number of spaces per reservation')
+                                                          help_text='Maximum number of spaces per reservation')
 
     total_spaces = models.IntegerField(help_text='Total number of seats '
-        '(based on selected activity)', blank=True)
+                                                 '(based on selected activity)', blank=True)
     free_spaces = models.IntegerField(help_text='Current number of available '
-        'seats (based on current resevations)', blank=True)
+                                                'seats (based on current resevations)', blank=True)
 
     @property
     def pytz_timezone(self):
@@ -505,20 +549,28 @@ class Showing(models.Model):
 
 class GroupReservation(models.Model):
     code = models.CharField(max_length=50, blank=True)
-    name = models.CharField(max_length=100, verbose_name=_('Group Name'))
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, verbose_name=_('Activity'))
-    showing = models.ForeignKey(Showing, on_delete=models.CASCADE, verbose_name=_('Showing'))
-    reservations = models.ManyToManyField(Reservation, verbose_name=_('Reservations'), blank=True)
+    name = models.CharField(max_length=100, verbose_name=_('Name'))
     email = models.EmailField(verbose_name=_('email address'))
     phone = models.CharField(verbose_name=_('phone'), max_length=15, blank=True, null=True)
+    guests = models.TextField(verbose_name=_('guests'), blank=True, null=True)
+    location = models.ForeignKey(
+        Activity,
+        on_delete=models.CASCADE,
+        verbose_name=_('Location'),
+        # Todo: not allow blank an null
+        blank=True,
+        null=True
+    )
+    accept_safety_form = models.BooleanField(verbose_name=_('Accept Safety Form'), default=False)
+    accept_disclaimer_form = models.BooleanField(verbose_name=_('Accept Disclaimer Form'), default=False)
 
     def __str__(self):
-        return f"{self.name} for {self.activity.name} at {self.showing.start_date_tz.strftime('%Y-%m-%d %H:%M')}"
+        return f"{self.name}"
 
     class Meta:
         verbose_name = _('Group Reservation')
         verbose_name_plural = _('Group Reservations')
-        ordering = ['-showing__start_time']
+
 
 def generate_code(sender, instance, raw, **kwargs):
     '''
@@ -531,7 +583,7 @@ def generate_code(sender, instance, raw, **kwargs):
     if instance.code == '':
         # Generate code
         hashids = Hashids(alphabet=settings.HASHIDS_ALPHABET,
-            salt=settings.HASHIDS_SALT, min_length=5)
+                          salt=settings.HASHIDS_SALT, min_length=5)
         instance.code = hashids.encrypt(instance.pk)
         instance.save()
 

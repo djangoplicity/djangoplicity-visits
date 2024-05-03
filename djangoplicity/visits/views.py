@@ -40,7 +40,7 @@ from django.utils import timezone, translation
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 )
-from djangoplicity.visits.forms import ReservationForm, GroupReservationForm, MemberForm
+from djangoplicity.visits.forms import ReservationForm, GroupReservationForm
 from djangoplicity.visits.models import Activity, Reservation, Showing, GroupReservation
 from djangoplicity.translation.models import translation_reverse
 
@@ -282,67 +282,36 @@ class ShowingReportListView(ListView):
         )
 
 
-class GroupReservationCreateView(CreateView):
+class GroupReservationCreateUpdateView(UpdateView):
     model = GroupReservation
     form_class = GroupReservationForm
     template_name = 'visits/group_reservations/create.html'
+    slug_url_kwarg = 'code'
+    slug_field = 'code'
+
+    def get_object(self, queryset=None):
+        code = self.kwargs.get(self.slug_url_kwarg)
+        if code:
+            return super(GroupReservationCreateUpdateView, self).get_object(queryset)
+        return None
 
     def get_context_data(self, **kwargs):
-        context = super(GroupReservationCreateView, self).get_context_data(**kwargs)
-        context['activities'] = Activity.objects.all()
+        context = super(GroupReservationCreateUpdateView, self).get_context_data(**kwargs)
+        group = self.get_object()
+        if group and group.pk:
+            context['members'] = str(self.object.guests).split(';')
+
         return context
 
     def get_form_kwargs(self):
-        kwargs = super(GroupReservationCreateView, self).get_form_kwargs()
-        print(kwargs)
+        kwargs = super(GroupReservationCreateUpdateView, self).get_form_kwargs()
         return kwargs
 
     def form_valid(self, form):
-        response = super(GroupReservationCreateView, self).form_valid(form)
+        response = super(GroupReservationCreateUpdateView, self).form_valid(form)
         return response
 
     def get_success_url(self):
-        return reverse('visits-group-detail',
+        return reverse('group-registration-update',
                        args=[self.object.code])
 
-
-class GroupReservationDetailView(DetailView):
-    model = GroupReservation
-    template_name = 'visits/group_reservations/group_reservation_detail.html'
-    slug_url_kwarg = 'code'
-    slug_field = 'code'
-    showing = None
-
-    def get_showing(self):
-        if self.showing is None:
-            self.showing = self.get_object().showing
-        return self.showing
-
-    def get_context_data(self, **kwargs):
-        self.get_showing()
-        form = MemberForm(showing=self.showing)
-        context = super().get_context_data(**kwargs)
-        context['reservations'] = self.object.reservations.all()
-        context['activity'] = self.object.activity
-        context['showing'] = self.object.showing
-        context['member_form'] = form
-        return context
-
-    def post(self, request, *args, **kwargs):
-        self.get_showing()
-        form = MemberForm(request.POST, showing=self.showing)
-        group = self.get_object()
-        if form.is_valid():
-            reservation = form.save(commit=False)
-            reservation.save()
-            group.reservations.add(reservation)
-        else:
-            return render(request, self.template_name, {'form': form, 'object': self.object})
-
-        return HttpResponseRedirect(reverse(
-                'visits-group-detail',
-                args=[group.code],
-            ))
-
-    def get_success_url(self):
-        return reverse('visits-group-detail', kwargs={'code': self.object.code})

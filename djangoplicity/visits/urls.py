@@ -36,8 +36,7 @@ from django.contrib.auth.decorators import login_required
 from djangoplicity.visits.views import (
     ReservationCreateView, ReservationDeleteView, ReservationConfirmView,
     ReservationDeleteConfirmView, ReservationUpdateView, ShowingListView,
-    ShowingReportDetailView, ShowingReportListView, ReservationCancelView, GroupReservationCreateView,
-    GroupReservationDetailView
+    ShowingReportDetailView, ShowingReportListView, ReservationCancelView, GroupReservationCreateUpdateView,
 )
 
 urlpatterns = [
@@ -58,10 +57,10 @@ urlpatterns = [
         name='visits-reservation-cancel'),
     url(r'^booking/(?P<showingpk>[-\w]+)/$', ReservationCreateView.as_view(),
         name='visits-reservation-create'),
-    url(r'^group-booking/$', GroupReservationCreateView.as_view(),
-        name='visits-group-reservation'),
-    url(r'^group-reservation/(?P<code>[-\w]+)/$', GroupReservationDetailView.as_view(),
-        name='visits-group-detail'),
+    url(r'^visitor-registration/$', GroupReservationCreateUpdateView.as_view(),
+        name='group-registration'),
+    url(r'^visitor-registration/(?P<code>[-\w]+)/$', GroupReservationCreateUpdateView.as_view(),
+        name='group-registration-update'),
     url(r'^(?P<pk>[-\w]+)/$', ShowingListView.as_view(),
         name='visits-showings-list'),
 ]
