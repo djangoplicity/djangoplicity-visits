@@ -558,6 +558,7 @@ class GroupReservation(models.Model):
         Activity,
         on_delete=models.CASCADE,
         verbose_name=_('Location'),
+        # Todo: not allow blank an null
         blank=True,
         null=True
     )
