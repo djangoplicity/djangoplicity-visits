@@ -1,6 +1,6 @@
 from django.utils import timezone
-from djangoplicity.visits.models import Showing
-from .serializers import ShowingSerializer
+from djangoplicity.visits.models import Showing, Activity
+from .serializers import ShowingSerializer, ActivitySerializer
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -44,4 +44,9 @@ class ShowingListView(mixins.ListModelMixin, GenericViewSet):
         else:
             return queryset.none()
 
+
+class ActivityViewSet(mixins.RetrieveModelMixin, GenericViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = Activity.objects.all()
+    serializer_class = ActivitySerializer
 

@@ -45,7 +45,6 @@ from django.utils.translation import gettext_lazy as _
 from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
 
-
 if hasattr(settings, 'ADD_NOT_CACHE_URL_PARAMETER') and settings.ADD_NOT_CACHE_URL_PARAMETER:
     CACHE_PARAMETER = '?nocache'
 else:
@@ -88,10 +87,39 @@ class ActivityAdminForm(forms.ModelForm):
 class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
     list_display = ('id', 'name', 'timezone', view_online,)
     raw_id_fields = ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc',
-                     'safety_tech_doc_es', 'conduct_tech_doc_es', 'liability_tech_doc_es')
+                     'safety_tech_doc_es', 'conduct_tech_doc_es', 'liability_tech_doc_es', 'group_safety_tech_doc',
+                     'group_liability_tech_doc', 'group_safety_tech_doc_es', 'group_liability_tech_doc_es')
     richtext_fields = ('description',)
     filter_horizontal = ('offered_languages', 'restrictions_and_recommendations', 'related_activities')
     form = ActivityAdminForm
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'title', 'description', 'slogan')
+        }),
+        ('Details', {
+            'fields': ('observatory', 'meeting_point', 'meeting_point_link', 'map_url', 'travel_info_url', 'timezone')
+        }),
+        ('Individual Mandatory Agreement Documents', {
+            'fields': ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc',
+                       'safety_tech_doc_es', 'conduct_tech_doc_es', 'liability_tech_doc_es'),
+            'classes': ('collapse',),
+        }),
+        ('Group Mandatory Agreement Documents', {
+            'fields': ('group_safety_tech_doc', 'group_liability_tech_doc', 'group_safety_tech_doc_es',
+                       'group_liability_tech_doc_es'),
+            'classes': ('collapse',),
+        }),
+        ('Registration Settings', {
+            'fields': ('latest_reservation_time', 'min_participants', 'max_participants', 'required_vehicle_plate',
+                       'require_age', 'require_rut_number', 'group_enable'),
+            'classes': ('collapse',),
+        }),
+        ('Language and Accessibility', {
+            'fields': ('offered_languages', 'restrictions_and_recommendations', 'related_activities'),
+            'classes': ('collapse',),
+        })
+    )
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
@@ -104,7 +132,7 @@ class ActivityProxyAdmin(dpadmin.DjangoplicityModelAdmin):
     fields = ('lang', 'source', 'translation_ready', 'name', 'title', 'meeting_point',
               'slogan', 'description')
     list_display = ('pk', 'name')
-    raw_id_fields = ('source', )
+    raw_id_fields = ('source',)
     richtext_fields = ('description',)
 
 
@@ -117,10 +145,10 @@ class ReservationResource(resources.ModelResource):
     date = fields.Field()
     time = fields.Field()
 
-    def dehydrate_date(self, reservation): # noqa
+    def dehydrate_date(self, reservation):  # noqa
         return reservation.showing.start_time.strftime('%Y-%m-%d'),
 
-    def dehydrate_time(self, reservation): # noqa
+    def dehydrate_time(self, reservation):  # noqa
         if reservation.showing.activity.timezone:
             return '{} {}'.format(
                 reservation.showing.start_date_tz.strftime('%I:%M %p'),
@@ -133,20 +161,22 @@ class ReservationResource(resources.ModelResource):
 
     class Meta:
         model = Reservation
-        fields = ('id', 'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone', 'email', 'country', 'language',
-                  'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'accept_safety_form',
-                  'accept_disclaimer_form', 'accept_conduct_form')
-        export_order = ('id', 'showing', 'date', 'time',  'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone',
-                        'email', 'country', 'language', 'n_spaces', 'created', 'last_modified', 'vehicle_plate',
-                        'accept_safety_form', 'accept_disclaimer_form', 'accept_conduct_form')
+        fields = (
+        'id', 'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone', 'email', 'country', 'language',
+        'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'accept_safety_form',
+        'accept_disclaimer_form', 'accept_conduct_form')
+        export_order = (
+        'id', 'showing', 'date', 'time', 'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone',
+        'email', 'country', 'language', 'n_spaces', 'created', 'last_modified', 'vehicle_plate',
+        'accept_safety_form', 'accept_disclaimer_form', 'accept_conduct_form')
 
 
 class ReservationAdmin(ImportExportModelAdmin):
     list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'phone', 'n_spaces', 'code',
-                    'rut', 'vehicle_plate', 'language', 'created', 'age_range', )
+                    'rut', 'vehicle_plate', 'language', 'created', 'age_range',)
     list_filter = ('showing__activity', 'showing__start_time', 'created')
     ordering = ['showing__start_time']
-    raw_id_fields = ('showing', )
+    raw_id_fields = ('showing',)
     date_hierarchy = 'showing__start_time'
     readonly_fields = ('code', 'created', 'last_modified')
     search_fields = ('email', 'name')
@@ -155,6 +185,7 @@ class ReservationAdmin(ImportExportModelAdmin):
 
     def showing_date(self, obj):
         return obj.showing.start_time.strftime('%Y-%m-%d'),
+
     showing_date.short_description = _('Showing Date')
 
     def showing_time(self, obj):
@@ -165,10 +196,12 @@ class ReservationAdmin(ImportExportModelAdmin):
             )
         else:
             return '{}'.format(obj.showing.start_date_tz.strftime('%I:%M %p %Z'))
+
     showing_time.short_description = _('Showing Time')
 
     def activity_name(self, obj):
         return obj.showing.activity.name
+
     activity_name.short_description = _('Activity Name')
 
 
@@ -207,7 +240,7 @@ class ShowingAdminForm(forms.ModelForm):
 
 class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     form = ShowingAdminForm
-    filter_horizontal = ('offered_languages', )
+    filter_horizontal = ('offered_languages',)
     list_display = ('activity', 'get_start_time_tz', 'private', 'total_spaces',
                     'free_spaces', view_online, view_report)
     list_filter = ('activity', 'private')
@@ -225,23 +258,16 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
 
 
 class GroupReservationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'activity', 'showing', 'email', 'formatted_showing_time', 'group_detail_link')
-    list_filter = ('activity', 'showing__start_time')
-    search_fields = ('name', 'email', 'phone', 'activity__name', 'showing__start_time')
-    raw_id_fields = ('activity', 'showing')
-    exclude = ('reservations',)
+    list_display = ('name', 'email', 'group_detail_link')
+    search_fields = ('name', 'email', 'phone')
 
     def group_detail_link(self, obj):
         if obj.code:
-            url = reverse('visits-group-detail', args=[obj.code])
+            url = reverse('group-registration-update', args=[obj.code])
             return format_html('<a href="{}" target="_blank">View Group</a>', url)
         return '-'
 
-    def formatted_showing_time(self, obj):
-        return obj.showing.start_date_tz.strftime('%Y-%m-%d %H:%M')
-
     group_detail_link.short_description = _('view group')
-    formatted_showing_time.short_description = _('Showing Time')
 
 
 def register_with_admin(admin_site):
