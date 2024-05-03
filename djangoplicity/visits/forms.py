@@ -34,8 +34,7 @@ from crispy_forms.layout import Submit
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.conf import Settings, settings
-from djangoplicity.visits.models import Reservation
-
+from djangoplicity.visits.models import Reservation, GroupReservation, Activity, Showing
 
 NOT_HAS_SYMPTOMS_LABEL = _("I declare that no one in my group has tested positive for COVID-19 or had any symptoms in "
                            "the last 10 days: "
@@ -100,6 +99,9 @@ class ReservationForm(forms.ModelForm):
         max_value = self.showing.max_spaces_per_reservation
         if max_value == 0:
             max_value = self.showing.free_spaces
+
+        if self.showing is not None:
+            self.fields['showing'].initial = self.showing.id
 
         # If we're editing an existing showing then max_value is max_value
         # added to the currently selected places
@@ -211,3 +213,68 @@ class ReservationForm(forms.ModelForm):
                         number=self.showing.free_spaces))
 
         return n_spaces
+
+
+class GroupReservationForm(forms.ModelForm):
+    email_confirm = forms.EmailField(label=_('Confirm Email'))
+    group_size = forms.IntegerField(label=_('Group Size'), min_value=1)
+    activity = forms.ModelChoiceField(queryset=Activity.objects.all(), label=_('Activity'))
+    showing = forms.CharField(widget=forms.Select())
+
+    class Meta:
+        model = GroupReservation
+        fields = ['name', 'phone', 'email', 'email_confirm', 'activity', 'showing', 'group_size']
+
+    def __init__(self, *args, **kwargs):
+        super(GroupReservationForm, self).__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({'class': 'nocopypaste'})
+        self.fields['email_confirm'].widget.attrs.update({'class': 'nocopypaste'})
+        self.helper = FormHelper()
+        self.helper.add_input(Submit('submit', _('Submit Group Reservation')))
+
+    def clean_showing(self):
+        showing_id = self.cleaned_data.get('showing')
+        if showing_id:
+            return Showing.objects.get(pk=showing_id)
+        else:
+            raise forms.ValidationError(_('Showing not exit.'))
+
+    def clean_email_confirm(self):
+        email = self.cleaned_data.get('email')
+        email_confirm = self.cleaned_data.get('email_confirm')
+        if email and email_confirm and email != email_confirm:
+            raise forms.ValidationError(_('Email and Confirmation Email do not match.'))
+        return email_confirm
+
+    def clean_group_size(self):
+        group_size = self.cleaned_data['group_size']
+        showing = self.cleaned_data.get('showing')
+
+        if not showing:
+            raise forms.ValidationError(_('Please select a showing first.'))
+
+        if group_size > showing.free_spaces:
+            raise forms.ValidationError(
+                _('There are only {spaces} spaces available').format(spaces=showing.free_spaces))
+        return group_size
+
+    def clean(self):
+        cleaned_data = super(GroupReservationForm, self).clean()
+        # Ensure showing is valid for the selected activity
+        activity = cleaned_data.get('activity')
+        showing = cleaned_data.get('showing')
+        if showing and showing.activity != activity:
+            self.add_error('showing', _('The selected showing does not match the activity.'))
+        return cleaned_data
+
+
+class MemberForm(ReservationForm):
+
+    def __init__(self, *args, **kwargs):
+        super(MemberForm, self).__init__(*args, **kwargs)
+        if self.fields.get('vehicle_plate'):
+            self.fields.pop('vehicle_plate')
+        if self.fields.get('rut'):
+            self.fields.pop('rut')
+        if self.fields.get('subscribe_checkbox'):
+            self.fields.pop('subscribe_checkbox')

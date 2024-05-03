@@ -30,16 +30,18 @@
 # POSSIBILITY OF SUCH DAMAGE
 
 from datetime import datetime, timedelta
+
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone, translation
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 )
-from djangoplicity.visits.forms import ReservationForm
-from djangoplicity.visits.models import Activity, Reservation, Showing
+from djangoplicity.visits.forms import ReservationForm, GroupReservationForm, MemberForm
+from djangoplicity.visits.models import Activity, Reservation, Showing, GroupReservation
 from djangoplicity.translation.models import translation_reverse
 
 
@@ -102,7 +104,7 @@ class ReservationCreateView(CreateView):
 
     def get_initial(self):
         initial = super(ReservationCreateView, self).get_initial()
-        initial['showing'] =  self.get_showing()
+        initial['showing'] = self.get_showing()
         return initial
 
     def get_other_showings(self):
@@ -278,3 +280,69 @@ class ShowingReportListView(ListView):
             super(ShowingReportListView, self).get_queryset()
             .order_by('activity__name', '-start_time')
         )
+
+
+class GroupReservationCreateView(CreateView):
+    model = GroupReservation
+    form_class = GroupReservationForm
+    template_name = 'visits/group_reservations/create.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(GroupReservationCreateView, self).get_context_data(**kwargs)
+        context['activities'] = Activity.objects.all()
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(GroupReservationCreateView, self).get_form_kwargs()
+        print(kwargs)
+        return kwargs
+
+    def form_valid(self, form):
+        response = super(GroupReservationCreateView, self).form_valid(form)
+        return response
+
+    def get_success_url(self):
+        return reverse('visits-group-detail',
+                       args=[self.object.code])
+
+
+class GroupReservationDetailView(DetailView):
+    model = GroupReservation
+    template_name = 'visits/group_reservations/group_reservation_detail.html'
+    slug_url_kwarg = 'code'
+    slug_field = 'code'
+    showing = None
+
+    def get_showing(self):
+        if self.showing is None:
+            self.showing = self.get_object().showing
+        return self.showing
+
+    def get_context_data(self, **kwargs):
+        self.get_showing()
+        form = MemberForm(showing=self.showing)
+        context = super().get_context_data(**kwargs)
+        context['reservations'] = self.object.reservations.all()
+        context['activity'] = self.object.activity
+        context['showing'] = self.object.showing
+        context['member_form'] = form
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.get_showing()
+        form = MemberForm(request.POST, showing=self.showing)
+        group = self.get_object()
+        if form.is_valid():
+            reservation = form.save(commit=False)
+            reservation.save()
+            group.reservations.add(reservation)
+        else:
+            return render(request, self.template_name, {'form': form, 'object': self.object})
+
+        return HttpResponseRedirect(reverse(
+                'visits-group-detail',
+                args=[group.code],
+            ))
+
+    def get_success_url(self):
+        return reverse('visits-group-detail', kwargs={'code': self.object.code})

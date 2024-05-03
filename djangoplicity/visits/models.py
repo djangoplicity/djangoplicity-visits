@@ -503,6 +503,23 @@ class Showing(models.Model):
         ordering = ('-start_time',)
 
 
+class GroupReservation(models.Model):
+    code = models.CharField(max_length=50, blank=True)
+    name = models.CharField(max_length=100, verbose_name=_('Group Name'))
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, verbose_name=_('Activity'))
+    showing = models.ForeignKey(Showing, on_delete=models.CASCADE, verbose_name=_('Showing'))
+    reservations = models.ManyToManyField(Reservation, verbose_name=_('Reservations'), blank=True)
+    email = models.EmailField(verbose_name=_('email address'))
+    phone = models.CharField(verbose_name=_('phone'), max_length=15, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name} for {self.activity.name} at {self.showing.start_date_tz.strftime('%Y-%m-%d %H:%M')}"
+
+    class Meta:
+        verbose_name = _('Group Reservation')
+        verbose_name_plural = _('Group Reservations')
+        ordering = ['-showing__start_time']
+
 def generate_code(sender, instance, raw, **kwargs):
     '''
     Done as signal in post_save as the PK used is assigned by the DB after
@@ -520,6 +537,7 @@ def generate_code(sender, instance, raw, **kwargs):
 
 
 post_save.connect(generate_code, sender=Reservation)
+post_save.connect(generate_code, sender=GroupReservation)
 post_delete.connect(Reservation.delete_notification, sender=Reservation)
 
 

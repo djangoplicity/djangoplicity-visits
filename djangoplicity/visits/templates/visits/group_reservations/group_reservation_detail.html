@@ -1,0 +1,201 @@
+{% extends "visits/visits-base.html" %}
+{% load i18n crispy_forms_tags static visits_tags %}
+
+{% block content %}
+    <style>
+        .checkbox label {
+            text-decoration: underline;
+            color: #2b669a;
+        }
+
+        .activity-banner {
+            background-color: #f0f0f0;
+            margin: 0;
+            height: 220px;
+            border: 1px solid #e3e3e3
+        }
+
+        @media (max-width: 767px) {
+            .activity-banner {
+                height: 420px;
+            }
+
+            .activity-image {
+                height: 50% !important;
+            }
+        }
+
+        .activity-image {
+            background-image: url('{{ activity.key_visual_en.resource_screen640.url }}');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            height: 100%;
+        }
+
+        @media (min-width: 767px) {
+            .activity-details {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                height: 100%;
+                margin: 0 30px;
+            }
+        }
+
+        .activity-icon-list {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0px;
+            flex-wrap: wrap;
+        }
+
+        .activity-icons {
+        {#height: 50px;#}
+        }
+
+        .activity-icons img {
+            height: 50px
+        }
+    </style>
+    <div>
+        <h1>{{ activity }}</h1>
+        <hr>
+        <div class="row activity-banner p-2">
+            <div class="col-12 col-sm-4 activity-image p-0"></div>
+            <div class="col-12 col-sm-8" style="height: 100%">
+                <div class="activity-details h-100">
+                    {% if perms.visits.change_showing %}
+                        <div class="d-flex justify-content-end">
+                            <a class="btn btn-link pull-right"
+                               href="{% url 'admin_site:visits_showing_change' showing.pk %}" role="button"
+                               style="float: right">{% trans 'Edit' %}</a>
+                        </div>
+                    {% endif %}
+                    {% if activity.timezone %}
+                        <p><strong>{% trans 'Date/Time' %}:</strong>
+                            {{ showing.start_date_tz|date:"l j M Y, H:i a" }} {{ activity.timezone_abbreviation }}</p>
+                    {% else %}
+                        <p><strong>{% trans 'Date/Time' %}:</strong> {{ showing.start_date_tz|date:"l j M Y, H:i a T" }}
+                        </p>
+                    {% endif %}
+                    <p><strong>{% trans 'Location' %}:</strong> {{ activity.observatory }}</p>
+                    <p><strong>{% trans 'Meeting point' %}:</strong> {{ activity.meeting_point }}</p>
+                    <p><strong>{% trans 'Duration' %}:</strong> {{ activity.duration }}</p>
+                    <p><strong>{% trans 'Available places' %}:</strong> {{ showing.free_spaces }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="activity-icon-list">
+                {% for item in activity.restrictions_and_recommendations.all %}
+                    <div class="d-flex flex-column justify-content-center"
+                         style="width: 15%; height: 100%; padding: 10px 0">
+                        <div class="activity-icons d-flex justify-content-center flex-column">
+                            {% if LANGUAGE_CODE == 'es' %}
+                                {% with item_translate=item.translations.first %}
+                                    <img
+                                        data-toggle="tooltip" data-placement="bottom"
+                                        title="{{ item_translate.caption }}"
+                                        class=""
+                                        src="https://noirlab.edu{{ STATIC_URL }}/icons/{{ item_translate.icon_name }}"
+                                        alt="{{ item_translate.caption }}"/>
+                                    <div class="text-center">{{ item_translate.caption }}</div>
+                                {% endwith %}
+                            {% else %}
+                                <img
+                                    data-toggle="tooltip" data-placement="bottom" title="{{ item.caption }}"
+                                    class=""
+                                    src="https://noirlab.edu{{ STATIC_URL }}/icons/{{ item.icon_name }}"
+                                    alt="{{ item.caption }}"/>
+                                <div class="text-center">{{ item.caption }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-sm-12">
+            {% with activity=activity %}
+                {% include 'visits/modal_forms.html' %}
+            {% endwith %}
+        </div>
+
+        <h2>Group Reservation: {{ object.name }}</h2>
+        <h3>{% trans 'Members' %}:</h3>
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>{% translate 'Name' %}</th>
+                    <th>{% translate 'Email' %}</th>
+                    <th>{% translate 'Phone' %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reservation in reservations %}
+                    <tr>
+                        <td>{{ reservation.name }}</td>
+                        <td>{{ reservation.email|obfuscate_email }}</td>
+                        <td>{{ reservation.phone|obfuscate_phone }}</td>  <!-- Asumiendo que hay un campo 'details' en la reserva -->
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">No reservations yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a class="btn btn-primary" data-toggle="collapse" href="#collapse-member-form" role="button" aria-expanded="false"
+           aria-controls="collapseExample">
+            {% trans 'Add Member' %}
+        </a>
+        <hr>
+        <div id="collapse-member-form" class="collapse col-sm-12">
+            <h4>{% trans 'Add New Member' %}</h4>
+            <form method="post" class="form-horizontal">
+                {% csrf_token %}
+                {{ member_form|crispy }}
+                <button type="submit">Add Member</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block extra_scripts %}
+    <script>
+        $("#id_not_has_tested_positive_for_covid").parents('.controls').addClass('well-blue');
+        $("#id_subscribe_checkbox").parents('.controls').addClass('well-blue');
+
+        function accept_conditions(modal_id) {
+            $(`#${modal_id}`).modal('hide');
+            $(`#id_accept_${modal_id}`).prop('checked', true);
+            check_conditions()
+        }
+
+        function decline_conditions(modal_id) {
+            $(`#${modal_id}`).modal('hide');
+            $(`#id_accept_${modal_id}`).prop('checked', false);
+            check_conditions()
+        }
+
+        $('.acceptConditions').click(function(){
+            let condition = $(`#${this.id}`)
+            if (!condition.hasClass("covid")) {
+                condition.prop('checked', false);
+            }
+            check_conditions()
+        });
+
+        function check_conditions() {
+            if ($('.acceptConditions:checked').length == $('.acceptConditions').length){
+                $('#submit-id-submit').prop('disabled', false);
+            } else {
+                $('#submit-id-submit').prop('disabled', true);
+            }
+        }
+
+        check_conditions();
+    </script>
+{% endblock %}
