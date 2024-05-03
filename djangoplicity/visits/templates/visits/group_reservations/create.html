@@ -130,80 +130,90 @@
             if (form && divToDisclaimer) {
                 form.insertBefore(divToDisclaimer, submitButton);
             }
-
-
+            
             // Open modal logic
             const activitySelect = document.querySelector('select[name="location"]');
             const openModalButtons = document.querySelectorAll('.open-modal');
             const checkboxSafety = document.querySelector('input[name="accept_safety_form"]');
             const checkboxLiability = document.querySelector('input[name="accept_disclaimer_form"]');
+            let currentActivityData = null;
 
             if (!activitySelect.value) {
                 checkboxSafety.closest('.form-group').style.display = 'none';
                 checkboxLiability.closest('.form-group').style.display = 'none';
             }
 
-            activitySelect.addEventListener('change', function () {
-                const activityId = this.value;
+            function updateActivityData(activityId) {
                 if (!activityId) {
-                    // Si no hay selección, oculta los checkboxes
                     checkboxSafety.closest('.form-group').style.display = 'none';
                     checkboxLiability.closest('.form-group').style.display = 'none';
+                    return;
+                }
+
+                if (currentActivityData && currentActivityData.id === activityId) {
+                    updateUI(currentActivityData);
                     return;
                 }
 
                 fetch(`/public/api/v2/visits/activities/${activityId}/`)
                     .then(response => response.json())
                     .then(data => {
-                        // Verificar y mostrar los checkboxes según la existencia de documentos
-                        if (data.group_safety_tech_doc || data.group_safety_tech_doc_es) {
-                            checkboxSafety.closest('.form-group').style.display = '';
-                            checkboxSafety.checked = false;
-                            checkboxSafety.required = true;
-                        } else {
-                            checkboxSafety.closest('.form-group').style.display = 'none';
-                            checkboxSafety.required = false;
-                        }
-
-                        if (data.group_liability_tech_doc || data.group_liability_tech_doc_es) {
-                            checkboxLiability.closest('.form-group').style.display = '';
-                            checkboxLiability.required = true;
-                            checkboxLiability.checked = false;
-                        } else {
-                            checkboxLiability.closest('.form-group').style.display = 'none';
-                            checkboxLiability.required = false;
-                        }
+                        currentActivityData = data; // Store the data
+                        updateUI(data);
                     })
                     .catch(error => console.error('Error loading activity details:', error));
-            });
+            }
 
+            function updateUI(data) {
+                // Checkboxes logic
+                if (data.group_safety_tech_doc || data.group_safety_tech_doc_es) {
+                    checkboxSafety.closest('.form-group').style.display = '';
+                    checkboxSafety.checked = false;
+                    checkboxSafety.required = true;
+                } else {
+                    checkboxSafety.closest('.form-group').style.display = 'none';
+                    checkboxSafety.required = false;
+                }
 
-            openModalButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const docType = this.getAttribute('data-doc-type');
-                    const language = '{{ LANGUAGE_CODE }}';
-                    const activityId = activitySelect.value;
+                if (data.group_liability_tech_doc || data.group_liability_tech_doc_es) {
+                    checkboxLiability.closest('.form-group').style.display = '';
+                    checkboxLiability.required = true;
+                    checkboxLiability.checked = false;
+                } else {
+                    checkboxLiability.closest('.form-group').style.display = 'none';
+                    checkboxLiability.required = false;
+                }
 
-                    fetch(`/public/api/v2/visits/activities/${activityId}/`)
-                        .then(response => response.json())
-                        .then(data => {
-                            let docUrl;
-                            switch (docType) {
-                                case 'safety':
-                                    docUrl = (language === 'es' && data.group_safety_tech_doc_es) ? data.group_safety_tech_doc_es : data.group_safety_tech_doc;
-                                    break;
-                                case 'liability':
-                                    docUrl = (language === 'es' && data.group_liability_tech_doc_es) ? data.group_liability_tech_doc_es : data.group_liability_tech_doc;
-                                    break;
-                            }
-                            if (docUrl) {
-                                const embed = document.querySelector('#modal-body embed');
+                // Open modal logic
+                openModalButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        const docType = this.getAttribute('data-doc-type');
+                        const language = '{{ LANGUAGE_CODE }}';
+                        let docUrl = getDocumentUrl(data, docType, language);
+
+                        if (docUrl) {
+                            const embed = document.querySelector('#modal-body embed');
+                            embed.src = '';
+                            setTimeout(() => {
                                 embed.src = docUrl + "#toolbar=0&navpanes=0&scrollbar=0";
                                 $(button.getAttribute('data-target')).modal('show');
-                            }
-                        })
-                        .catch(error => console.error('Error loading the document:', error));
+                            }, 100);
+                        }
+                    });
                 });
+            }
+
+            function getDocumentUrl(data, docType, language) {
+                switch (docType) {
+                    case 'safety':
+                        return (language === 'es' && data.group_safety_tech_doc_es) ? data.group_safety_tech_doc_es : data.group_safety_tech_doc;
+                    case 'liability':
+                        return (language === 'es' && data.group_liability_tech_doc_es) ? data.group_liability_tech_doc_es : data.group_liability_tech_doc;
+                }
+            }
+
+            activitySelect.addEventListener('change', function () {
+                updateActivityData(this.value);
             });
 
             // Handle accept and decline actions
