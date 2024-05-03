@@ -156,7 +156,7 @@
                     .then(response => response.json())
                     .then(data => {
                         // Verificar y mostrar los checkboxes según la existencia de documentos
-                        if (data.safety_tech_doc || data.safety_tech_doc_es) {
+                        if (data.group_safety_tech_doc || data.group_safety_tech_doc_es) {
                             checkboxSafety.closest('.form-group').style.display = '';
                             checkboxSafety.checked = false;
                             checkboxSafety.required = true;
@@ -165,7 +165,7 @@
                             checkboxSafety.required = false;
                         }
 
-                        if (data.liability_tech_doc || data.liability_tech_doc_es) {
+                        if (data.group_liability_tech_doc || data.group_liability_tech_doc_es) {
                             checkboxLiability.closest('.form-group').style.display = '';
                             checkboxLiability.required = true;
                             checkboxLiability.checked = false;
@@ -190,10 +190,10 @@
                             let docUrl;
                             switch (docType) {
                                 case 'safety':
-                                    docUrl = language === 'es' ? data.safety_tech_doc_es : data.safety_tech_doc;
+                                    docUrl = (language === 'es' && data.group_safety_tech_doc_es) ? data.group_safety_tech_doc_es : data.group_safety_tech_doc;
                                     break;
                                 case 'liability':
-                                    docUrl = language === 'es' ? data.liability_tech_doc_es : data.liability_tech_doc;
+                                    docUrl = (language === 'es' && data.group_liability_tech_doc_es) ? data.group_liability_tech_doc_es : data.group_liability_tech_doc;
                                     break;
                             }
                             if (docUrl) {
