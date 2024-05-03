@@ -39,40 +39,65 @@ class ActivitySerializer(serializers.ModelSerializer):
 
 
     def get_key_visual_en(self, obj): # noqa
-        return obj.key_visual_en.get_absolute_url if obj.key_visual_en else None
+        if obj.key_visual_en:
+            return obj.key_visual_en.get_absolute_url() if obj.key_visual_en else None
+        return ''
 
     def get_key_visual_es(self, obj): # noqa
-        return obj.key_visual_es.get_absolute_url if obj.key_visual_es else None
+        if obj.key_visual_es:
+            return obj.key_visual_es.get_absolute_url() if obj.key_visual_es else None
+        return ''
+
 
     def get_safety_tech_doc(self, obj): # noqa
-        return obj.safety_tech_doc.resource_pdf.absolute_url if obj.safety_tech_doc else None
+        if obj.safety_tech_doc:
+            return obj.safety_tech_doc.resource_pdf.absolute_url if obj.safety_tech_doc else None
+        return ''
 
     def get_safety_tech_doc_es(self, obj): # noqa
-        return obj.safety_tech_doc_es.resource_pdf.absolute_url if obj.safety_tech_doc_es else None
+        if obj.safety_tech_doc_es:
+            return obj.safety_tech_doc_es.resource_pdf.absolute_url if obj.safety_tech_doc_es else None
+        return ''
 
     def get_conduct_tech_doc(self, obj): # noqa
-        return obj.conduct_tech_doc.resource_pdf.absolute_url if obj.conduct_tech_doc else None
+        if obj.conduct_tech_doc:
+            return obj.conduct_tech_doc.resource_pdf.absolute_url if obj.conduct_tech_doc else None
+        return ''
 
     def get_conduct_tech_doc_es(self, obj): # noqa
-        return obj.conduct_tech_doc_es.resource_pdf.absolute_url if obj.conduct_tech_doc_es else None
+        if obj.conduct_tech_doc_es:
+            return obj.conduct_tech_doc_es.resource_pdf.absolute_url if obj.conduct_tech_doc_es else None
+        return ''
 
     def get_liability_tech_doc(self, obj): # noqa
-        return obj.liability_tech_doc.resource_pdf.absolute_url if obj.liability_tech_doc else None
+        if obj.liability_tech_doc:
+            return obj.liability_tech_doc.resource_pdf.absolute_url if obj.liability_tech_doc else None
+        return ''
 
     def get_liability_tech_doc_es(self, obj): # noqa
-        return obj.liability_tech_doc_es.resource_pdf.absolute_url if obj.liability_tech_doc_es else None
+        if obj.liability_tech_doc_es:
+            return obj.liability_tech_doc_es.resource_pdf.absolute_url if obj.liability_tech_doc_es else None
+        return ''
 
     def get_group_safety_tech_doc(self, obj): # noqa
-        return obj.group_safety_tech_doc.resource_pdf.absolute_url if obj.group_safety_tech_doc else None
+        if obj.group_safety_tech_doc:
+            return obj.group_safety_tech_doc.resource_pdf.absolute_url if obj.group_safety_tech_doc else None
+        return ''
 
     def get_group_safety_tech_doc_es(self, obj): # noqa
-        return obj.group_safety_tech_doc_es.resource_pdf.absolute_url if obj.group_safety_tech_doc_es else None
+        if obj.group_safety_tech_doc_es:
+            return obj.group_safety_tech_doc_es.resource_pdf.absolute_url if obj.group_safety_tech_doc_es else None
+        return ''
 
     def get_group_liability_tech_doc(self, obj): # noqa
-        return obj.group_liability_tech_doc.resource_pdf.absolute_url if obj.group_liability_tech_doc else None
+        if obj.group_liability_tech_doc:
+            return obj.group_liability_tech_doc.resource_pdf.absolute_url if obj.group_liability_tech_doc else None
+        return ''
 
     def get_group_liability_tech_doc_es(self, obj): # noqa
-        return obj.group_liability_tech_doc_es.resource_pdf.absolute_url if obj.group_liability_tech_doc_es else None
+        if obj.group_liability_tech_doc_es:
+            return obj.group_liability_tech_doc_es.resource_pdf.absolute_url if obj.group_liability_tech_doc_es else None
+        return ''
 
     class Meta:
         model = Activity

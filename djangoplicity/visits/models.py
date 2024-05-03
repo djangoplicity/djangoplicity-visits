@@ -80,6 +80,7 @@ def get_default_from_email():
     else:
         return None
 
+
 TIMEZONES_TZS = [(tz, tz) for tz in pytz.all_timezones]
 
 
@@ -94,7 +95,7 @@ class RestrictionRecommendation(TranslationModel):
         fields = ['icon_name', 'caption']
 
     class Meta:
-        ordering = ['name',]
+        ordering = ['name', ]
 
     def __str__(self):
         return self.name
@@ -557,7 +558,6 @@ class GroupReservation(models.Model):
         Activity,
         on_delete=models.CASCADE,
         verbose_name=_('Location'),
-        # Todo: not allow blank an null
         blank=True,
         null=True
     )
