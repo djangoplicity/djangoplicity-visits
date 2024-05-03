@@ -40,7 +40,7 @@ from import_export.widgets import ForeignKeyWidget
 from djangoplicity.contrib import admin as dpadmin
 from django.conf import settings
 from djangoplicity.visits.models import Activity, ActivityProxy, \
-    Language, Reservation, Showing, RestrictionRecommendation, RestrictionRecommendationProxy
+    Language, Reservation, Showing, RestrictionRecommendation, RestrictionRecommendationProxy, GroupReservation
 from django.utils.translation import gettext_lazy as _
 from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
@@ -224,7 +224,28 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     get_start_time_tz.admin_order_field = 'start_time'
 
 
+class GroupReservationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'activity', 'showing', 'email', 'formatted_showing_time', 'group_detail_link')
+    list_filter = ('activity', 'showing__start_time')
+    search_fields = ('name', 'email', 'phone', 'activity__name', 'showing__start_time')
+    raw_id_fields = ('activity', 'showing')
+    exclude = ('reservations',)
+
+    def group_detail_link(self, obj):
+        if obj.code:
+            url = reverse('visits-group-detail', args=[obj.code])
+            return format_html('<a href="{}" target="_blank">View Group</a>', url)
+        return '-'
+
+    def formatted_showing_time(self, obj):
+        return obj.showing.start_date_tz.strftime('%Y-%m-%d %H:%M')
+
+    group_detail_link.short_description = _('view group')
+    formatted_showing_time.short_description = _('Showing Time')
+
+
 def register_with_admin(admin_site):
+    admin_site.register(GroupReservation, GroupReservationAdmin)
     admin_site.register(Activity, ActivityAdmin)
     admin_site.register(ActivityProxy, ActivityProxyAdmin)
     admin_site.register(Language)
