@@ -1,0 +1,141 @@
+{% extends "visits/visits-base.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+    <div class="row">
+        <div class="page-header">
+            <h1>{% trans 'Special Group Visits' %}</h1>
+
+            <h3>{% trans 'Guidelines for Special Group Visits to NOIRLab Facilities' %}</h3>
+            <p>
+                {% blocktrans %}
+                    NSF’s NOIRLab welcomes special groups interested in visiting our sites in the US and Chile. Our
+                    Communications, Education & Engagement (CEE) team may decline visit requests, for practical reasons
+                    and due to the significant investment of resources required from NOIRLab.
+                {% endblocktrans %}
+            </p>
+            <h3>{% translate 'How to apply for a Special Group visit' %}</h3>
+            <ul>
+                <li>
+                    <p>{% blocktrans %}Complete the form below.{% endblocktrans %}</p>
+                </li>
+                <li>
+                    <p>{% blocktrans %}Once you have submitted the form, you should receive an automated email that we
+                        have received
+                        your request and that it will be under review; if you do not receive this notification please
+                        check your spam folder and if still not found send an email to our <a
+                            href="mailto:visits@noirlab.edu">Visits Coordinator</a>.{% endblocktrans %}</p>
+                </li>
+                <li>
+                    <p>{% blocktrans %}Your request will be evaluated by the CEE team with the following
+                        considerations:{% endblocktrans %}</p>
+                </li>
+                <ul>
+                    <li>The nature and purpose of the project (please include as much information as possible like
+                        synopsis or scripts).
+                    </li>
+                    <li>
+                        <p>{% blocktrans %}The complexity of the logistics involved and any impact on regular operations
+                            at the
+                            sites.{% endblocktrans %}</p>
+                    </li>
+                    <li>
+                        <p>{% blocktrans %}The amount of time available for planning the visit (at least 4 weeks are
+                            needed for the
+                            permissions and planning).{% endblocktrans %}</p>
+                    </li>
+                    <li>
+                        <p>{% blocktrans %}All proper documentation and required permits (if any) are submitted in a
+                            timely fashion.{% endblocktrans %}</p>
+                    </li>
+                </ul>
+                <li>
+                    <p>{% blocktrans %}You will be notified of our initial evaluation regarding your visit within 2
+                        weeks of applying;
+                        If your visit is tentatively approved, NOIRLab will send a proposed site visit
+                        itinerary.{% endblocktrans %}</p>
+                </li>
+                <li>
+                    <p>{% blocktrans %}Once both parties agree to the itinerary, NOIRLab will start the internal
+                        approval process. It is
+                        recommended that you do not confirm any travel reservations until we receive the final approvals
+                        from the observatories.{% endblocktrans %}</p>
+                </li>
+                <li>
+                    <p>{% blocktrans %}You will be notified of the final approval or rejection of your visit within a
+                        reasonable time
+                        period. If you have a deadline please state it clearly in the form.{% endblocktrans %}</p>
+                </li>
+                <li>
+                    <p>{% blocktrans %}Site visit costs that are incurred as a result of your visit (meal and lodging
+                        requests etc) must
+                        be reimbursed to the programs visited, an invoice can be requested.{% endblocktrans %}</p>
+                </li>
+                <li>
+                    <p>{% blocktrans %}Please note, that every effort will be made to follow through with your planned
+                        visit, however
+                        certain circumstances may prevent us from being able to conduct the visit as planned. It is
+                        advisable to come up with a plan B or a secondary site (such as base facilities) in case a
+                        summit visit is precluded. (This can occur when the mountain sites become inaccessible due to
+                        weather, earthquake or if there is an unplanned engineering event etc). If we need to cancel the
+                        visit we will let you know as soon as we become aware of the potential
+                        issue.{% endblocktrans %}</p>
+                </li>
+                <li>
+                    <p>{% blocktrans %}The sites you are visiting are active worksites and each have requirements about
+                        proper attire
+                        and the appropriate safety protocols to be observed. Depending on which site you intend to
+                        visit, additional requirements (in regards to high altitude for example) may
+                        apply.{% endblocktrans %}</p>
+                </li>
+                <li>
+                    <p>{% blocktrans %}For site-specific information, requirements, and safety notices please see the
+                        appropriate
+                        section below.{% endblocktrans %}</p>
+                </li>
+            </ul>
+        </div>
+        <div class="row">
+            <div class="well info clearfix" style="margin: 0 4rem">
+                <div class="col-sm-12">
+                    <form method="post" class="form-horizontal">
+                        {% csrf_token %}
+                        {% crispy form %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const activitySelect = document.querySelector('select[name="activity"]');
+            const showingSelect = document.querySelector('select[name="showing"]');
+
+            activitySelect.addEventListener('change', function () {
+                const activityId = this.value;
+                fetch(`/public/api/v2/visits/showings/?activity=${activityId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        showingSelect.innerHTML = '';
+                        showingSelect.appendChild(new Option('---------', ''));
+                        if (data.length > 0) {
+                            data.forEach(showing => {
+                                const option = new Option(
+                                    `${showing.formatted_start_time} - Available spaces: ${showing.free_spaces}`,
+                                    showing.id
+                                );
+                                showingSelect.appendChild(option);
+                            });
+                            showingSelect.selectedIndex = 0;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading the showings:', error);
+                    });
+            });
+        });
+    </script>
+{% endblock %}
