@@ -148,8 +148,10 @@
             const checkboxSafety = document.querySelector('input[name="accept_safety_form"]');
             const checkboxLiability = document.querySelector('input[name="accept_disclaimer_form"]');
             let currentActivityData = null;
+            let isInitialize = false;
 
             if (activitySelect.value) {
+                isInitialize = true;
                 updateActivityData(activitySelect.value)
             } else {
                 checkboxSafety.closest('.form-group').style.display = 'none';
@@ -173,29 +175,27 @@
                     .then(data => {
                         currentActivityData = data; // Store the data
                         updateUI(data);
+                        isInitialize = false
                     })
                     .catch(error => console.error('Error loading activity details:', error));
             }
 
+            function setCheckboxVisibility(checkbox, hasDocument) {
+                if (hasDocument) {
+                    checkbox.closest('.form-group').style.display = '';
+                    checkbox.required = true;
+                } else {
+                    checkbox.closest('.form-group').style.display = 'none';
+                    checkbox.required = false;
+                }
+                if (!isInitialize)
+                    checkbox.checked = false
+            }
+
             function updateUI(data) {
                 // Checkboxes logic
-                if (data.group_safety_tech_doc || data.group_safety_tech_doc_es) {
-                    checkboxSafety.closest('.form-group').style.display = '';
-                    checkboxSafety.checked = false;
-                    checkboxSafety.required = true;
-                } else {
-                    checkboxSafety.closest('.form-group').style.display = 'none';
-                    checkboxSafety.required = false;
-                }
-
-                if (data.group_liability_tech_doc || data.group_liability_tech_doc_es) {
-                    checkboxLiability.closest('.form-group').style.display = '';
-                    checkboxLiability.required = true;
-                    checkboxLiability.checked = false;
-                } else {
-                    checkboxLiability.closest('.form-group').style.display = 'none';
-                    checkboxLiability.required = false;
-                }
+                setCheckboxVisibility(checkboxSafety, data.group_safety_tech_doc || data.group_safety_tech_doc_es);
+                setCheckboxVisibility(checkboxLiability, data.group_liability_tech_doc || data.group_liability_tech_doc_es);
 
                 // Open modal logic
                 openModalButtons.forEach(button => {
