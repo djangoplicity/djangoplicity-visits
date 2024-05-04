@@ -238,7 +238,6 @@ class GroupReservationForm(forms.ModelForm):
         self.fields['accept_safety_form'].widget.attrs.update({
             'data-form-field': 'accept_safety_form',
             'class': 'acceptConditions open-modal',
-            'data-toggle': 'modal',
             'data-target': '#modal_form',
             'data-doc-type': 'safety'
         })
@@ -249,7 +248,6 @@ class GroupReservationForm(forms.ModelForm):
         self.fields['accept_disclaimer_form'].widget.attrs.update({
             'data-form-field': 'accept_disclaimer_form',
             'class': 'acceptConditions open-modal',
-            'data-toggle': 'modal',
             'data-target': '#modal_form',
             'data-doc-type': 'liability'
         })
