@@ -30,7 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE
 
 from datetime import datetime, timedelta
-
+from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.conf import settings
@@ -309,6 +309,7 @@ class GroupReservationCreateUpdateView(UpdateView):
 
     def form_valid(self, form):
         response = super(GroupReservationCreateUpdateView, self).form_valid(form)
+        messages.success(self.request, 'Thanks for submitting the Visitor Registration Form!')
         return response
 
     def get_success_url(self):
