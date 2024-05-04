@@ -233,7 +233,7 @@ class GroupReservationForm(forms.ModelForm):
         self.fields['email_confirm'].widget.attrs.update({'class': 'nocopypaste'})
 
         self.fields['accept_safety_form'].label = _(
-            "I hereby accept the Safety conditions on behalf of all visitors in my party.*")
+            "By checking this box I assert that I have read and agree to the Safety document on behalf of my party.*")
 
         self.fields['accept_safety_form'].widget.attrs.update({
             'data-form-field': 'accept_safety_form',
@@ -244,7 +244,7 @@ class GroupReservationForm(forms.ModelForm):
         })
 
         self.fields['accept_disclaimer_form'].label = _(
-            "I hereby accept the Liability Disclaimer conditions on behalf of all visitors in my party.*")
+            "By checking this box I affirm that I have read and agree to the Waiver and Release of Liability on behalf of my party.*")
 
         self.fields['accept_disclaimer_form'].widget.attrs.update({
             'data-form-field': 'accept_disclaimer_form',

@@ -12,6 +12,19 @@
         <div class="col-sm-12">
             <div class="page-header">
                 <h1>{% trans 'Visitor Registration Form' %}</h1>
+                <p>
+                    {% blocktrans %}
+                        Please accept the forms below to agree to our liability and — where applicable — our summit
+                        safety rules.
+                    {% endblocktrans %}
+                </p>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </div>
             <div class="info clearfix">
                 <div class="col-sm-12">
@@ -37,7 +50,7 @@
                             <table class="table table-striped table-bordered table-hover m-0" id="guestList">
                                 <thead>
                                 <tr>
-                                    <th class="text-primary">{% translate 'Guest Names' %}</th>
+                                    <th class="text-primary">{% translate 'Names of additional people in your party' %}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -57,7 +70,7 @@
                             </table>
                         </div>
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">{% trans 'Submit' %}</button>
+                            <button type="submit" class="btn btn-primary">{% trans 'Submit Registration' %}</button>
                         </div>
                     </form>
                 </div>
@@ -130,7 +143,7 @@
             if (form && divToDisclaimer) {
                 form.insertBefore(divToDisclaimer, submitButton);
             }
-            
+
             // Open modal logic
             const activitySelect = document.querySelector('select[name="location"]');
             const openModalButtons = document.querySelectorAll('.open-modal');
@@ -138,7 +151,9 @@
             const checkboxLiability = document.querySelector('input[name="accept_disclaimer_form"]');
             let currentActivityData = null;
 
-            if (!activitySelect.value) {
+            if (activitySelect.value) {
+                updateActivityData(activitySelect.value)
+            } else {
                 checkboxSafety.closest('.form-group').style.display = 'none';
                 checkboxLiability.closest('.form-group').style.display = 'none';
             }
