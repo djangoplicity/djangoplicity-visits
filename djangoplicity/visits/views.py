@@ -310,7 +310,7 @@ class GroupReservationCreateUpdateView(UpdateView):
 
     def form_valid(self, form):
         response = super(GroupReservationCreateUpdateView, self).form_valid(form)
-        messages.success(self.request, 'Thanks for submitting the Visitor Registration Form!')
+        messages.success(self.request, 'Thanks for submitting the Visitor Release Form!')
         return response
 
     def get_success_url(self):
