@@ -95,7 +95,7 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'title', 'description', 'slogan')
+            'fields': ('id', 'name', 'title', 'description', 'slogan')
         }),
         ('Details', {
             'fields': ('observatory', 'meeting_point', 'meeting_point_link', 'map_url', 'travel_info_url', 'timezone')
