@@ -111,7 +111,7 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
             'classes': ('collapse',),
         }),
         ('Registration Settings', {
-            'fields': ('latest_reservation_time', 'min_participants', 'max_participants', 'required_vehicle_plate',
+            'fields': ('latest_reservation_time', 'min_participants', 'max_participants', 'duration', 'required_vehicle_plate',
                        'require_age', 'require_rut_number', 'group_enable'),
             'classes': ('collapse',),
         }),

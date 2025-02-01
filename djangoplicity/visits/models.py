@@ -130,7 +130,7 @@ class Activity(TranslationModel):
     travel_info_url = models.URLField(help_text='Link to travel info page')
     map_url = models.URLField(help_text='Link to Google Maps')
     offered_languages = models.ManyToManyField('Language')
-    duration = models.DurationField(help_text='Format: HH:MM')
+    duration = models.DurationField(help_text='Format: HH:MM', blank=True, null=True)
     latest_reservation_time = models.IntegerField(default=24,
                                                   help_text='Until how many hours before the start do we accept reservations')
     min_participants = models.IntegerField(help_text='Min. no of participants',
