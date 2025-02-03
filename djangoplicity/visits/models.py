@@ -53,6 +53,7 @@ from djangoplicity.translation.fields import TranslationForeignKey, TranslationM
 from djangoplicity.translation.models import TranslationModel, translation_reverse
 from django.contrib.sites.models import Site
 from djangoplicity.products2.models import TechnicalDocument
+from datetime import timedelta
 
 
 def eprint(*args, **kwargs):
@@ -130,7 +131,7 @@ class Activity(TranslationModel):
     travel_info_url = models.URLField(help_text='Link to travel info page')
     map_url = models.URLField(help_text='Link to Google Maps')
     offered_languages = models.ManyToManyField('Language')
-    duration = models.DurationField(help_text='Format: HH:MM', blank=True, null=True)
+    duration = models.DurationField(help_text='Format: HH:MM', blank=False, null=False, default=timedelta(minutes=60))
     latest_reservation_time = models.IntegerField(default=24,
                                                   help_text='Until how many hours before the start do we accept reservations')
     min_participants = models.IntegerField(help_text='Min. no of participants',
@@ -152,6 +153,14 @@ class Activity(TranslationModel):
         default=False,
         help_text=_('RUT number required on the reservation form')
     )
+    require_hawaii_state_id = models.BooleanField(
+        default=False,
+        help_text=_('Hawai’i State ID required on the reservation form')
+    )
+    require_hawaii_drivers_license_number = models.BooleanField(
+        default=False,
+        help_text=_('Hawai’i Drivers License Number required on the reservation form')
+    )
 
     key_visual_en = TranslationForeignKey(Image, blank=True, null=True,
                                           on_delete=models.SET_NULL, related_name='+',
@@ -171,6 +180,10 @@ class Activity(TranslationModel):
     liability_tech_doc = TranslationForeignKey(TechnicalDocument, blank=True, null=True,
                                                on_delete=models.SET_NULL, related_name='+',
                                                verbose_name='Liability Technical Doc')
+    
+    photo_release_form = TranslationForeignKey(TechnicalDocument, blank=True, null=True,
+                                               on_delete=models.SET_NULL, related_name='+',
+                                               verbose_name='Photo and Publication Release Form')
 
     # Technical Document Spanish versions
     safety_tech_doc_es = TranslationForeignKey(
@@ -184,6 +197,10 @@ class Activity(TranslationModel):
     liability_tech_doc_es = TranslationForeignKey(
         TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
         verbose_name='Spanish Liability Technical Doc')
+    
+    photo_release_form_es = TranslationForeignKey(
+        TechnicalDocument, blank=True, null=True, on_delete=models.SET_NULL, related_name='+',
+        verbose_name='Spanish Photo and Publication Release Form')
 
     group_safety_tech_doc = TranslationForeignKey(
         TechnicalDocument,
@@ -319,10 +336,13 @@ class Reservation(models.Model):
     rut = models.CharField(_('RUT Number'), max_length=50, blank=True, null=True, default='')
 
     vehicle_plate = models.CharField(_('Vehicle Plate'), max_length=20, blank=True, null=True)
+    hawaii_state_id = models.CharField(_('Hawai’i State ID'), max_length=25, blank=True, null=True)
+    hawaii_drivers_license_number = models.CharField(_('Hawai’i Drivers License Number'), max_length=25, blank=True, null=True)
 
     accept_safety_form = models.BooleanField(verbose_name=_('Accept Safety Form'), default=False)
     accept_disclaimer_form = models.BooleanField(verbose_name=_('Accept Disclaimer Form'), default=False)
     accept_conduct_form = models.BooleanField(verbose_name=_('Accept Conduct Form'), default=False)
+    accept_photo_release_form = models.BooleanField(verbose_name=_('Accept Photo and Publication Release Form'), default=False)
 
     age_range = models.CharField(
         max_length=10,
@@ -526,7 +546,7 @@ class Showing(models.Model):
         if self.free_spaces is None:
             self.free_spaces = self.total_spaces
 
-        if not self.end_time:
+        if not self.end_time and self.activity.duration:
             self.end_time = self.start_time + self.activity.duration
 
         super(Showing, self).save(**kwargs)

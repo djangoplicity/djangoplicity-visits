@@ -73,7 +73,9 @@ class ReservationForm(forms.ModelForm):
 
     field_order = ['name', 'phone', 'alternative_phone', 'email',
                    'email_confirm', 'country', 'language', 'vehicle_plate', 'n_spaces',
-                   'rut', 'age_range', 'accept_safety_form', 'accept_disclaimer_form',]
+                   'rut', 'hawaii_state_id', 'hawaii_drivers_license_number', 
+                   'age_range', 'accept_safety_form', 'accept_disclaimer_form',
+                   ]
 
     if getattr(settings, 'VISITS_DISPLAY_ACCEPT_CONDUCT_FORM', False):
         field_order.append('accept_conduct_form')
@@ -135,6 +137,16 @@ class ReservationForm(forms.ModelForm):
             self.fields['rut'].required = False
         else:
             self.fields.pop('rut')
+        
+        if self.showing.activity.require_hawaii_state_id:
+            self.fields['hawaii_state_id'].required = True
+        else:
+            self.fields.pop('hawaii_state_id')
+            
+        if self.showing.activity.require_hawaii_drivers_license_number:
+            self.fields['hawaii_drivers_license_number'].required = True
+        else:
+            self.fields.pop('hawaii_drivers_license_number')
 
 
         if self.showing.activity.require_age:
@@ -163,6 +175,13 @@ class ReservationForm(forms.ModelForm):
             self.fields['accept_conduct_form'].label = _("I hereby accept the Standard of Workplace Conduct conditions on behalf of all visitors in my party.*")
         else:
             self.fields['accept_conduct_form'].widget = forms.HiddenInput()
+
+        if self.showing.activity.photo_release_form:
+            self.fields['accept_photo_release_form'].widget.attrs.update({
+                'data-target': '#photo_release_form', 'data-toggle': 'modal', 'class': 'acceptConditions'})
+            self.fields['accept_photo_release_form'].label = _("I hereby accept the Photo and Publication Release Form on behalf of all visitors in my party.*")
+        else:
+            self.fields['accept_photo_release_form'].widget = forms.HiddenInput()
             
         # Setup crispyform
         self.helper = FormHelper()

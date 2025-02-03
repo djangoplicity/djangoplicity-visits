@@ -88,7 +88,8 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
     list_display = ('id', 'name', 'timezone', view_online,)
     raw_id_fields = ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc',
                      'safety_tech_doc_es', 'conduct_tech_doc_es', 'liability_tech_doc_es', 'group_safety_tech_doc',
-                     'group_liability_tech_doc', 'group_safety_tech_doc_es', 'group_liability_tech_doc_es')
+                     'group_liability_tech_doc', 'group_safety_tech_doc_es', 'group_liability_tech_doc_es', 
+                     'photo_release_form', 'photo_release_form_es')
     richtext_fields = ('description',)
     filter_horizontal = ('offered_languages', 'restrictions_and_recommendations', 'related_activities')
     form = ActivityAdminForm
@@ -102,7 +103,7 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
         }),
         ('Individual Mandatory Agreement Documents', {
             'fields': ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc',
-                       'safety_tech_doc_es', 'conduct_tech_doc_es', 'liability_tech_doc_es'),
+                       'photo_release_form', 'safety_tech_doc_es', 'conduct_tech_doc_es', 'liability_tech_doc_es', 'photo_release_form_es'),
             'classes': ('collapse',),
         }),
         ('Group Mandatory Agreement Documents', {
@@ -112,7 +113,7 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
         }),
         ('Registration Settings', {
             'fields': ('latest_reservation_time', 'min_participants', 'max_participants', 'duration', 'required_vehicle_plate',
-                       'require_age', 'require_rut_number', 'group_enable'),
+                       'require_age', 'require_rut_number', 'require_hawaii_state_id', 'require_hawaii_drivers_license_number', 'group_enable'),
             'classes': ('collapse',),
         }),
         ('Language and Accessibility', {
@@ -173,7 +174,7 @@ class ReservationResource(resources.ModelResource):
 
 class ReservationAdmin(ImportExportModelAdmin):
     list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'phone', 'n_spaces', 'code',
-                    'rut', 'vehicle_plate', 'language', 'created', 'age_range',)
+                    'rut', 'vehicle_plate', 'hawaii_state_id', 'hawaii_drivers_license_number', 'language', 'created', 'age_range',)
     list_filter = ('showing__activity', 'showing__start_time', 'created')
     ordering = ['showing__start_time']
     raw_id_fields = ('showing',)
