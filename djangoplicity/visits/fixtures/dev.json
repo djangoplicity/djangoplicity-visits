@@ -1,0 +1,166 @@
+[
+{
+  "model": "visits.activity",
+  "pk": "aura-recinto",
+  "fields": {
+    "lang": "en",
+    "source": null,
+    "translation_ready": false,
+    "name": "Public Visits to AURA Recinto, La Serena, Chile",
+    "title": null,
+    "observatory": "AURA Recinto",
+    "timezone": "Chile/Continental",
+    "meeting_point": "AURA Recinto gate, Avenida Juan Cisternas 1500, La Serena, Chile",
+    "meeting_point_link": "https://goo.gl/maps/5ni7mVgLefBX97oM6",
+    "travel_info_url": "https://noirlab.edu/public/about/contacts/aura-recinto/",
+    "map_url": "https://goo.gl/maps/5ni7mVgLefBX97oM6",
+    "duration": "02:00:00",
+    "latest_reservation_time": 24,
+    "min_participants": 4,
+    "max_participants": 20,
+    "slogan": "",
+    "description": "<p>NOIRLab is pleased to receive public and educational visits at no cost to our site, and make every effort to accommodate the public interested in learning about astronomical research/engineering activities. A minimum of 24 hours notice is necessary for scheduled public visit requests.</p>\r\n<ul>\r\n<li>At the <a href=\"https://noirlab.edu/public/about/contacts/aura-recinto/\">AURA Recinto</a>, tours are limited to 20 visitors per tour.</li>\r\n<li>The minimum number of confirmed visitors to operate a tour is four people. If that number is not reached day by 12 pm local time the previous day, the tour will be canceled and the confirmed visitors alerted by email and phone by the coordinator of the local visit.</li>\r\n<li>Pets are not allowed.</li>\r\n<li>Visits may also be canceled because of operational problems, bad weather, natural disaster, accidents, or any other case of force majeure.</li>\r\n<li>Minors under six years old are not permitted.</li>\r\n</ul>\r\n<center>\r\n<table class=\"table table-bordered\" style=\"width: 131px;\">\r\n<tbody>\r\n<tr>\r\n<td style=\"width: 133.111px;\"><a href=\"/public/media/archives/techdocs/pdf/techdoc080.pdf\"><img style=\"display: block; margin-left: auto; margin-right: auto; border: 4px solid #e5e5e5; padding: 15px;\" src=\"/public/media/img/Liability.jpg\" alt=\"WAIVER AND RELEASE OF LIABILITY\" width=\"96\" height=\"121\" /></a></td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n</center>\r\n<p>You must read and comply with our regulations. A form will need to be signed before sending your visit request.</p>\r\n<h3>When to Visit?</h3>\r\n<table class=\"table table-bordered table-hover\">\r\n<tbody>\r\n<tr>\r\n<td>\r\n<p><strong>Location</strong></p>\r\n</td>\r\n<td>\r\n<p><strong>Day and tour capacities</strong></p>\r\n</td>\r\n<td>\r\n<p><strong>Times and meeting points</strong></p>\r\n</td>\r\n</tr>\r\n<tr>\r\n<td>\r\n<p>AURA Recinto, La Serena, Chile</p>\r\n</td>\r\n<td>\r\n<p>On 1st and 3rd Wednesday of the month</p>\r\n<p>4–20 visitors per tour</p>\r\n</td>\r\n<td>\r\n<p>10:00 am</p>\r\n<p><strong>Meeting point:</strong> <a href=\"https://goo.gl/maps/5ni7mVgLefBX97oM6\">AURA Recinto gate, Avenida Juan Cisternas 1500, La Serena, Chile</a></p>\r\n</td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n<h3>What will you see on the tour?</h3>\r\n<p>Previously booked visitors will gather at the AURA Recinto gate, located in Avenida Juan Cisternas 1500, La Serena, at 10:00 am on the day of the visit. The group will be directed by the NOIRLab visit guide to the AURA Lecture Hall located at the Gemini South building, where the organization will be presented, after which, the visitors will be guided to the Gemini South Remote Observing room to learn how astronomers perform their astronomical observations. The group will then continue to the Main Building Reception Hall to learn about the the history of AURA/NOIRLab facilities, continuing to the Data Center to understand engineering processes related to astronomy data science, and stopping for a picture at front of the building glass mural. The tour will continue with a visit to the Instrument Shop where many fundamental parts and pieces are fabricated and repaired for the proper operation of the telescopes. The tour will finish in Casa 8 with an observing experience of the Sun with one of our outreach telescopes — if weather permits. Around 12:00 am visitors will leave the facility.</p>\r\n<table style=\"border-collapse: collapse; width: 100%;\" border=\"1\">\r\n<tbody>\r\n<tr>\r\n<td style=\"width: 100%;\">\r\n<h4>Check out our <a href=\"https://noirlab.edu/public/products/virtual-tours/recinto-chile/?nocache=true\">Facility's Virtual Tour</a> to give you a glimpse of your future visit !</h4>\r\n</td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n<h3>How to book a Public visit?</h3>\r\n<ul>\r\n<li>Select a Tour below and complete the Reservation Form at least 24 hours in advance of your desired date.</li>\r\n<li><strong>You need to fill in one Reservation Form for each visitor.</strong></li>\r\n<li>The sites you are visiting are active worksites so please accept the Liability rules and recommendations provided in the Form.</li>\r\n<li>Once you have submitted the form, you will receive an automated email informing you that we have received your booking; if you do not receive this notification please check your spam folder and if still not found send an <a href=\"mailto:%20visits@noirlab.edu\">email to us</a>.</li>\r\n<li>Please note that every effort will be made to follow through with your planned visit; however, certain circumstances may prevent us from being able to conduct the visit as planned. It is advisable to have a plan B, in case the visit is canceled. This can occur if the site become inaccessible due to weather, earthquake, or if there is an unplanned engineering event etc. If we need to cancel the visit we will let you know by e-mail as soon as we become aware of the potential issue.</li>\r\n</ul>\r\n<p>Travel information to the AURA Recinto in La Serena, Chile, can be found<a href=\"https://noirlab.edu/public/about/contacts/aura-recinto/\"> here.</a></p>\r\n<p> </p>",
+    "published": false,
+    "required_vehicle_plate": true,
+    "require_age": false,
+    "require_rut_number": true,
+    "require_hawaii_state_id_or_drivers_license_number": false,
+    "key_visual_en": null,
+    "key_visual_es": null,
+    "safety_tech_doc": null,
+    "conduct_tech_doc": null,
+    "liability_tech_doc": null,
+    "photo_release_form": null,
+    "safety_tech_doc_es": null,
+    "conduct_tech_doc_es": null,
+    "liability_tech_doc_es": null,
+    "photo_release_form_es": null,
+    "group_safety_tech_doc": null,
+    "group_liability_tech_doc": null,
+    "group_safety_tech_doc_es": null,
+    "group_liability_tech_doc_es": null,
+    "showing_list_title": null,
+    "showing_list_title_es": null,
+    "group_enable": true,
+    "offered_languages": [
+      "en",
+      "es"
+    ],
+    "restrictions_and_recommendations": [],
+    "related_activities": []
+  }
+},
+{
+  "model": "visits.activity",
+  "pk": "KOE",
+  "fields": {
+    "lang": "en",
+    "source": null,
+    "translation_ready": false,
+    "name": "Kamaʻāina Observatory Experience",
+    "title": null,
+    "observatory": "Maunakea Telescopes",
+    "timezone": "HST",
+    "meeting_point": "Visitor Information Station (VIS)",
+    "meeting_point_link": "https://www.google.com/maps/place/Onizuka+Center+for+International+Astronomy+Visitor+Information+Station/@19.7630179,-155.4549026,15.75z/data=!4m5!3m4!1s0x0:0x7b70cc00c554a42c!8m2!3d19.7590842!4d-155.",
+    "travel_info_url": "https://noirlab.edu/public/about/contacts/gemini-north-maunakea/",
+    "map_url": "https://goo.gl/maps/cAvoT363dTLUYMPG8",
+    "duration": "01:00:00",
+    "latest_reservation_time": 24,
+    "min_participants": 2,
+    "max_participants": 10,
+    "slogan": "",
+    "description": "<p>The Maunakea Observatories and NOIRLab have welcomed back the Kamaʻāina Observatory Experience (KOE), a free all-inclusive tour program to the telescopes at the summit of Maunakea on Hawaiʻi Island. On the first Saturday of each month (excluding December and January due to winter weather), kamaʻāina are invited to experience Hawaiʻi Astronomy and our world-class facilities as well as share in the cultural significance of Maunakea and Native Hawaiian protocol for entering into sacred space. Breakfast and lunch at <a href=\"https://hilo.hawaii.edu/maunakea/visitor-information/station\">Hale Pōhaku</a> are provided. Transportation from the Visitor Information Station at 9,200 ft. to the summit of Maunakea is provided. KOE tours are limited to 12 to 14 guests at a time dependent on the telescope visited that month. If tour dates are full below, you are welcome to add your name to this <a href=\"https://forms.gle/WWzwzBsW6WUUxAsQ9\"><strong>waitlist</strong></a>. </p>\r\n<p>This program is open to kamaʻāina (defined here as Hawaiʻi residents) only. Proof of residency in the form of a Hawaiʻi State ID or Driver’s Licence must be provided for all guests over 18 years of age. Minors under 13 years are not permitted on the tours. Minors 13 to 17 are required to be accompanied by an adult. Pets are not allowed including support animals. Drone flights are not allowed</p>\r\n<p>The summit area of Maunakea is located at 13,825 feet above sea level, so it is vitally important that visitors be aware of their physical condition. At this elevation, altitude sickness can occur. Please consider personal health issues that could arise from being at altitude or walking at this elevation, such as: decreased lung capacity, cardiac issues, or other altitude related issues. Time spent at altitude may also aggravate pre-existing illness, particularly cardiovascular and respiratory diseases. If you have health concerns or a pre-existing condition which could be affected by altitude, consult with your doctor prior to your visit and bring your concerns to the attention of AURA/NOIRLab staff hosting your visit to the summit. We do not recommend that anyone pregnant or anyone who has been scuba diving 24 hours prior visit the summit of Maunakea.</p>\r\n<p>Maunakea is cold and dry. Please wear appropriate warm clothing and close toed shoes. Bring a refillable water bottle and snack.</p>\r\n<p>During the reservation process we will ask you to comply with our Safety and Liability Rules. Please consult them in advance here:</p>\r\n<center>\r\n<table class=\"table table-bordered\" style=\"width: 222px;\">\r\n<tbody>\r\n<tr>\r\n<td style=\"width: 155px;\"><a href=\"/public/media/archives/techdocs/pdf/techdoc082.pdf\" aria-label=\"AURA/NOIRLab Visits Summit Safety Form\"><img style=\"display: block; margin-left: auto; margin-right: auto; border: 4px solid #e5e5e5; padding: 15px;\" src=\"/public/media/img/Safey.jpg\" alt=\"AURA/NOIRLab Visits Summit Safety Form\" width=\"117\" height=\"133\" /></a></td>\r\n<td style=\"width: 157px;\"><a href=\"/public/media/archives/techdocs/pdf/techdoc080.pdf\" aria-label=\"WAIVER AND RELEASE OF LIABILITY\"><img style=\"display: block; margin-left: auto; margin-right: auto; border: 4px solid #e5e5e5; padding: 15px;\" src=\"/public/media/img/Liability.jpg\" alt=\"WAIVER AND RELEASE OF LIABILITY\" width=\"119\" height=\"142\" /></a></td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n<h2 style=\"text-align: left;\">KOE Agenda</h2>\r\n</center>\r\n<p><span style=\"font-weight: 400;\">Each month a different Maunakea Observatory is visited and so each experience is a little different. Please see the agenda below for a general outline of what KOE includes: </span></p>\r\n<ul>\r\n<li style=\"font-weight: 400;\"><span style=\"font-weight: 400;\">8:00 am – Meet guests at Maunakea Visitors Information Station (VIS)</span></li>\r\n<li style=\"font-weight: 400;\"><span style=\"font-weight: 400;\">8:10 am – Walk guests to the silversword enclosure for optional protocol</span></li>\r\n<li style=\"font-weight: 400;\"><span style=\"font-weight: 400;\">8:30 am – Tour van provided by <em>Super Vacations Hawai'i</em> transports guests from VIS to Hale Pōhaku</span></li>\r\n<li style=\"font-weight: 400;\"><span style=\"font-weight: 400;\">9:00 am – Orientation, safety, science and cultural presentations with breakfast provided</span></li>\r\n<li style=\"font-weight: 400;\"><span style=\"font-weight: 400;\">10:30 am – Depart for summit area</span></li>\r\n<li style=\"font-weight: 400;\"><span style=\"font-weight: 400;\">11:00 am – Arrive at telescope facility and begin guided tour</span></li>\r\n<li style=\"font-weight: 400;\"><span style=\"font-weight: 400;\">12:00 pm – Tour concludes, transport guests back to Hale Pōhaku </span></li>\r\n<li style=\"font-weight: 400;\"><span style=\"font-weight: 400;\">12:30 pm – Lunch at HP</span></li>\r\n<li style=\"font-weight: 400;\"><span style=\"font-weight: 400;\">1:30 pm – Transport guests back to the VIS</span></li>\r\n<li style=\"font-weight: 400;\"><span style=\"font-weight: 400;\">1:45 pm - Pau! </span></li>\r\n</ul>\r\n<h2>How to Sign Up for KOE</h2>\r\n<ul>\r\n<li>KOE dates open for registration one month before the tour date. For example, the March 1st tour date will open for registration on February 1st at 8am HST.</li>\r\n<li>Select your desired tour date below and complete the Reservation Form asap or at least one week in advance of your desired date.</li>\r\n<li>The sites you are visiting are active worksites so please accept the Safety, Liability and Code of Conduct rules and recommendations provided in the Form.</li>\r\n<li>Once you have submitted the form, you will receive an automated email informing you that we have received your booking; if you do not receive this notification please check your spam folder.</li>\r\n<li><strong>If your desired tour date is full you may try again for next month or fill out </strong><a href=\"https://forms.gle/WWzwzBsW6WUUxAsQ9\"><strong>this google form</strong></a><strong> to be added to our waitlist. Please read the instructions of the waitlist carefully.</strong></li>\r\n<li>Please note that every effort will be made to follow through with your planned visit; however, certain circumstances may prevent us from being able to conduct the visit as planned. It is advisable to have a plan B, in case the visit is canceled. This can occur if the site becomes inaccessible due to weather (especially during winter months), earthquake, or if there is an unplanned engineering event etc. If we need to cancel the visit we will let you know by e-mail or by phone as soon as we become aware of the potential issue.</li>\r\n<li>Finally, we ask that anyone who attends a KOE tour please wait until the next calendar year before signing up for KOE again.</li>\r\n</ul>\r\n<pre dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 7pt; text-align: left;\"><span style=\"font-size: 13pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: bold; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">KOE Telescope Visit Schedule</span></pre>\r\n<div dir=\"ltr\" style=\"margin-left: 0pt;\" align=\"left\">\r\n<table style=\"border: none; border-collapse: collapse;\"><colgroup><col width=\"111\" /><col width=\"394\" /></colgroup>\r\n<tbody>\r\n<tr style=\"height: 18pt; text-align: left;\">\r\n<td style=\"vertical-align: bottom; padding: 2pt 2pt 2pt 2pt; overflow: hidden; overflow-wrap: break-word; border: solid #cccccc 0.75pt;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt; text-align: left;\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">Apr. 5 2025</span></h5>\r\n</td>\r\n<td style=\"vertical-align: bottom; padding: 2pt 2pt 2pt 2pt; overflow: hidden; overflow-wrap: break-word; border: solid #cccccc 0.75pt;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><a style=\"text-decoration: none;\" href=\"https://lweb.cfa.harvard.edu/sma/\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #1155cc; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: underline; -webkit-text-decoration-skip: none; text-decoration-skip-ink: none; vertical-align: baseline; white-space: pre-wrap;\">Submillimeter Array</span></a><span style=\"font-size: 10pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\"> (SMA)</span></h5>\r\n</td>\r\n</tr>\r\n<tr style=\"height: 18pt; text-align: left;\">\r\n<td style=\"vertical-align: bottom; padding: 2pt 2pt 2pt 2pt; overflow: hidden; overflow-wrap: break-word; border: solid #cccccc 0.75pt;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">May. 3 2025</span></h5>\r\n</td>\r\n<td style=\"vertical-align: bottom; padding: 2pt 2pt 2pt 2pt; overflow: hidden; overflow-wrap: break-word; border: solid #cccccc 0.75pt;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">No KOE, AstroDay takes place at Prince Kuhio Mall</span></h5>\r\n</td>\r\n</tr>\r\n<tr style=\"height: 18pt; text-align: left;\">\r\n<td style=\"vertical-align: bottom; padding: 2pt 2pt 2pt 2pt; overflow: hidden; overflow-wrap: break-word; border: solid #cccccc 0.75pt;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">Jun. 7 2025</span></h5>\r\n</td>\r\n<td style=\"vertical-align: bottom; padding: 2pt 2pt 2pt 2pt; overflow: hidden; overflow-wrap: break-word; border: solid #cccccc 0.75pt;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><a style=\"text-decoration: none;\" href=\"https://www.eaobservatory.org/jcmt/\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #1155cc; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: underline; -webkit-text-decoration-skip: none; text-decoration-skip-ink: none; vertical-align: baseline; white-space: pre-wrap;\">James Clerk Maxwell Telescope</span></a><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\"> (JCMT) *Note that this telescope does not have an elevator and so guests will have to walk flights of stairs at elevation.</span></h5>\r\n</td>\r\n</tr>\r\n<tr style=\"height: 18pt; text-align: left;\">\r\n<td style=\"vertical-align: bottom; background-color: #fff2cc; padding: 2pt 2pt 2pt 2pt; overflow: hidden; overflow-wrap: break-word; border: solid #cccccc 0.75pt;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">Jul. 5 2025</span></h5>\r\n</td>\r\n<td style=\"border-left: solid #cccccc 0.75pt; border-right: solid #000000 0.75pt; border-bottom: solid #cccccc 0.75pt; border-top: solid #cccccc 0.75pt; vertical-align: bottom; padding: 2pt 0pt 2pt 0pt; overflow: hidden; overflow-wrap: break-word;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">TBA</span></h5>\r\n</td>\r\n</tr>\r\n<tr style=\"height: 18pt; text-align: left;\">\r\n<td style=\"vertical-align: bottom; padding: 2pt 2pt 2pt 2pt; overflow: hidden; overflow-wrap: break-word; border: solid #cccccc 0.75pt;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">Aug. 2 2025</span></h5>\r\n</td>\r\n<td style=\"vertical-align: bottom; padding: 2pt 2pt 2pt 2pt; overflow: hidden; overflow-wrap: break-word; border: solid #cccccc 0.75pt;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><a style=\"text-decoration: none;\" href=\"https://www.gemini.edu/\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #1155cc; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: underline; -webkit-text-decoration-skip: none; text-decoration-skip-ink: none; vertical-align: baseline; white-space: pre-wrap;\">International Gemini Observatory</span></a></h5>\r\n</td>\r\n</tr>\r\n<tr style=\"height: 18pt; text-align: left;\">\r\n<td style=\"vertical-align: bottom; padding: 2pt 2pt 2pt 2pt; overflow: hidden; overflow-wrap: break-word; border: solid #cccccc 0.75pt;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">Sept. 6 2025</span></h5>\r\n</td>\r\n<td style=\"vertical-align: bottom; padding: 2pt 2pt 2pt 2pt; overflow: hidden; overflow-wrap: break-word; border: solid #cccccc 0.75pt;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><a style=\"text-decoration: none;\" href=\"https://irtfweb.ifa.hawaii.edu/\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #1155cc; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: underline; -webkit-text-decoration-skip: none; text-decoration-skip-ink: none; vertical-align: baseline; white-space: pre-wrap;\">NASA Infrared Telescope Facility (IRTF)</span></a></h5>\r\n</td>\r\n</tr>\r\n<tr style=\"height: 18pt;\">\r\n<td style=\"vertical-align: bottom; background-color: #fff2cc; padding: 2pt; overflow: hidden; overflow-wrap: break-word; text-align: left; border: 0.75pt solid #cccccc;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt;\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">Oct. 4 2025</span></h5>\r\n</td>\r\n<td style=\"border-left: solid #cccccc 0.75pt; border-right: solid #000000 0.75pt; border-bottom: solid #cccccc 0.75pt; border-top: solid #cccccc 0.75pt; vertical-align: bottom; padding: 2pt 0pt 2pt 0pt; overflow: hidden; overflow-wrap: break-word;\">\r\n<h5 dir=\"ltr\" style=\"line-height: 1.38; margin-top: 0pt; margin-bottom: 0pt; text-align: left;\"><span style=\"font-size: 12pt; font-family: Arial,sans-serif; color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">TBA</span></h5>\r\n</td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n</div>\r\n<p> </p>",
+    "published": false,
+    "required_vehicle_plate": false,
+    "require_age": false,
+    "require_rut_number": false,
+    "require_hawaii_state_id_or_drivers_license_number": true,
+    "key_visual_en": null,
+    "key_visual_es": null,
+    "safety_tech_doc": null,
+    "conduct_tech_doc": null,
+    "liability_tech_doc": null,
+    "photo_release_form": null,
+    "safety_tech_doc_es": null,
+    "conduct_tech_doc_es": null,
+    "liability_tech_doc_es": null,
+    "photo_release_form_es": null,
+    "group_safety_tech_doc": null,
+    "group_liability_tech_doc": null,
+    "group_safety_tech_doc_es": null,
+    "group_liability_tech_doc_es": null,
+    "showing_list_title": null,
+    "showing_list_title_es": null,
+    "group_enable": true,
+    "offered_languages": [
+      "en" 
+    ],
+    "restrictions_and_recommendations": [],
+    "related_activities": []
+  }
+},
+{
+  "model": "visits.language",
+  "pk": "en",
+  "fields": {
+    "name": "English"
+  }
+},
+{
+  "model": "visits.language",
+  "pk": "es",
+  "fields": {
+    "name": "Español"
+  }
+},
+{
+  "model": "visits.showing",
+  "pk": 1,
+  "fields": {
+    "activity": "KOE",
+    "start_time": "2025-04-05T11:00:00",
+    "end_time": "2025-04-05T16:00:00",
+    "private": false,
+    "max_spaces_per_reservation": 1,
+    "total_spaces": 14,
+    "free_spaces": 14,
+    "offered_languages": [
+      "en"
+    ]
+  }
+},
+{
+  "model": "visits.showing",
+  "pk": 2,
+  "fields": {
+    "activity": "KOE",
+    "start_time": "2030-11-06T11:53:42",
+    "end_time": "2030-11-06T12:53:42",
+    "private": false,
+    "max_spaces_per_reservation": 0,
+    "total_spaces": 20,
+    "free_spaces": 20,
+    "offered_languages": [
+      "en"
+    ]
+  }
+},
+{
+  "model": "visits.showing",
+  "pk": 3,
+  "fields": {
+    "activity": "aura-recinto",
+    "start_time": "2025-04-02T06:00:00",
+    "end_time": "2025-04-02T08:00:00",
+    "private": false,
+    "max_spaces_per_reservation": 1,
+    "total_spaces": 20,
+    "free_spaces": 20,
+    "offered_languages": [
+      "en",
+      "es"
+    ]
+  }
+}
+]

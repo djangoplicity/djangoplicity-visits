@@ -153,13 +153,9 @@ class Activity(TranslationModel):
         default=False,
         help_text=_('RUT number required on the reservation form')
     )
-    require_hawaii_state_id = models.BooleanField(
+    require_hawaii_state_id_or_drivers_license_number = models.BooleanField(
         default=False,
-        help_text=_('Hawai’i State ID required on the reservation form')
-    )
-    require_hawaii_drivers_license_number = models.BooleanField(
-        default=False,
-        help_text=_('Hawai’i Drivers License Number required on the reservation form')
+        help_text=_('Hawai’i State ID or Drivers License Number required on the reservation form')
     )
 
     key_visual_en = TranslationForeignKey(Image, blank=True, null=True,
@@ -336,8 +332,14 @@ class Reservation(models.Model):
     rut = models.CharField(_('RUT Number'), max_length=50, blank=True, null=True, default='')
 
     vehicle_plate = models.CharField(_('Vehicle Plate'), max_length=20, blank=True, null=True)
-    hawaii_state_id = models.CharField(_('Hawai’i State ID'), max_length=25, blank=True, null=True)
-    hawaii_drivers_license_number = models.CharField(_('Hawai’i Drivers License Number'), max_length=25, blank=True, null=True)
+    hawaii_state_id_or_drivers_license_number = models.CharField(
+        _('Hawai’i State ID or Drivers License Number'),
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text=_('Hawai’i State ID or Drivers License Number')
+    )
+    zip_code = models.CharField(_('Zip Code'), max_length=20, blank=True, null=True)
 
     accept_safety_form = models.BooleanField(verbose_name=_('Accept Safety Form'), default=False)
     accept_disclaimer_form = models.BooleanField(verbose_name=_('Accept Disclaimer Form'), default=False)

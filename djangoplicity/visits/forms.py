@@ -73,7 +73,7 @@ class ReservationForm(forms.ModelForm):
 
     field_order = ['name', 'phone', 'alternative_phone', 'email',
                    'email_confirm', 'country', 'language', 'vehicle_plate', 'n_spaces',
-                   'rut', 'hawaii_state_id', 'hawaii_drivers_license_number', 
+                   'rut', 'hawaii_state_id_or_drivers_license_number', 'zip_code', 
                    'age_range', 'accept_safety_form', 'accept_disclaimer_form',
                    ]
 
@@ -138,15 +138,25 @@ class ReservationForm(forms.ModelForm):
         else:
             self.fields.pop('rut')
         
-        if self.showing.activity.require_hawaii_state_id:
-            self.fields['hawaii_state_id'].required = True
+        if self.showing.activity.require_hawaii_state_id_or_drivers_license_number:
+            self.fields.pop('country')
         else:
-            self.fields.pop('hawaii_state_id')
-            
-        if self.showing.activity.require_hawaii_drivers_license_number:
-            self.fields['hawaii_drivers_license_number'].required = True
+            self.fields['country'].required = True
+
+        if self.showing.activity.require_hawaii_state_id_or_drivers_license_number:
+            self.fields.pop('language')
         else:
-            self.fields.pop('hawaii_drivers_license_number')
+            self.fields['language'].required = True
+
+        if self.showing.activity.require_hawaii_state_id_or_drivers_license_number:
+            self.fields['hawaii_state_id_or_drivers_license_number'].required = True
+        else:
+            self.fields.pop('hawaii_state_id_or_drivers_license_number')
+
+        if self.showing.activity.require_hawaii_state_id_or_drivers_license_number:
+            self.fields['zip_code']
+        else:
+            self.fields.pop('zip_code')
 
 
         if self.showing.activity.require_age:
