@@ -113,7 +113,7 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
         }),
         ('Registration Settings', {
             'fields': ('latest_reservation_time', 'min_participants', 'max_participants', 'duration', 'required_vehicle_plate',
-                       'require_age', 'require_rut_number', 'require_hawaii_state_id', 'require_hawaii_drivers_license_number', 'group_enable'),
+                       'require_age', 'require_rut_number', 'require_hawaii_state_id_or_drivers_license_number', 'group_enable'),
             'classes': ('collapse',),
         }),
         ('Language and Accessibility', {
@@ -174,7 +174,7 @@ class ReservationResource(resources.ModelResource):
 
 class ReservationAdmin(ImportExportModelAdmin):
     list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'phone', 'n_spaces', 'code',
-                    'rut', 'vehicle_plate', 'hawaii_state_id', 'hawaii_drivers_license_number', 'language', 'created', 'age_range',)
+                    'rut', 'vehicle_plate', 'hawaii_state_id_or_drivers_license_number', 'zip_code', 'language', 'created', 'age_range',)
     list_filter = ('showing__activity', 'showing__start_time', 'created')
     ordering = ['showing__start_time']
     raw_id_fields = ('showing',)
