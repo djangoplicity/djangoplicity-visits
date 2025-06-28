@@ -325,7 +325,7 @@ class Reservation(models.Model):
     alternative_phone = models.CharField(max_length=50, verbose_name=_('Alternative Phone'), blank=True, null=True)
     email = models.EmailField(verbose_name=_('Email'))
     country = models.CharField(max_length=50, verbose_name=_('Country'))
-    language = models.ForeignKey(Language, verbose_name=_('Preferred language'), on_delete=models.RESTRICT)
+    language = models.ForeignKey(Language, verbose_name=_('Preferred language'), on_delete=models.RESTRICT, blank=True, null=True)
     n_spaces = models.SmallIntegerField(verbose_name=_('Number of places'))
     created = models.DateTimeField(default=timezone.now)
     last_modified = models.DateTimeField(default=timezone.now)
