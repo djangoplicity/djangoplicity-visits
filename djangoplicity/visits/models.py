@@ -395,6 +395,15 @@ class Reservation(models.Model):
 
     def save(self, **kwargs):
         self.last_modified = timezone.now()
+        
+        # If language is None, like for forms that doesn't require the language, then assign the default language from settings
+        if self.language is None:
+            # Get or create the default language
+            self.language, created = Language.objects.get_or_create(
+                code=settings.LANGUAGE_CODE,
+                defaults={'name': dict(settings.LANGUAGES).get(settings.LANGUAGE_CODE, settings.LANGUAGE_CODE)}
+            )
+                    
         super(Reservation, self).save(**kwargs)
         transaction.on_commit(self.showing.update_spaces_count)
 
