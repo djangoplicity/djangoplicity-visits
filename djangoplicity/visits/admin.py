@@ -40,7 +40,7 @@ from import_export.widgets import ForeignKeyWidget
 from djangoplicity.contrib import admin as dpadmin
 from django.conf import settings
 from djangoplicity.visits.models import Activity, ActivityProxy, \
-    Language, Reservation, Showing, RestrictionRecommendation, RestrictionRecommendationProxy, GroupReservation
+    Language, Reservation, Showing, RestrictionRecommendation, RestrictionRecommendationProxy, GroupReservation, WaitingListEntry
 from django.utils.translation import gettext_lazy as _
 from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
@@ -63,6 +63,13 @@ def view_online(obj):
 def view_report(obj):
     return format_html('<a href="{}{}" target="_blank">View Report</a>',
                        reverse('visits-showings-reports-detail', args=[obj.id]), CACHE_PARAMETER)
+
+def view_waiting_list_report(obj):
+    return format_html(
+        '<a href="{}{}" target="_blank">View WaitingList Report</a>',
+        reverse('visits-waitinglist-report-detail', args=[obj.id]),
+        CACHE_PARAMETER
+    )
 
 
 class RestrictionRecommendationAdmin(dpadmin.DjangoplicityModelAdmin):
@@ -243,7 +250,7 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     form = ShowingAdminForm
     filter_horizontal = ('offered_languages',)
     list_display = ('activity', 'get_start_time_tz', 'private', 'total_spaces',
-                    'free_spaces', view_online, view_report)
+                    'free_spaces', view_online, view_report, view_waiting_list_report)
     list_filter = ('activity', 'private')
     readonly_fields = ('free_spaces',)
 
@@ -270,6 +277,106 @@ class GroupReservationAdmin(admin.ModelAdmin):
 
     group_detail_link.short_description = _('view group')
 
+class WaitingListEntryResource(resources.ModelResource):
+    showing = fields.Field(
+        column_name='showing',
+        attribute='showing',
+        widget=ForeignKeyWidget(Showing, 'activity__name')
+    )
+    date = fields.Field()
+    time = fields.Field()
+    n_spaces = fields.Field(column_name='n_spaces')
+
+    def dehydrate_date(self, obj):
+        return obj.showing.start_time.strftime('%Y-%m-%d')
+
+    def dehydrate_time(self, obj):
+        if obj.showing.activity.timezone:
+            return '{} {}'.format(
+                obj.showing.start_date_tz.strftime('%I:%M %p'),
+                obj.showing.activity.timezone_abbreviation
+            )
+        else:
+            return obj.showing.start_date_tz.strftime('%I:%M %p %Z')
+
+    def n_spaces(self, obj):
+        return obj.n_spaces
+    class Meta:
+        model = WaitingListEntry
+        fields = (
+            'id', 'showing', 'date', 'time', 'name', 'email', 'phone',
+            'n_spaces', 'created'
+        )
+        export_order = fields
+
+class WaitingListEntryAdmin(ImportExportModelAdmin):
+    list_display = (
+        'email', 'name', 'activity_name', 'showing_date', 'showing_time',
+        'phone', 'n_spaces', 'created'
+    )
+    list_filter = ('showing__activity', 'showing__start_time', 'created')
+    ordering = ['showing__start_time']
+    raw_id_fields = ('showing',)
+    date_hierarchy = 'showing__start_time'
+    readonly_fields = ('created',)
+    search_fields = ('email', 'name', 'phone')
+    list_select_related = ('showing', 'showing__activity')
+    resource_class = WaitingListEntryResource
+
+    def showing_date(self, obj):
+        return obj.showing.start_time.strftime('%Y-%m-%d')
+    showing_date.short_description = _('Showing Date')
+
+    def showing_time(self, obj):
+        if obj.showing.activity.timezone:
+            return '{} {}'.format(
+                obj.showing.start_date_tz.strftime('%I:%M %p'),
+                obj.showing.activity.timezone_abbreviation
+            )
+        else:
+            return obj.showing.start_date_tz.strftime('%I:%M %p %Z')
+    showing_time.short_description = _('Showing Time')
+
+    def activity_name(self, obj):
+        return obj.showing.activity.name
+    activity_name.short_description = _('Activity Name')
+
+
+
+    list_display = (
+        'email', 'name', 'activity_name', 'showing_date', 'showing_time',
+        'phone', 'created'
+    )
+    list_filter = ('showing__activity', 'showing__start_time', 'created')
+    ordering = ['showing__start_time']
+    raw_id_fields = ('showing',)
+    date_hierarchy = 'showing__start_time'
+    readonly_fields = ('created',)
+    search_fields = ('email', 'name', 'phone')
+    list_select_related = ('showing', 'showing__activity')
+    resource_class = WaitingListEntryResource
+
+    def showing_date(self, obj):
+        return obj.showing.start_time.strftime('%Y-%m-%d')
+    showing_date.short_description = _('Showing Date')
+
+    def showing_time(self, obj):
+        if obj.showing.activity.timezone:
+            return '{} {}'.format(
+                obj.showing.start_date_tz.strftime('%I:%M %p'),
+                obj.showing.activity.timezone_abbreviation
+            )
+        else:
+            return obj.showing.start_date_tz.strftime('%I:%M %p %Z')
+    showing_time.short_description = _('Showing Time')
+
+    def activity_name(self, obj):
+        return obj.showing.activity.name
+    activity_name.short_description = _('Activity Name')
+
+    def n_space(self, obj):
+        return obj.n_spaces
+    n_space.short_description = _('N Spaces')
 
 def register_with_admin(admin_site):
     admin_site.register(GroupReservation, GroupReservationAdmin)
@@ -280,6 +387,7 @@ def register_with_admin(admin_site):
     admin_site.register(Showing, ShowingAdmin)
     admin_site.register(RestrictionRecommendation, RestrictionRecommendationAdmin)
     admin_site.register(RestrictionRecommendationProxy, RestrictionRecommendationProxyAdmin)
+    admin_site.register(WaitingListEntry, WaitingListEntryAdmin, )
 
 
 register_with_admin(admin.site)

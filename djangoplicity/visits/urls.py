@@ -37,6 +37,7 @@ from djangoplicity.visits.views import (
     ReservationCreateView, ReservationDeleteView, ReservationConfirmView,
     ReservationDeleteConfirmView, ReservationUpdateView, ShowingListView,
     ShowingReportDetailView, ShowingReportListView, ReservationCancelView, GroupReservationCreateUpdateView,
+    WaitingListEntryCreateView, WaitingListEntryConfirmView, WaitingListReportDetailView, ConvertWaitingListEntryView
 )
 
 urlpatterns = [
@@ -63,4 +64,13 @@ urlpatterns = [
         name='group-registration-update'),
     url(r'^(?P<pk>[-\w]+)/$', ShowingListView.as_view(),
         name='visits-showings-list'),
+    url(r'^waitinglist/(?P<showingpk>[-\w]+)/$', WaitingListEntryCreateView.as_view(),
+        name='visits-waitinglist-create'),
+    url(r'^waitinglistentry/confirm/$', WaitingListEntryConfirmView.as_view(),
+        name='visits-waitinglist-confirm'),
+    url(r'^waitinglist-report/(?P<showingpk>[-\w]+)/$', login_required(WaitingListReportDetailView.as_view()),
+        name='visits-waitinglist-report-detail'
+    ),
+    url(r'^waitinglist/convert/(?P<pk>\d+)/$', ConvertWaitingListEntryView.as_view(),
+        name='visits-waitinglist-convert'),
 ]

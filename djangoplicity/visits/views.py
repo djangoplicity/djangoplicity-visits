@@ -32,23 +32,30 @@
 from datetime import datetime, timedelta
 
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone, translation
 from django.views.generic import (
-    CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
+    CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView, View
 )
-from djangoplicity.visits.forms import ReservationForm, GroupReservationForm
-from djangoplicity.visits.models import Activity, Reservation, Showing, GroupReservation
+from djangoplicity.visits.forms import ReservationForm, GroupReservationForm, WaitingListForm
+from djangoplicity.visits.models import Activity, Reservation, Showing, GroupReservation, WaitingListEntry
 from djangoplicity.translation.models import translation_reverse
 
 
 class ReservationCreateView(CreateView):
     model = Reservation
     form_class = ReservationForm
+
+
+    def dispatch(self, request, *args, **kwargs):
+        showing = self.get_showing()
+        if showing.free_spaces == 0:
+            return redirect('visits-waitinglist-create', showingpk=showing.pk)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(ReservationCreateView, self).get_context_data(**kwargs)
@@ -317,3 +324,99 @@ class GroupReservationCreateUpdateView(UpdateView):
         return reverse('group-registration-update',
                        args=[self.object.code])
 
+class WaitingListEntryCreateView(CreateView):
+    """
+     View to allow users to register on the waiting list
+     when reservations for a `Showing` are full.
+    """
+    model = WaitingListEntry
+    form_class = WaitingListForm
+    template_name = 'visits/waitinglist_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.showing = self.get_showing()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_showing(self):
+        try:
+            return Showing.objects.get(pk=self.kwargs['showingpk'])
+        except (Showing.DoesNotExist, ValueError):
+            raise Http404("No showing found.")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['showing'] = self.showing
+        context['activity'] = self.showing.get_activity()
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['showing'] = self.showing
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.showing = self.showing
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('visits-waitinglist-confirm')
+
+class WaitingListEntryConfirmView(TemplateView):
+    template_name = 'visits/waitinglist_confirm.html'
+
+class WaitingListReportDetailView(TemplateView):
+    template_name = "visits/waitinglist_report_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        showing = get_object_or_404(Showing, pk=self.kwargs['showingpk'])
+        context['showing'] = showing
+        context['waiting_list'] = WaitingListEntry.objects.filter(showing=showing)
+        context['max_waiting_capacity'] = showing.free_spaces
+        return context
+
+class ConvertWaitingListEntryView(View):
+    def post(self, request, *args, **kwargs):
+        entry = get_object_or_404(WaitingListEntry, pk=kwargs['pk'])
+        showing = entry.showing
+
+        # Validate whether a reservation already exists with that email address.
+        if Reservation.objects.filter(email=entry.email, showing=showing).exists():
+            messages.warning(request, "This person is already registered as a reservation.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+
+        # Check if there are places available
+        if showing.reservation_set.count() >= showing.total_spaces:
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+
+        # Move to Reservation
+        Reservation.objects.create(
+            showing=entry.showing,
+            name=entry.name,
+            email=entry.email,
+            phone=entry.phone,
+            alternative_phone=entry.alternative_phone,
+            country=entry.country,
+            language=entry.language,
+            n_spaces=entry.n_spaces,
+            created=timezone.now(),
+            last_modified=timezone.now(),
+
+
+            code='',
+            rut='',
+            vehicle_plate='',
+            hawaii_state_id_or_drivers_license_number='',
+            zip_code='',
+
+            accept_safety_form=False,
+            accept_disclaimer_form=False,
+            accept_conduct_form=False,
+            accept_photo_release_form=False,
+        )
+
+        # Remove from waiting list
+        entry.delete()
+
+        messages.success(request, "Entry has been moved from the waiting list to reservations.")
+        return redirect(request.META.get('HTTP_REFERER', '/'))

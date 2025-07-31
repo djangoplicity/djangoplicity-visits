@@ -579,6 +579,30 @@ class Showing(models.Model):
         ordering = ('-start_time',)
 
 
+# This model represents an entry in the waiting list for an event (showing).
+# It is used when the maximum capacity of the event has already been reached, allowing to record
+# information of people interested in attending if a space becomes available. The data collected
+# are similar to those of a reservation, but do not guarantee a place. This list can be consulted
+# later by the staff in charge to manually contact those interested.
+class WaitingListEntry(models.Model):
+    showing = models.ForeignKey('Showing', on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, verbose_name=_('Full name'))
+    email = models.EmailField(verbose_name=_('Email'))
+    phone = models.CharField(max_length=50, verbose_name=_('Phone'))
+    alternative_phone = models.CharField(max_length=50, verbose_name=_('Alternative Phone'), blank=True, null=True)
+    n_spaces = models.SmallIntegerField(verbose_name=_('Number of places'))
+    language = models.ForeignKey(Language, verbose_name=_('Preferred language'), on_delete=models.RESTRICT, blank=True, null=True)
+    country = models.CharField(max_length=2, verbose_name=_('Country'))
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created']
+        unique_together = ('showing', 'email')
+
+    def __str__(self):
+        return f"{self.name} - {self.showing}"
+
+
 class GroupReservation(models.Model):
     code = models.CharField(max_length=50, blank=True)
     name = models.CharField(max_length=100, verbose_name=_('Name'))

@@ -29,12 +29,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE
 
+from django.db.models import Sum
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.conf import Settings, settings
-from djangoplicity.visits.models import Reservation, GroupReservation, Activity, Showing
+from djangoplicity.visits.models import Reservation, GroupReservation, Activity, Showing, WaitingListEntry
 
 NOT_HAS_SYMPTOMS_LABEL = _("I declare that no one in my group has tested positive for COVID-19 or had any symptoms in "
                            "the last 10 days: "
@@ -294,3 +295,66 @@ class GroupReservationForm(forms.ModelForm):
             raise forms.ValidationError(_('Email and Confirmation Email do not match.'))
         return email_confirm
 
+
+class WaitingListForm(forms.ModelForm):
+    class Meta:
+        model = WaitingListEntry
+        fields = (
+            'name',
+            'email',
+            'phone',
+            'alternative_phone',
+            'n_spaces',
+            'language',
+            'country',
+        )
+        field_order = [
+            'name', 'phone', 'alternative_phone', 'email',
+            'country', 'language', 'n_spaces',
+            'subscribe_checkbox', 'not_has_tested_positive_for_covid'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.showing = kwargs.pop('showing', None)
+        super().__init__(*args, **kwargs)
+
+        if not self.showing:
+            raise ValueError("Missing required 'showing' argument for WaitingListForm.")
+
+        if getattr(settings, 'VISITS_COVID_CONDITIONS', False):
+            self.fields['not_has_tested_positive_for_covid'] = forms.BooleanField(
+                label=NOT_HAS_SYMPTOMS_LABEL,
+                required=False,
+                widget=forms.CheckboxInput(attrs={'class': 'acceptConditions covid'})
+            )
+
+        if getattr(settings, 'DISPLAY_VISITS_SUBSCRIBE_CHECKOUT', True):
+            self.fields['subscribe_checkbox'] = forms.BooleanField(
+                label=SUBSCRIBE_CHECKBOX_LABEL,
+                required=False,
+                widget=forms.CheckboxInput()
+            )
+
+        # Crispy Forms helper
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form-horizontal'
+        self.helper.label_class = 'col-lg-3'
+        self.helper.field_class = 'col-lg-9'
+        self.helper.add_input(Submit('submit', _('Join the Waiting List')))
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if not self.showing:
+            raise forms.ValidationError("Missing showing context.")
+
+        waiting_count = WaitingListEntry.objects.filter(showing=self.showing).aggregate(
+            total=Sum('n_spaces'))['total'] or 0
+
+        max_waiting = int(self.showing.total_spaces * 0.5)
+
+        if waiting_count + cleaned_data.get('n_spaces', 1) > max_waiting:
+            raise forms.ValidationError(_("Waiting list is full for this showing."))
+
+        return cleaned_data

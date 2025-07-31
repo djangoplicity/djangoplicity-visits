@@ -1,0 +1,92 @@
+{% extends "visits/visits-base.html" %}
+{% load i18n crispy_forms_tags static %}
+
+{% block site_title %}NOIRLab - {{ activity }} {% trans 'Waiting List' %}{% endblock %}
+
+{% block content %}
+<h1>{{ activity }}</h1><hr>
+
+<div class="row activity-banner p-2">
+  <div class="col-12 col-sm-4 activity-image p-0"></div>
+  <div class="col-12 col-sm-8" style="height: 100%">
+    <div class="activity-details h-100">
+        {% if perms.visits.change_showing %}
+        <div class="d-flex justify-content-end">
+            <a class="btn btn-link pull-right" href="{% url 'admin_site:visits_showing_change' showing.pk %}" role="button">{% trans 'Edit' %}</a>
+        </div>
+        {% endif %}
+        {% if activity.timezone %}
+            <p><strong>{% trans 'Date/Time' %}:</strong> {{ showing.start_date_tz|date:"l j M Y, H:i a" }} {{ activity.timezone_abbreviation }}</p>
+        {% else %}
+            <p><strong>{% trans 'Date/Time' %}:</strong> {{ showing.start_date_tz|date:"l j M Y, H:i a T" }}</p>
+        {% endif %}
+        <p><strong>{% trans 'Location' %}:</strong> {{ activity.observatory }}</p>
+        <p><strong>{% trans 'Meeting point' %}:</strong> {{ activity.meeting_point }}</p>
+        <p><strong>{% trans 'Duration' %}:</strong> {{ activity.duration }}</p>
+        <p><strong>{% trans 'Available places' %}:</strong> {{ showing.free_spaces }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+    <div class="activity-icon-list">
+        {% for item in activity.restrictions_and_recommendations.all %}
+            <div class="d-flex flex-column justify-content-center" style="width: 15%; padding: 10px 0">
+                <div class="activity-icons d-flex justify-content-center flex-column">
+                    {% if LANGUAGE_CODE == 'es' %}
+                        {% with item_translate=item.translations.first %}
+                            <img data-toggle="tooltip" title="{{ item_translate.caption }}"
+                                 src="https://noirlab.edu{{STATIC_URL}}/icons/{{ item_translate.icon_name }}"
+                                 alt="{{ item_translate.caption }}">
+                            <div class="text-center">{{ item_translate.caption }}</div>
+                        {% endwith %}
+                    {% else %}
+                        <img data-toggle="tooltip" title="{{ item.caption }}"
+                             src="https://noirlab.edu{{STATIC_URL}}/icons/{{ item.icon_name }}"
+                             alt="{{ item.caption }}">
+                        <div class="text-center">{{ item.caption }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="col-sm-12">
+    <div class="alert alert-info">
+        <h2>{% trans "This showing is currently fully booked. Please fill out the form below to join the waiting list. We will contact you if spots become available." %}</h2>
+    </div>
+
+    <h3>{% trans 'Join the Waiting List' %}</h3>
+    <hr>
+    <form method="post" class="form-horizontal">
+        {% csrf_token %}
+        {% crispy form %}
+    </form>
+
+    <hr>
+    <h3>{% trans 'Other tours' %}:</h3>
+    <ul class="list-group">
+        {% for other in other_showings %}
+            {% if showing != other %}
+                {% ifchanged other.start_time.month %}<hr><h4>{{ other.start_time|date:"F Y" }}</h4>{% endifchanged %}
+                <a class="list-group-item" href="{% url 'visits-reservation-create' other.pk %}">
+                    {% if activity.timezone %}
+                        {{ other.start_date_tz|date:"l j M Y, H:i a" }} {{ activity.timezone_abbreviation }}
+                    {% else %}
+                        {{ other.start_date_tz|date:"l j M Y, H:i a T" }}
+                    {% endif %}
+                    <span class="badge">
+                        {% if other.free_spaces <= 0 %}
+                            {% trans 'Fully booked' %}
+                        {% else %}
+                            {% trans 'Available places' %}: {{ other.free_spaces }}
+                        {% endif %}
+                    </span>
+                </a>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+

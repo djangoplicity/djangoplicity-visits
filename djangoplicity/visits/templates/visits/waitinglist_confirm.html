@@ -1,0 +1,15 @@
+{% extends "visits/visits-base.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load transurl from djangoplicity_translation %}
+
+{% block content %}
+<div class="row">
+    <hr>
+    <div class="alert alert-info" role="alert">
+        <h2>{% trans 'You have been added to the waiting list. We will contact you at if a spot becomes available.' %}</h2>
+        <hr>
+        <a href="/public/about/visitors/">{% trans 'Back to visits page' %}</a>
+    </div>
+</div>
+{% endblock %}
