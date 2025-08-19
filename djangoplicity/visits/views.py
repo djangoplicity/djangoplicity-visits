@@ -163,8 +163,14 @@ class ReservationDeleteView(DeleteView):
     slug_field = 'code'
     #  success_url = '/public/weekend-visits/reservation-cancelled/'
 
+    def delete(self, request, *args, **kwargs):
+
+        self.send_email_reservation_cancel(request, *args, **kwargs)
+        return super().delete(request, *args, **kwargs)
+
     def send_email_reservation_cancel(self, request, *args, **kwargs):
         self.object = self.get_object()
+        activity = self.object.showing.activity
 
         # Send email to the visits team
         try:
@@ -179,20 +185,22 @@ class ReservationDeleteView(DeleteView):
                 f"Number of spaces: {self.object.n_spaces}\n"
                 f"Showing date: {self.object.showing.start_time.strftime('%Y-%m-%d %H:%M')}\n"
             )
-            send_mail(
-                subject,
-                message,
-                settings.EMAIL_HOST_USER,
-                [settings.VISITS_DEFAULT_FROM_EMAIL],
-                fail_silently=False
-            )
+            recipients = activity.get_contact_emails()
+
+            if recipients:  # Only send if there are emails configured
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    recipients,
+                    fail_silently=False
+                )
 
         except BadHeaderError:
             logger.error("Invalid header found when sending visit team email.")
         except Exception as e:
             logger.error(f"Error sending email to the visits team: {e}")
 
-        return super().delete(request, *args, **kwargs)
 
     def get_success_url(self, **kwargs):
         self.object.send_deleted_email()
