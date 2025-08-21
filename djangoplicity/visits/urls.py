@@ -37,6 +37,7 @@ from djangoplicity.visits.views import (
     ReservationCreateView, ReservationDeleteView, ReservationConfirmView,
     ReservationDeleteConfirmView, ReservationUpdateView, ShowingListView,
     ShowingReportDetailView, ShowingReportListView, ReservationCancelView, GroupReservationCreateUpdateView,
+    ShowingWaitingListReportDetailView,
 )
 
 urlpatterns = [
@@ -45,6 +46,9 @@ urlpatterns = [
     url(r'^reports/(?P<pk>[-\w]+)/$', login_required(
         ShowingReportDetailView.as_view()),
         name='visits-showings-reports-detail'),
+    url(r'^reports/waiting-list/(?P<pk>[-\w]+)/$', login_required(
+        ShowingWaitingListReportDetailView.as_view()),
+        name='visits-showings-waiting-list-report'),
     url(r'^delete/(?P<code>[-\w]+)/$', ReservationDeleteView.as_view(),
         name='visits-reservation-delete'),
     url(r'^confirmed/(?P<code>[-\w]+)/$', ReservationConfirmView.as_view(),

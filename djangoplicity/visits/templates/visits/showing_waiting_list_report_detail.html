@@ -4,7 +4,7 @@
 {% block content %}
     <div class="row">
         <div class="page-header">
-            <h1>{% trans 'Public Visits Reports' %}</h1>
+            <h1>{% trans 'Public Visits Waiting List Report' %}</h1>
         </div>
         <h2>Showing: {{ showing }}</h2>
         <table class="table table-striped">
@@ -22,7 +22,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for r in reservations  %}
+                {% for r in waiting_list %}
                 <tr>
                     <td>{{ r.name }}</td>
                     <td>{{ r.email }}</td>

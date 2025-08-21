@@ -352,6 +352,8 @@ class Reservation(models.Model):
         default='Unknown',
     )
 
+    is_waiting_list = models.BooleanField(default=False, verbose_name=_('Waiting List'))
+
     def __str__(self):
         return '{}, {} ({} spaces)'.format(self.email, self.showing,
                                            self.n_spaces)
@@ -403,9 +405,29 @@ class Reservation(models.Model):
                 code=settings.LANGUAGE_CODE,
                 defaults={'name': dict(settings.LANGUAGES).get(settings.LANGUAGE_CODE, settings.LANGUAGE_CODE)}
             )
-                    
+
+        # Save previous value of is_waiting_list (if it already exists in DB)
+        old = None
+        if self.pk:
+            old = Reservation.objects.filter(pk=self.pk).first()
+
+        # --- Waiting list logic ---S
+        total_spaces = self.showing.total_spaces
+
+        confirmed = self.showing.reservation_set.filter(is_waiting_list=False) \
+                        .aggregate(Sum('n_spaces'))['n_spaces__sum'] or 0
+
+        if old and not old.is_waiting_list:
+            confirmed -= old.n_spaces
+
+        self.is_waiting_list = (confirmed + self.n_spaces) > total_spaces
+
         super(Reservation, self).save(**kwargs)
         transaction.on_commit(self.showing.update_spaces_count)
+
+        # --- Email sent when the waiting list is changed to confirmed ---
+        if old and old.is_waiting_list and not self.is_waiting_list:
+            self.send_confirmation_email()
 
     def get_context(self):
         return {
@@ -417,6 +439,9 @@ class Reservation(models.Model):
         }
 
     def send_confirmation_email(self):
+        if self.is_waiting_list:
+            return
+
         template = loader.get_template('visits/emails/reservation-confirm.html')
         translation.activate(self.language.code)
 
@@ -439,6 +464,9 @@ class Reservation(models.Model):
         translation.deactivate()
 
     def send_reminder_email(self):
+        if self.is_waiting_list:
+            return
+
         template = loader.get_template('visits/emails/reservation-reminder.html')
 
         translation.activate(self.language.code)
@@ -567,7 +595,7 @@ class Showing(models.Model):
         '''
         Update the number of free_seats, called in Reservation.save()
         '''
-        reserved_spaces = self.reservation_set.aggregate(
+        reserved_spaces = self.reservation_set.filter(is_waiting_list=False).aggregate(
             Sum('n_spaces')
         )['n_spaces__sum'] or 0
         free_spaces = self.total_spaces - reserved_spaces
