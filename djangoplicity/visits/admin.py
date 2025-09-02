@@ -99,7 +99,8 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
             'fields': ('id', 'name', 'title', 'description', 'slogan')
         }),
         ('Details', {
-            'fields': ('observatory', 'meeting_point', 'meeting_point_link', 'map_url', 'travel_info_url', 'timezone')
+            'fields': ('observatory', 'meeting_point', 'meeting_point_link', 'map_url', 'travel_info_url', 'timezone',
+                       'contact_emails_notify')
         }),
         ('Individual Mandatory Agreement Documents', {
             'fields': ('key_visual_en', 'key_visual_es', 'safety_tech_doc', 'conduct_tech_doc', 'liability_tech_doc',

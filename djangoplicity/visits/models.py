@@ -247,6 +247,11 @@ class Activity(TranslationModel):
         help_text=_('Enable in group registration')
     )
 
+    contact_emails_notify = models.TextField(
+        "Contact Emails To Notify About Reservations Updates",
+        blank=True,
+        help_text="Comma-separated list of emails to notify about reservations updates."
+    )
     @property
     def timezone_abbreviation(self):
         timezone_name = self.timezone if self.timezone else settings.TIME_ZONE
@@ -276,6 +281,16 @@ class Activity(TranslationModel):
     def get_absolute_url(self):
         return translation_reverse('visits-showings-list', args=[str(self.id if self.is_source() else self.source.id)],
                                    lang=self.lang)
+
+    def get_contact_emails(self):
+        """
+            Returns a list of contact emails configured for this activity.
+            The emails are expected to be stored as a comma-separated string.
+        """
+
+        if not self.contact_emails_notify:
+            return []
+        return [email.strip() for email in self.contact_emails_notify.split(",") if email.strip()]
 
 
 class ActivityProxy(Activity, TranslationProxyMixin):

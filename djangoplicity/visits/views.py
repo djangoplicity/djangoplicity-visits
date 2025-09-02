@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE
-
+import logging
 from datetime import datetime, timedelta
 
 from django.contrib import messages
@@ -44,7 +44,9 @@ from django.views.generic import (
 from djangoplicity.visits.forms import ReservationForm, GroupReservationForm
 from djangoplicity.visits.models import Activity, Reservation, Showing, GroupReservation
 from djangoplicity.translation.models import translation_reverse
+from django.core.mail import send_mail, BadHeaderError
 
+logger = logging.getLogger(__name__)
 
 class ReservationCreateView(CreateView):
     model = Reservation
@@ -161,6 +163,45 @@ class ReservationDeleteView(DeleteView):
     slug_field = 'code'
     #  success_url = '/public/weekend-visits/reservation-cancelled/'
 
+    def delete(self, request, *args, **kwargs):
+
+        self.send_email_reservation_cancel(request, *args, **kwargs)
+        return super().delete(request, *args, **kwargs)
+
+    def send_email_reservation_cancel(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        activity = self.object.showing.activity
+
+        # Send email to the visits team
+        try:
+            subject = f"Reservation Cancelled - {self.object.showing.activity.name}"
+            message = (
+                f"The reservation for {self.object.name} "
+                f"on {self.object.showing.activity.name} has been cancelled.\n\n"
+                f"Reservation details:\n"
+                f"Name: {self.object.name}\n"
+                f"Email: {self.object.email}\n"
+                f"Phone: {self.object.phone}\n"
+                f"Number of spaces: {self.object.n_spaces}\n"
+                f"Showing date: {self.object.showing.start_time.strftime('%Y-%m-%d %H:%M')}\n"
+            )
+            recipients = activity.get_contact_emails()
+
+            if recipients:  # Only send if there are emails configured
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    recipients,
+                    fail_silently=False
+                )
+
+        except BadHeaderError:
+            logger.error("Invalid header found when sending visit team email.")
+        except Exception as e:
+            logger.error(f"Error sending email to the visits team: {e}")
+
+
     def get_success_url(self, **kwargs):
         self.object.send_deleted_email()
         #  return reverse('visits-reservation-delete-confirm')
@@ -213,7 +254,6 @@ class ReservationCancelView(ReservationUpdateView):
         context = super(ReservationCancelView, self).get_context_data(**kwargs)
         context['cancel'] = True
         return context
-
 
 class ShowingListView(ListView):
     model = Showing
