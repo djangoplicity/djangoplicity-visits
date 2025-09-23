@@ -61,8 +61,13 @@ def view_online(obj):
 
 
 def view_report(obj):
-    return format_html('<a href="{}{}" target="_blank">View Report</a>',
-                       reverse('visits-showings-reports-detail', args=[obj.id]), CACHE_PARAMETER)
+    return format_html(
+        '<a href="{}{}" target="_blank">View Report</a> | '
+        '<a href="{}" target="_blank">Waiting List</a>',
+        reverse('visits-showings-reports-detail', args=[obj.id]),
+        CACHE_PARAMETER,
+        reverse('visits-showings-waiting-list-report', args=[obj.id])
+    )
 
 
 class RestrictionRecommendationAdmin(dpadmin.DjangoplicityModelAdmin):

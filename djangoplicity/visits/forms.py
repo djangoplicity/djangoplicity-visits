@@ -31,6 +31,7 @@
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+from django.db.models import Sum
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.conf import Settings, settings
@@ -56,6 +57,7 @@ SUBSCRIBE_CHECKBOX_LABEL = _('Subscribe to news from our observatories')
 class ReservationForm(forms.ModelForm):
 
     email_confirm = forms.EmailField(label=_('Confirm Email'))
+    waiting_list_message = None
 
     if getattr(settings, 'VISITS_COVID_CONDITIONS', False):
         not_has_tested_positive_for_covid = forms.BooleanField(
@@ -82,7 +84,7 @@ class ReservationForm(forms.ModelForm):
 
     class Meta:
         model = Reservation
-        exclude = ['code', 'created', 'last_modified']
+        exclude = ['code', 'created', 'last_modified', 'is_waiting_list']
 
     def __init__(self, *args, **kwargs):
         self.showing = kwargs.pop('showing', None)
@@ -222,24 +224,37 @@ class ReservationForm(forms.ModelForm):
 
     def clean_n_spaces(self):
         n_spaces = self.cleaned_data['n_spaces']
+        free_spaces = self.showing.free_spaces
 
         if n_spaces > self.showing.max_spaces_per_reservation:
-            raise forms.ValidationError(_('The maximum number of spaces per person is '
-                                          '({max_spaces_per_reservation}).').format(
-                max_spaces_per_reservation=self.showing.max_spaces_per_reservation))
+            raise forms.ValidationError(
+                _('The maximum number of spaces per person is '
+                  '({max_spaces_per_reservation}).').format(
+                    max_spaces_per_reservation=self.showing.max_spaces_per_reservation
+                )
+            )
 
-        if self.instance.pk:
-            # Updating existing reservation
-            if self.showing.free_spaces + self.instance.n_spaces - n_spaces < 0:
-                raise forms.ValidationError(_('Only {number} spaces are '
-                    'currently available').format(
-                        number=self.instance.n_spaces))
-        else:
-            # Making new reservation
-            if n_spaces > self.showing.free_spaces:
-                raise forms.ValidationError(_('Only {number} spaces are '
-                    'currently available').format(
-                        number=self.showing.free_spaces))
+        if n_spaces <= free_spaces:
+            self.instance.is_waiting_list = False
+            return n_spaces
+
+        current_reserved = (
+            self.showing.reservation_set.aggregate(Sum("n_spaces"))["n_spaces__sum"] or 0
+        )
+        max_with_waiting = self.showing.total_spaces + int(self.showing.total_spaces * 0.5)
+
+        if current_reserved + n_spaces > max_with_waiting:
+            raise forms.ValidationError(
+                _("The waiting list is already full (max {max} seats).").format(
+                    max=max_with_waiting
+                )
+            )
+
+        self.instance.is_waiting_list = True
+        self.waiting_list_message = _(
+            "⚠️ This is not a confirmed reservation. "
+            "You will be added to the waiting list and contacted if a spot becomes available."
+        )
 
         return n_spaces
 

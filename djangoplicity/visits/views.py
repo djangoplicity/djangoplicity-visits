@@ -41,6 +41,7 @@ from django.utils import timezone, translation
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 )
+from django.db.models import Sum
 from djangoplicity.visits.forms import ReservationForm, GroupReservationForm
 from djangoplicity.visits.models import Activity, Reservation, Showing, GroupReservation
 from djangoplicity.translation.models import translation_reverse
@@ -74,6 +75,13 @@ class ReservationCreateView(CreateView):
 
         # Determine if it's too late to make a reservation
         context['too_late'] = (latest_reservation_time < showing_now)
+
+        # --- waiting list logic ---
+        max_with_waiting = showing.total_spaces + int(showing.total_spaces * 0.5)
+        current_reservations = (
+            showing.reservation_set.aggregate(Sum("n_spaces"))["n_spaces__sum"] or 0
+        )
+        context["waiting_list_full"] = current_reservations >= max_with_waiting
 
         return context
 
@@ -311,6 +319,23 @@ class ShowingReportDetailView(DetailView):
     model = Showing
     template_name = 'visits/showing_report_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        showing = self.get_object()
+        context['reservations'] = showing.reservation_set.filter(is_waiting_list=False).order_by('created')
+
+        return context
+
+
+class ShowingWaitingListReportDetailView(DetailView):
+    model = Showing
+    template_name = 'visits/showing_waiting_list_report_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        showing = self.get_object()
+        context['waiting_list'] = showing.reservation_set.filter(is_waiting_list=True).order_by('created')
+        return context
 
 class ShowingReportListView(ListView):
     model = Showing

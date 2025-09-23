@@ -26,18 +26,23 @@
                 <div class="alert alert-warning">
                     {% blocktrans with limit=activity.latest_reservation_time %}Reservations can only be made until Friday 13:00 before the weekend of the visit.{% endblocktrans %}
                 </div>
-            {% elif showing.free_spaces <= 0 %}
+            {% elif waiting_list_full %}
                 <div class="alert alert-warning">
                     {% trans 'This showing is already fully booked' %}
                 </div>
             {% else %}
+                {% if showing.free_spaces <= 0 %}
+                    <div class="alert alert-info">
+                        {% trans 'This showing is fully booked. If you continue, your reservation will be added to the waiting list.' %}
+                    </div>
+                {% endif %}
                 <h3>{% trans 'Make a reservation' %}</h3>
                 <hr>
                 <form method="post" class="form-horizontal">
                     {% crispy form  %}
                 </form>
             {% endif %}
-            <hr>            
+            <hr>
             <h3>{% trans 'Other showings' %}:</h3>
             <ul class="list-group">
                 {% for other in other_showings %}
