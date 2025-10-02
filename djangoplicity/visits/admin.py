@@ -179,7 +179,7 @@ class ReservationResource(resources.ModelResource):
 
 
 class ReservationAdmin(ImportExportModelAdmin):
-    list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'phone', 'n_spaces', 'code',
+    list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'is_waiting_list', 'phone', 'n_spaces', 'code',
                     'rut', 'vehicle_plate', 'hawaii_state_id_or_drivers_license_number', 'zip_code', 'language', 'created', 'age_range',)
     list_filter = ('showing__activity', 'showing__start_time', 'created', 'is_waiting_list')
     ordering = ['showing__start_time']
