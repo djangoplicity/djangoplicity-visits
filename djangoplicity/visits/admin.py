@@ -179,9 +179,9 @@ class ReservationResource(resources.ModelResource):
 
 
 class ReservationAdmin(ImportExportModelAdmin):
-    list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'phone', 'n_spaces', 'code',
+    list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'is_waiting_list', 'phone', 'n_spaces', 'code',
                     'rut', 'vehicle_plate', 'hawaii_state_id_or_drivers_license_number', 'zip_code', 'language', 'created', 'age_range',)
-    list_filter = ('showing__activity', 'showing__start_time', 'created')
+    list_filter = ('showing__activity', 'showing__start_time', 'created', 'is_waiting_list')
     ordering = ['showing__start_time']
     raw_id_fields = ('showing',)
     date_hierarchy = 'showing__start_time'
@@ -189,6 +189,15 @@ class ReservationAdmin(ImportExportModelAdmin):
     search_fields = ('email', 'name')
     list_select_related = ('showing', 'language')
     resource_class = ReservationResource
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+
+        # Check if the admin applied the is_waiting_list filter
+        if "is_waiting_list__exact" not in request.GET:
+            # By default, hide waiting list reservations
+            qs = qs.filter(is_waiting_list=False)
+        return qs
 
     def showing_date(self, obj):
         return obj.showing.start_time.strftime('%Y-%m-%d'),

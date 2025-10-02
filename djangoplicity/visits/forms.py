@@ -234,10 +234,36 @@ class ReservationForm(forms.ModelForm):
                 )
             )
 
+        # Updating an existing reservation
+        if self.instance.pk:
+            old = Reservation.objects.filter(pk=self.instance.pk).first()
+
+            if old and not old.is_waiting_list:
+                # If user reduces or keeps same seats, always allowed
+                if n_spaces <= old.n_spaces:
+                    self.instance.is_waiting_list = False
+                    return n_spaces
+
+                # If user increases seats, must check real availability
+                if n_spaces - old.n_spaces <= free_spaces:
+                    self.instance.is_waiting_list = False
+                    return n_spaces
+
+                # No enough free seats, show clear error
+                raise forms.ValidationError(
+                    _("This exhibition is already fully booked, so we cannot increase the seats in your reservation. "
+                      "If you need more seats, you can create a new reservation, but it will be added to the waiting list in case spots become available.")
+                )
+
+        # Creating a new reservation
         if n_spaces <= free_spaces:
             self.instance.is_waiting_list = False
             return n_spaces
 
+        # Otherwise → try waiting list
+        return self._validate_waiting_list(n_spaces)
+
+    def _validate_waiting_list(self, n_spaces):
         current_reserved = (
             self.showing.reservation_set.aggregate(Sum("n_spaces"))["n_spaces__sum"] or 0
         )
@@ -255,7 +281,6 @@ class ReservationForm(forms.ModelForm):
             "⚠️ This is not a confirmed reservation. "
             "You will be added to the waiting list and contacted if a spot becomes available."
         )
-
         return n_spaces
 
 
