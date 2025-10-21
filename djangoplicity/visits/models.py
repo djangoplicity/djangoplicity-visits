@@ -411,6 +411,7 @@ class Reservation(models.Model):
         return reverse('visits-reservation-update', args=[self.code])
 
     def save(self, **kwargs):
+        skip_waiting_list_calc = kwargs.pop("skip_waiting_list_calc", False)
         self.last_modified = timezone.now()
         
         # If language is None, like for forms that doesn't require the language, then assign the default language from settings
@@ -435,7 +436,8 @@ class Reservation(models.Model):
         if old and not old.is_waiting_list:
             confirmed -= old.n_spaces
 
-        self.is_waiting_list = (confirmed + self.n_spaces) > total_spaces
+        if not skip_waiting_list_calc:
+            self.is_waiting_list = (confirmed + self.n_spaces) > total_spaces
 
         super(Reservation, self).save(**kwargs)
         transaction.on_commit(self.showing.update_spaces_count)
