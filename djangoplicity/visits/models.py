@@ -410,7 +410,8 @@ class Reservation(models.Model):
     def get_absolute_url(self):
         return reverse('visits-reservation-update', args=[self.code])
 
-    def save(self, **kwargs):
+    def save(self,  *args, **kwargs):
+        skip_waiting_list_calc = kwargs.pop("skip_waiting_list_calc", False)
         self.last_modified = timezone.now()
         
         # If language is None, like for forms that doesn't require the language, then assign the default language from settings
@@ -435,7 +436,8 @@ class Reservation(models.Model):
         if old and not old.is_waiting_list:
             confirmed -= old.n_spaces
 
-        self.is_waiting_list = (confirmed + self.n_spaces) > total_spaces
+        if not skip_waiting_list_calc:
+            self.is_waiting_list = (confirmed + self.n_spaces) > total_spaces
 
         super(Reservation, self).save(**kwargs)
         transaction.on_commit(self.showing.update_spaces_count)
@@ -479,9 +481,11 @@ class Reservation(models.Model):
         translation.deactivate()
 
     def send_reminder_email(self):
+        print(f"[DEBUG] Preparando correo para {self.email}")
         if self.is_waiting_list:
+            print(f"❌ {self.email} está en lista de espera, no se envía")
             return
-
+        print(f"[DEBUG] Remitente: {get_default_from_email()}")       
         template = loader.get_template('visits/emails/reservation-reminder.html')
 
         translation.activate(self.language.code)
@@ -493,7 +497,7 @@ class Reservation(models.Model):
         #  print(_('Reservation reminder'))
         #  print(html_message)
         #  print('DEBUG')
-
+        print("[DEBUG] Intentando enviar correo...")
         send_mail(
             _('Reservation reminder'),
             txt_message,
@@ -501,7 +505,7 @@ class Reservation(models.Model):
             [self.email],
             html_message=html_message,
         )
-
+        print("[DEBUG] Correo enviado (si no hay error).")
         translation.deactivate()
 
     def send_deleted_email(self):

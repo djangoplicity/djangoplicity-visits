@@ -190,15 +190,24 @@ class ReservationAdmin(ImportExportModelAdmin):
     list_select_related = ('showing', 'language')
     resource_class = ReservationResource
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
+    def changelist_view(self, request, extra_context=None):
+        """
+        Only hide waiting list reservations in the changelist (table),
+        not when accessing a specific reservation.
+        """
+        if (
+            "is_waiting_list__exact" not in request.GET
+            and not request.path.endswith("/change/")
+        ):
+            mutable_get = request.GET.copy()
+            mutable_get["is_waiting_list__exact"] = "0"
+            request.GET = mutable_get
+        return super().changelist_view(request, extra_context)
 
-        # Check if the admin applied the is_waiting_list filter
-        if "is_waiting_list__exact" not in request.GET:
-            # By default, hide waiting list reservations
-            qs = qs.filter(is_waiting_list=False)
-        return qs
-
+    def save_model(self, request, obj, form, change):
+        # Guardar desde admin sin recalcular waiting list
+        obj.save(skip_waiting_list_calc=True)
+    
     def showing_date(self, obj):
         return obj.showing.start_time.strftime('%Y-%m-%d'),
 
