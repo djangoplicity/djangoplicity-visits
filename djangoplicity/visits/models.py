@@ -481,11 +481,8 @@ class Reservation(models.Model):
         translation.deactivate()
 
     def send_reminder_email(self):
-        print(f"[DEBUG] Preparando correo para {self.email}")
         if self.is_waiting_list:
-            print(f"❌ {self.email} está en lista de espera, no se envía")
-            return
-        print(f"[DEBUG] Remitente: {get_default_from_email()}")       
+            return       
         template = loader.get_template('visits/emails/reservation-reminder.html')
 
         translation.activate(self.language.code)
@@ -497,7 +494,7 @@ class Reservation(models.Model):
         #  print(_('Reservation reminder'))
         #  print(html_message)
         #  print('DEBUG')
-        print("[DEBUG] Intentando enviar correo...")
+
         send_mail(
             _('Reservation reminder'),
             txt_message,
@@ -505,7 +502,6 @@ class Reservation(models.Model):
             [self.email],
             html_message=html_message,
         )
-        print("[DEBUG] Correo enviado (si no hay error).")
         translation.deactivate()
 
     def send_deleted_email(self):
