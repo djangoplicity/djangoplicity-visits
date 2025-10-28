@@ -261,6 +261,14 @@ class ReservationForm(forms.ModelForm):
             return n_spaces
 
         # Otherwise → try waiting list
+        activity = self.showing.activity
+        if not getattr(activity, "enable_waiting_list", False):
+            self.add_error(
+            None,  # None = error global del formulario
+            forms.ValidationError(
+                _("This activity is already fully booked and does not allow waiting list.")
+            ))
+            return n_spaces
         return self._validate_waiting_list(n_spaces)
 
     def _validate_waiting_list(self, n_spaces):

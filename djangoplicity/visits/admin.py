@@ -119,7 +119,7 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
         }),
         ('Registration Settings', {
             'fields': ('latest_reservation_time', 'min_participants', 'max_participants', 'duration', 'required_vehicle_plate',
-                       'require_age', 'require_rut_number', 'require_hawaii_state_id_or_drivers_license_number', 'group_enable'),
+                       'require_age', 'require_rut_number', 'require_hawaii_state_id_or_drivers_license_number', 'group_enable', 'enable_waiting_list',),
             'classes': ('collapse',),
         }),
         ('Language and Accessibility', {
