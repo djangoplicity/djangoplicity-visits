@@ -54,6 +54,7 @@ from djangoplicity.translation.models import TranslationModel, translation_rever
 from django.contrib.sites.models import Site
 from djangoplicity.products2.models import TechnicalDocument
 from datetime import timedelta
+from django.core.exceptions import ValidationError
 
 
 def eprint(*args, **kwargs):
@@ -252,6 +253,12 @@ class Activity(TranslationModel):
         blank=True,
         help_text="Comma-separated list of emails to notify about reservations updates."
     )
+
+    enable_waiting_list = models.BooleanField(
+        default=False,
+        help_text=_('Enable waiting list for this activity')
+    )
+
     @property
     def timezone_abbreviation(self):
         timezone_name = self.timezone if self.timezone else settings.TIME_ZONE
@@ -423,21 +430,40 @@ class Reservation(models.Model):
             )
 
         # Save previous value of is_waiting_list (if it already exists in DB)
-        old = None
-        if self.pk:
-            old = Reservation.objects.filter(pk=self.pk).first()
-
-        # --- Waiting list logic ---S
+        old = Reservation.objects.filter(pk=self.pk).first() if self.pk else None
+        activity = self.showing.activity
         total_spaces = self.showing.total_spaces
 
-        confirmed = self.showing.reservation_set.filter(is_waiting_list=False) \
-                        .aggregate(Sum('n_spaces'))['n_spaces__sum'] or 0
+        # Calculate only confirmed reservations
+        confirmed = (
+            self.showing.reservation_set
+            .filter(is_waiting_list=False)
+            .exclude(pk=self.pk)
+            .aggregate(Sum("n_spaces"))["n_spaces__sum"]
+            or 0
+        )
 
-        if old and not old.is_waiting_list:
-            confirmed -= old.n_spaces
+        # Calculate total reserved spaces (including waiting list)
+        total_reserved = (
+            self.showing.reservation_set
+            .exclude(pk=self.pk)
+            .aggregate(Sum("n_spaces"))["n_spaces__sum"]
+            or 0
+        )
 
         if not skip_waiting_list_calc:
-            self.is_waiting_list = (confirmed + self.n_spaces) > total_spaces
+            overbooked = (confirmed + self.n_spaces) > total_spaces
+
+            if overbooked:
+                if activity.enable_waiting_list:
+                    max_with_waiting = total_spaces + int(total_spaces * 0.5)
+                    if total_reserved + self.n_spaces > max_with_waiting:
+                        raise ValidationError(_("The waiting list for this activity is full."))
+                    self.is_waiting_list = True
+                else:
+                    raise ValidationError(_("This activity is full and does not allow waiting list."))
+            else:
+                self.is_waiting_list = False
 
         super(Reservation, self).save(**kwargs)
         transaction.on_commit(self.showing.update_spaces_count)

@@ -77,11 +77,14 @@ class ReservationCreateView(CreateView):
         context['too_late'] = (latest_reservation_time < showing_now)
 
         # --- waiting list logic ---
-        max_with_waiting = showing.total_spaces + int(showing.total_spaces * 0.5)
-        current_reservations = (
-            showing.reservation_set.aggregate(Sum("n_spaces"))["n_spaces__sum"] or 0
-        )
-        context["waiting_list_full"] = current_reservations >= max_with_waiting
+        if showing.activity.enable_waiting_list:
+            max_with_waiting = showing.total_spaces + int(showing.total_spaces * 0.5)
+            current_reservations = (
+                showing.reservation_set.aggregate(Sum("n_spaces"))["n_spaces__sum"] or 0
+            )
+            context["waiting_list_full"] = current_reservations >= max_with_waiting
+        else:
+            context["waiting_list_full"] = False
 
         return context
 
