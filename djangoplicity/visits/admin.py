@@ -281,8 +281,9 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
 
 
 class GroupReservationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'group_detail_link')
+    list_display = ('name', 'email', 'group_detail_link', 'location')
     search_fields = ('name', 'email', 'phone')
+    list_filter = ('location',)
 
     def group_detail_link(self, obj):
         if obj.code:
