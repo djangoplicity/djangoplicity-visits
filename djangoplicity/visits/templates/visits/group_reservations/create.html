@@ -150,15 +150,27 @@
             let currentActivityData = null;
             let isInitialize = false;
 
+            function hideCheckboxes() {
+
+                if (checkboxSafety) {
+                    checkboxSafety.closest('.form-group').style.display = 'none';
+                    checkboxSafety.required = false;
+                }
+                if (checkboxLiability) {
+                    checkboxLiability.closest('.form-group').style.display = 'none';
+                    checkboxLiability.required = false;
+                }
+            }
+
+            hideCheckboxes();
+
             if (activitySelect.value) {
                 isInitialize = true;
-                updateActivityData(activitySelect.value)
-            } else {
-                checkboxSafety.closest('.form-group').style.display = 'none';
-                checkboxLiability.closest('.form-group').style.display = 'none';
+                updateActivityData(activitySelect.value);
             }
 
             function updateActivityData(activityId) {
+                hideCheckboxes();
                 if (!activityId) {
                     checkboxSafety.closest('.form-group').style.display = 'none';
                     checkboxLiability.closest('.form-group').style.display = 'none';
@@ -177,7 +189,10 @@
                         updateUI(data);
                         isInitialize = false
                     })
-                    .catch(error => console.error('Error loading activity details:', error));
+                    .catch(error => {
+                        console.error('Error loading activity details:', error);
+                        hideCheckboxes();
+                    });
             }
 
             function setCheckboxVisibility(checkbox, hasDocument) {
