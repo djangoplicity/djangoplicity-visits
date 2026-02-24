@@ -36,9 +36,6 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.conf import Settings, settings
 from djangoplicity.visits.models import Reservation, GroupReservation, Activity, Showing
-from captcha.fields import ReCaptchaField
-from captcha.widgets import ReCaptchaV3
-
 
 NOT_HAS_SYMPTOMS_LABEL = _("I declare that no one in my group has tested positive for COVID-19 or had any symptoms in "
                            "the last 10 days: "
@@ -61,8 +58,6 @@ class ReservationForm(forms.ModelForm):
 
     email_confirm = forms.EmailField(label=_('Confirm Email'))
     waiting_list_message = None
-
-    captcha = ReCaptchaField(widget=ReCaptchaV3, required=True)
 
     if getattr(settings, 'VISITS_COVID_CONDITIONS', False):
         not_has_tested_positive_for_covid = forms.BooleanField(
@@ -224,6 +219,7 @@ class ReservationForm(forms.ModelForm):
         # res = Reservation.objects.filter(showing=self.showing, email=email, n_spaces=self.cleaned_data['n_spaces'])
         # if res:
         #     raise forms.ValidationError(_('This reservation already exists. In case of issues with your reservation, please send an email'))
+
         return cleaned_data
 
     def clean_n_spaces(self):
@@ -297,7 +293,7 @@ class ReservationForm(forms.ModelForm):
 
 
 class GroupReservationForm(forms.ModelForm):
-    email_confirm = forms.EmailField(label=_('Confirm Email'))   
+    email_confirm = forms.EmailField(label=_('Confirm Email'))
     location = forms.ModelChoiceField(
         queryset=Activity.objects.filter(group_enable=True),
         label=_('location'))
