@@ -47,7 +47,6 @@ from djangoplicity.visits.models import Activity, Reservation, Showing, GroupRes
 from djangoplicity.translation.models import translation_reverse
 from django.core.mail import send_mail, BadHeaderError
 
-
 logger = logging.getLogger(__name__)
 
 class ReservationCreateView(CreateView):
@@ -165,7 +164,7 @@ class ReservationCreateView(CreateView):
         reservation.save()
         if form.cleaned_data.get('subscribe_checkbox', False):
             self.subscribe_contact(form.cleaned_data)
-        return super().form_valid(form)
+        return super(ReservationCreateView, self).form_valid(form)
 
 
 class ReservationDeleteView(DeleteView):
