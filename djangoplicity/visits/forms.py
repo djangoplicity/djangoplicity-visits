@@ -194,6 +194,9 @@ class ReservationForm(forms.ModelForm):
             self.fields['accept_photo_release_form'].label = _("I hereby accept the Photo and Publication Release Form on behalf of all visitors in my party.*")
         else:
             self.fields['accept_photo_release_form'].widget = forms.HiddenInput()
+        
+        if not getattr(settings, 'ENABLE_RECAPTCHA', False):
+            self.fields.pop('captcha', None)
             
         # Setup crispyform
         self.helper = FormHelper()
