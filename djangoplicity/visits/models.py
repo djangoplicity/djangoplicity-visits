@@ -55,6 +55,7 @@ from django.contrib.sites.models import Site
 from djangoplicity.products2.models import TechnicalDocument
 from datetime import timedelta
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 
 
 def eprint(*args, **kwargs):
@@ -84,6 +85,19 @@ def get_default_from_email():
 
 
 TIMEZONES_TZS = [(tz, tz) for tz in pytz.all_timezones]
+
+# --- SECURITY VALIDATORS ---
+# These validators mitigate SQL injection attempts and bot spam 
+# by enforcing strict character sets on free-text fields.
+phone_validator = RegexValidator(
+    regex=r'^[0-9\+\-\(\) ]+$',
+    message=_('Enter a valid phone number (e.g., +1 555-0123). Only digits, spaces, and + - ( ) are allowed.')
+)
+
+country_validator = RegexValidator(
+    regex=r'^[a-zA-Z\s\.\-\(\)]+$',
+    message=_('Enter a valid country name. No special symbols or numbers allowed.')
+)
 
 
 class RestrictionRecommendation(TranslationModel):
@@ -343,10 +357,10 @@ class Reservation(models.Model):
     code = models.CharField(max_length=50, blank=True)
     showing = models.ForeignKey('Showing', on_delete=models.RESTRICT)
     name = models.CharField(max_length=80, verbose_name=_('Full name'))
-    phone = models.CharField(max_length=50, verbose_name=_('Phone'))
-    alternative_phone = models.CharField(max_length=50, verbose_name=_('Alternative Phone'), blank=True, null=True)
+    phone = models.CharField(max_length=50, verbose_name=_('Phone'), validators=[phone_validator])
+    alternative_phone = models.CharField(max_length=50, verbose_name=_('Alternative Phone'), blank=True, null=True, validators=[phone_validator])
     email = models.EmailField(verbose_name=_('Email'))
-    country = models.CharField(max_length=50, verbose_name=_('Country'))
+    country = models.CharField(max_length=50, verbose_name=_('Country'), validators=[country_validator])
     language = models.ForeignKey(Language, verbose_name=_('Preferred language'), on_delete=models.RESTRICT, blank=True, null=True)
     n_spaces = models.SmallIntegerField(verbose_name=_('Number of places'))
     created = models.DateTimeField(default=timezone.now)
