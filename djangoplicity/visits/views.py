@@ -165,7 +165,7 @@ class ReservationCreateView(CreateView):
         reservation.save()
         if form.cleaned_data.get('subscribe_checkbox', False):
             self.subscribe_contact(form.cleaned_data)
-        return super().form_valid(form)
+        return super(ReservationCreateView, self).form_valid(form)
 
 
 class ReservationDeleteView(DeleteView):
