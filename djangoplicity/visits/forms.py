@@ -305,6 +305,7 @@ class GroupReservationForm(forms.ModelForm):
         queryset=Activity.objects.filter(group_enable=True),
         label=_('location'))
     guests = forms.CharField(widget=forms.HiddenInput())
+    captcha = ReCaptchaField(widget=ReCaptchaV3, required=True)
 
     class Meta:
         model = GroupReservation
@@ -335,6 +336,9 @@ class GroupReservationForm(forms.ModelForm):
             'data-target': '#modal_form',
             'data-doc-type': 'liability'
         })
+        
+        if not getattr(settings, 'ENABLE_RECAPTCHA', False):
+            self.fields.pop('captcha', None)
 
     def clean_guests(self):
         guests = self.cleaned_data.get('guests')
