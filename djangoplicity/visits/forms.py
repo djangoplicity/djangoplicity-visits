@@ -62,7 +62,7 @@ class ReservationForm(forms.ModelForm):
     email_confirm = forms.EmailField(label=_('Confirm Email'))
     waiting_list_message = None
 
-    captcha = ReCaptchaField(widget=ReCaptchaV3, required=True)
+    captcha = ReCaptchaField(widget=ReCaptchaV3, required=True, label=False)
 
     if getattr(settings, 'VISITS_COVID_CONDITIONS', False):
         not_has_tested_positive_for_covid = forms.BooleanField(
@@ -305,7 +305,7 @@ class GroupReservationForm(forms.ModelForm):
         queryset=Activity.objects.filter(group_enable=True),
         label=_('location'))
     guests = forms.CharField(widget=forms.HiddenInput())
-    captcha = ReCaptchaField(widget=ReCaptchaV3, required=True)
+    captcha = ReCaptchaField(widget=ReCaptchaV3, required=True, label=False)
 
     class Meta:
         model = GroupReservation
