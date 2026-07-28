@@ -154,8 +154,7 @@ class ReservationCreateView(CreateView):
 
     def get_success_url(self, **kwargs):
         self.object.send_confirmation_email()
-        # return reverse('visits-reservation-confirm', args=[self.object.code])
-        return translation_reverse(
+        url = translation_reverse(
             'visits-reservation-confirm',
             args=[self.object.code],
             lang=self.object.language.code)
