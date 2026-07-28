@@ -158,6 +158,9 @@ class ReservationCreateView(CreateView):
             'visits-reservation-confirm',
             args=[self.object.code],
             lang=self.object.language.code)
+        if self.request.GET.get('embed') == 'true':
+            url += '?embed=true'
+        return url
 
     def form_valid(self, form):
         reservation = form.save(commit=False)
@@ -215,11 +218,13 @@ class ReservationDeleteView(DeleteView):
 
     def get_success_url(self, **kwargs):
         self.object.send_deleted_email()
-        #  return reverse('visits-reservation-delete-confirm')
-        return translation_reverse(
+        url = translation_reverse(
             'visits-reservation-delete-confirm',
             args=[],
             lang=self.object.language.code)
+        if self.request.GET.get('embed') == 'true':
+            url += '?embed=true'
+        return url
 
 
 class ReservationConfirmView(DetailView):
@@ -252,11 +257,13 @@ class ReservationUpdateView(UpdateView):
 
     def get_success_url(self, **kwargs):
         self.object.send_updated_email()
-        #  return reverse('visits-reservation-confirm', args=[self.object.code])
-        return translation_reverse(
+        url = translation_reverse(
             'visits-reservation-confirm',
             args=[self.object.code],
             lang=self.object.language.code)
+        if self.request.GET.get('embed') == 'true':
+            url += '?embed=true'
+        return url
 
 
 class ReservationCancelView(ReservationUpdateView):
