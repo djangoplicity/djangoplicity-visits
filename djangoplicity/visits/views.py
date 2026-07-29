@@ -45,6 +45,7 @@ from django.db.models import Sum
 from djangoplicity.visits.forms import ReservationForm, GroupReservationForm
 from djangoplicity.visits.models import Activity, Reservation, Showing, GroupReservation
 from djangoplicity.translation.models import translation_reverse
+from djangoplicity.utils.embed import embed_url
 from django.core.mail import send_mail, BadHeaderError
 
 
@@ -158,9 +159,7 @@ class ReservationCreateView(CreateView):
             'visits-reservation-confirm',
             args=[self.object.code],
             lang=self.object.language.code)
-        if self.request.GET.get('embed') == 'true':
-            url += '?embed=true'
-        return url
+        return embed_url(url, self.request.GET.get('embed') == 'true')
 
     def form_valid(self, form):
         reservation = form.save(commit=False)
@@ -222,9 +221,7 @@ class ReservationDeleteView(DeleteView):
             'visits-reservation-delete-confirm',
             args=[],
             lang=self.object.language.code)
-        if self.request.GET.get('embed') == 'true':
-            url += '?embed=true'
-        return url
+        return embed_url(url, self.request.GET.get('embed') == 'true')
 
 
 class ReservationConfirmView(DetailView):
@@ -261,9 +258,7 @@ class ReservationUpdateView(UpdateView):
             'visits-reservation-confirm',
             args=[self.object.code],
             lang=self.object.language.code)
-        if self.request.GET.get('embed') == 'true':
-            url += '?embed=true'
-        return url
+        return embed_url(url, self.request.GET.get('embed') == 'true')
 
 
 class ReservationCancelView(ReservationUpdateView):
@@ -389,6 +384,7 @@ class GroupReservationCreateUpdateView(UpdateView):
         return response
 
     def get_success_url(self):
-        return reverse('group-registration-update',
-                       args=[self.object.code])
+        url = reverse('group-registration-update',
+                      args=[self.object.code])
+        return embed_url(url, self.request.GET.get('embed') == 'true')
 
