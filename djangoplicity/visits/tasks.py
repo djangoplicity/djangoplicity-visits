@@ -38,13 +38,13 @@ def reservation_reminder():
         day_to_start = date.today() + timedelta(days=days_reminder)
         reservations = Reservation.objects.filter(
             showing__start_time__date=day_to_start
-        )
+        ).exclude(showing__private=True)
 
     # Get the reservations that were modified yesterday
     yesterday = date.today() - timedelta(days=1)
     reservations_yesterday = Reservation.objects.filter(
         last_modified__date=yesterday
-    )
+    ).exclude(showing__private=True)
 
     for reservation in reservations:
         reservation.send_reminder_email()
