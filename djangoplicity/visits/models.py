@@ -485,6 +485,9 @@ class Reservation(models.Model):
         if self.is_waiting_list:
             return
 
+        if self.showing.private:
+            return
+
         template = loader.get_template('visits/emails/reservation-confirm.html')
         translation.activate(self.language.code)
 
@@ -508,6 +511,9 @@ class Reservation(models.Model):
 
     def send_reminder_email(self):
         if self.is_waiting_list:
+            return
+
+        if self.showing.private:
             return
 
         template = loader.get_template('visits/emails/reservation-reminder.html')
