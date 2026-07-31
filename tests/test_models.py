@@ -125,6 +125,15 @@ class ReservationTestCase(TestCase):
         # Verify that the subject of the first message is correct.
         self.assertEqual(mail.outbox[0].subject, _('Reservation confirmation'))
 
+    def test_no_confirmation_email_for_private_showing(self):
+        private_showing = factory_showing(self.activity, {'private': True})
+        private_showing.save()
+        reservation = factory_reservation(private_showing, {})
+        reservation.save()
+        reservation.send_confirmation_email()
+
+        self.assertEqual(len(mail.outbox), 0)
+
     def test_send_reminder_email(self):
         reservation = factory_reservation(self.showing, {})
         reservation.save()
@@ -135,6 +144,15 @@ class ReservationTestCase(TestCase):
 
         # Verify that the subject of the first message is correct.
         self.assertEqual(mail.outbox[0].subject, _('Reservation reminder'))
+
+    def test_no_reminder_email_for_private_showing(self):
+        private_showing = factory_showing(self.activity, {'private': True})
+        private_showing.save()
+        reservation = factory_reservation(private_showing, {})
+        reservation.save()
+        reservation.send_reminder_email()
+
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_send_deleted_email(self):
         reservation = factory_reservation(self.showing, {})
