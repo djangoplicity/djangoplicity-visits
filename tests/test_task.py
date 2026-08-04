@@ -51,6 +51,14 @@ class TestDjangoplicityTask(TransactionTestCase):
             self.assertEqual(mail.outbox[0].subject, _('Reservation reminder'))
             self.assertEqual(mail.outbox[1].subject, _('Reservation reminder'))
 
+    def test_no_reminder_for_private_showing(self):
+        """Ensure reminders are not sent for reservations of private showings."""
+        self.showing.private = True
+        self.showing.save()
+        with self.settings(SITE_ENVIRONMENT='prod'):
+            reservation_reminder()
+            self.assertEqual(len(mail.outbox), 0)
+
     def test_reminder_not_run_develop(self):
         """Ensure the task not runs in develop."""
         with self.settings(SITE_ENVIRONMENT='dev'):
