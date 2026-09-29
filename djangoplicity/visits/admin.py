@@ -361,7 +361,7 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
 
         context = dict(
             self.admin_site.each_context(request),
-            title=_('Call list: %s') % showing,
+            title=_('Tour: %s') % showing,
             opts=self.model._meta,
             showing=showing,
             formset=formset,
