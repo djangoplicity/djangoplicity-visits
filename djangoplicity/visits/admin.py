@@ -31,8 +31,15 @@
 
 from __future__ import unicode_literals
 
+from functools import update_wrapper
+
+from django.conf.urls import url
 from django.contrib import admin
 from django import forms
+from django.core.exceptions import PermissionDenied
+from django.forms import modelformset_factory
+from django.shortcuts import get_object_or_404, redirect
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
@@ -58,16 +65,6 @@ def view_online(obj):
     elif isinstance(obj, Showing):
         url = reverse('visits-reservation-create', args=[obj.id])
     return format_html('<a href="{}{}" target="_blank">View Online</a>', url, CACHE_PARAMETER)
-
-
-def view_report(obj):
-    return format_html(
-        '<a href="{}{}" target="_blank">View Report</a> | '
-        '<a href="{}" target="_blank">Waiting List</a>',
-        reverse('visits-showings-reports-detail', args=[obj.id]),
-        CACHE_PARAMETER,
-        reverse('visits-showings-waiting-list-report', args=[obj.id])
-    )
 
 
 class RestrictionRecommendationAdmin(dpadmin.DjangoplicityModelAdmin):
@@ -171,17 +168,18 @@ class ReservationResource(resources.ModelResource):
         fields = (
         'id', 'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone', 'email', 'country', 'language',
         'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'accept_safety_form',
-        'accept_disclaimer_form', 'accept_conduct_form')
+        'accept_disclaimer_form', 'accept_conduct_form', 'attendance_confirmed')
         export_order = (
         'id', 'showing', 'date', 'time', 'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone',
         'email', 'country', 'language', 'n_spaces', 'created', 'last_modified', 'vehicle_plate',
-        'accept_safety_form', 'accept_disclaimer_form', 'accept_conduct_form')
+        'accept_safety_form', 'accept_disclaimer_form', 'accept_conduct_form', 'attendance_confirmed')
 
 
 class ReservationAdmin(ImportExportModelAdmin):
-    list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'is_waiting_list', 'phone', 'n_spaces', 'code',
-                    'rut', 'vehicle_plate', 'hawaii_state_id_or_drivers_license_number', 'zip_code', 'language', 'created', 'age_range',)
-    list_filter = ('showing__activity', 'showing__start_time', 'created', 'is_waiting_list')
+    list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'is_waiting_list',
+                    'attendance_confirmed', 'phone', 'n_spaces', 'code', 'rut', 'vehicle_plate',
+                    'hawaii_state_id_or_drivers_license_number', 'zip_code', 'language', 'created', 'age_range',)
+    list_filter = ('showing__activity', 'showing__start_time', 'created', 'is_waiting_list', 'attendance_confirmed')
     ordering = ['showing__start_time']
     raw_id_fields = ('showing',)
     date_hierarchy = 'showing__start_time'
@@ -265,7 +263,7 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     form = ShowingAdminForm
     filter_horizontal = ('offered_languages',)
     list_display = ('activity', 'get_start_time_tz', 'private', 'total_spaces',
-                    'free_spaces', view_online, view_report)
+                    'free_spaces', view_online, 'view_report')
     list_filter = ('activity', 'private')
     readonly_fields = ('free_spaces',)
 
@@ -278,6 +276,137 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
 
     get_start_time_tz.short_description = 'Start time (TZ)'
     get_start_time_tz.admin_order_field = 'start_time'
+
+    def view_report(self, obj):
+        return format_html(
+            '<a href="{}">View Report</a> | '
+            '<a href="{}" target="_blank">Waiting List</a>',
+            reverse('admin:visits_showing_call_list', args=[obj.id], current_app=self.admin_site.name),
+            reverse('visits-showings-waiting-list-report', args=[obj.id])
+        )
+
+    view_report.short_description = 'View report'
+
+    def get_urls(self):
+        # Tool to wrap class method into a view
+        # START: Copied from django.contrib.admin.options
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+            wrapper.model_admin = self
+            return update_wrapper(wrapper, view)
+
+        info = self.model._meta.app_label, self.model._meta.model_name  # visits, showing
+        # END: Copied from django.contrib.admin.options
+
+        urlpatterns = [
+            url(r'^(?P<pk>\d+)/call-list/$',
+                wrap(self.call_list_view),
+                name='%s_%s_call_list' % info),
+            url(r'^(?P<pk>\d+)/call-list/cancel/(?P<reservation_pk>\d+)/$',
+                wrap(self.cancel_reservation_view),
+                name='%s_%s_cancel_reservation' % info),
+        ]
+
+        # Note, must be last one, otherwise the change view
+        # consumes everything else.
+        urlpatterns += super(ShowingAdmin, self).get_urls()
+
+        return urlpatterns
+
+    def _call_list_url(self, pk):
+        return reverse('admin:visits_showing_call_list', args=[pk], current_app=self.admin_site.name)
+
+    def _has_reservation_perm(self, request, action):
+        opts = Reservation._meta
+        return request.user.has_perm('%s.%s_%s' % (opts.app_label, action, opts.model_name))
+
+    def call_list_view(self, request, pk):
+        '''
+        List the confirmed reservations of a showing (sorted by vehicle plate) so
+        the visits team can call each visitor and mark the attendance
+        '''
+        request.current_app = self.admin_site.name
+
+        if not self._has_reservation_perm(request, 'view'):
+            raise PermissionDenied
+
+        showing = get_object_or_404(Showing.objects.select_related('activity'), pk=pk)
+        queryset = showing.reservation_set.filter(is_waiting_list=False) \
+            .select_related('language').order_by('vehicle_plate', 'name')
+
+        ReservationFormSet = modelformset_factory(Reservation, fields=('attendance_confirmed',), extra=0)
+
+        if request.method == 'POST':
+            if not self._has_reservation_perm(request, 'change'):
+                raise PermissionDenied
+
+            formset = ReservationFormSet(request.POST, queryset=queryset)
+            if formset.is_valid():
+                changed = 0
+                for form in formset.forms:
+                    if form.has_changed():
+                        obj = form.save(commit=False)
+                        # Same as ReservationAdmin.save_model, don't move reservations to/from the waiting list
+                        obj.save(skip_waiting_list_calc=True)
+                        self.log_change(request, obj, [{'changed': {'fields': ['attendance_confirmed']}}])
+                        changed += 1
+
+                self.message_user(request, _('%d reservation(s) updated.') % changed)
+                return redirect(self._call_list_url(showing.pk))
+        else:
+            formset = ReservationFormSet(queryset=queryset)
+
+        attendance = [form.instance.attendance_confirmed for form in formset.forms]
+
+        context = dict(
+            self.admin_site.each_context(request),
+            title=_('Tour: %s') % showing,
+            opts=self.model._meta,
+            showing=showing,
+            formset=formset,
+            summary={
+                'confirmed': attendance.count(True),
+                'pending': attendance.count(False),
+            },
+            has_change_permission=self._has_reservation_perm(request, 'change'),
+            has_delete_permission=self._has_reservation_perm(request, 'delete'),
+        )
+
+        return TemplateResponse(request, 'admin/visits/showing/call_list.html', context)
+
+    def cancel_reservation_view(self, request, pk, reservation_pk):
+        '''
+        Cancel a reservation the same way the visitor does it (see Reservation.cancel)
+        '''
+        request.current_app = self.admin_site.name
+
+        if not self._has_reservation_perm(request, 'delete'):
+            raise PermissionDenied
+
+        reservation = get_object_or_404(
+            Reservation.objects.select_related('showing__activity', 'language'),
+            pk=reservation_pk,
+            showing__pk=pk
+        )
+
+        if request.method == 'POST':
+            obj_display = str(reservation)
+            self.log_deletion(request, reservation, obj_display)
+            reservation.cancel()
+
+            self.message_user(request, _('The reservation "%s" was cancelled.') % obj_display)
+            return redirect(self._call_list_url(pk))
+
+        context = dict(
+            self.admin_site.each_context(request),
+            title=_('Cancel reservation'),
+            opts=self.model._meta,
+            showing=reservation.showing,
+            reservation=reservation,
+        )
+
+        return TemplateResponse(request, 'admin/visits/showing/cancel_reservation_confirm.html', context)
 
 
 class GroupReservationAdmin(admin.ModelAdmin):

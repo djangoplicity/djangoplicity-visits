@@ -1,0 +1,94 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}">
+<style>
+    #result_list .column-attendance_confirmed { text-align: center; }
+</style>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-list{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a> &rsaquo;
+    <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a> &rsaquo;
+    <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+    <a href="{% url opts|admin_urlname:'change' showing.pk %}">{{ showing }}</a> &rsaquo;
+    {% trans 'Call list' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <ul class="object-tools">
+        <li><a href="{{ showing.get_report_url }}" target="_blank">{% trans 'Old Report' %}</a></li>
+        <li><a href="{% url 'visits-showings-waiting-list-report' showing.pk %}" target="_blank">{% trans 'Waiting List' %}</a></li>
+    </ul>
+
+    <p>
+        {% trans 'Total spaces' %}: <strong>{{ showing.total_spaces }}</strong> |
+        {% trans 'Free spaces' %}: <strong>{{ showing.free_spaces }}</strong> |
+        {% trans 'Confirmed' %}: <strong>{{ summary.confirmed }}</strong> |
+        {% trans 'Pending' %}: <strong>{{ summary.pending }}</strong>
+    </p>
+
+    <div class="module" id="changelist">
+        <form method="post" id="call_list_form" novalidate>{% csrf_token %}
+            {{ formset.management_form }}
+            {% if formset.non_form_errors %}{{ formset.non_form_errors }}{% endif %}
+            <div class="results">
+                <table id="result_list">
+                    <thead>
+                        <tr>
+                            <th scope="col"><div class="text"><span>{% trans 'Vehicle Plate' %}</span></div></th>
+                            <th scope="col"><div class="text"><span>{% trans 'Name' %}</span></div></th>
+                            <th scope="col"><div class="text"><span>{% trans 'Email' %}</span></div></th>
+                            <th scope="col"><div class="text"><span>{% trans 'Phone number' %}</span></div></th>
+                            <th scope="col"><div class="text"><span>{% trans 'Alternative Phone number' %}</span></div></th>
+                            <th scope="col"><div class="text"><span>{% trans 'Country' %}</span></div></th>
+                            <th scope="col"><div class="text"><span>{% trans 'Number of places' %}</span></div></th>
+                            <th scope="col"><div class="text"><span>{% trans 'Language' %}</span></div></th>
+                            <th scope="col"><div class="text"><span>{% trans 'Reservation code' %}</span></div></th>
+                            <th scope="col"><div class="text"><span>{% trans 'RUT' %}</span></div></th>
+                            <th scope="col"><div class="text"><span>{% trans 'Reservation date' %}</span></div></th>
+                            <th scope="col" class="column-attendance_confirmed"><div class="text"><span>{% trans 'Attendance confirmed' %}</span></div></th>
+                            {% if has_delete_permission %}<th scope="col"><div class="text"><span>&nbsp;</span></div></th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for form in formset %}
+                        {% with r=form.instance %}
+                        <tr class="{% cycle 'row1' 'row2' %}">
+                            <td><a href="{% url 'admin:visits_reservation_change' r.pk %}">{{ r.vehicle_plate|default:'-' }}</a></td>
+                            <td>{{ r.name }}</td>
+                            <td>{{ r.email }}</td>
+                            <td>{{ r.phone }}</td>
+                            <td>{{ r.alternative_phone|default:'-' }}</td>
+                            <td>{{ r.country }}</td>
+                            <td>{{ r.n_spaces }}</td>
+                            <td>{{ r.language }}</td>
+                            <td>{{ r.code }}</td>
+                            <td>{{ r.rut|default:'-' }}</td>
+                            <td>{{ r.created }}</td>
+                            <td class="column-attendance_confirmed">{{ form.id }}{{ form.attendance_confirmed.errors }}{{ form.attendance_confirmed }}</td>
+                            {% if has_delete_permission %}
+                            <td><a href="{% url 'admin:visits_showing_cancel_reservation' showing.pk r.pk %}" class="deletelink">{% trans 'Cancel reservation' %}</a></td>
+                            {% endif %}
+                        </tr>
+                        {% endwith %}
+                        {% empty %}
+                        <tr><td colspan="13">{% trans 'There are no reservations for this showing.' %}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if has_change_permission and formset.forms %}
+            <div class="submit-row">
+                <input type="submit" value="{% trans 'Save' %}" class="default" name="_save">
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}
