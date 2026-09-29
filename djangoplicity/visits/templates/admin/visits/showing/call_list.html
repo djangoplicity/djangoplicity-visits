@@ -1,7 +1,11 @@
 {% extends "admin/base_site.html" %}
 {% load i18n admin_urls static %}
 
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}">{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}">
+<style>
+    #result_list .column-attendance_confirmed { text-align: center; }
+</style>
+{% endblock %}
 
 {% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-list{% endblock %}
 
@@ -26,8 +30,7 @@
         {% trans 'Total spaces' %}: <strong>{{ showing.total_spaces }}</strong> |
         {% trans 'Free spaces' %}: <strong>{{ showing.free_spaces }}</strong> |
         {% trans 'Confirmed' %}: <strong>{{ summary.confirmed }}</strong> |
-        {% trans 'Not confirmed' %}: <strong>{{ summary.not_confirmed }}</strong> |
-        {% trans 'Not reviewed' %}: <strong>{{ summary.not_reviewed }}</strong>
+        {% trans 'Pending' %}: <strong>{{ summary.pending }}</strong>
     </p>
 
     <div class="module" id="changelist">
@@ -49,7 +52,7 @@
                             <th scope="col"><div class="text"><span>{% trans 'Reservation code' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'RUT' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Reservation date' %}</span></div></th>
-                            <th scope="col"><div class="text"><span>{% trans 'Attendance confirmed' %}</span></div></th>
+                            <th scope="col" class="column-attendance_confirmed"><div class="text"><span>{% trans 'Attendance confirmed' %}</span></div></th>
                             {% if has_delete_permission %}<th scope="col"><div class="text"><span>&nbsp;</span></div></th>{% endif %}
                         </tr>
                     </thead>
@@ -68,7 +71,7 @@
                             <td>{{ r.code }}</td>
                             <td>{{ r.rut|default:'-' }}</td>
                             <td>{{ r.created }}</td>
-                            <td>{{ form.id }}{{ form.attendance_confirmed.errors }}{{ form.attendance_confirmed }}</td>
+                            <td class="column-attendance_confirmed">{{ form.id }}{{ form.attendance_confirmed.errors }}{{ form.attendance_confirmed }}</td>
                             {% if has_delete_permission %}
                             <td><a href="{% url 'admin:visits_showing_cancel_reservation' showing.pk r.pk %}" class="deletelink">{% trans 'Cancel reservation' %}</a></td>
                             {% endif %}
