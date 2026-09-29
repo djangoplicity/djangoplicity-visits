@@ -46,7 +46,6 @@ from djangoplicity.visits.forms import ReservationForm, GroupReservationForm
 from djangoplicity.visits.models import Activity, Reservation, Showing, GroupReservation
 from djangoplicity.translation.models import translation_reverse
 from djangoplicity.utils.embed import embed_url
-from django.core.mail import send_mail, BadHeaderError
 
 
 logger = logging.getLogger(__name__)
@@ -183,37 +182,9 @@ class ReservationDeleteView(DeleteView):
 
     def send_email_reservation_cancel(self, request, *args, **kwargs):
         self.object = self.get_object()
-        activity = self.object.showing.activity
 
         # Send email to the visits team
-        try:
-            subject = f"Reservation Cancelled - {self.object.showing.activity.name}"
-            message = (
-                f"The reservation for {self.object.name} "
-                f"on {self.object.showing.activity.name} has been cancelled.\n\n"
-                f"Reservation details:\n"
-                f"Name: {self.object.name}\n"
-                f"Email: {self.object.email}\n"
-                f"Phone: {self.object.phone}\n"
-                f"Number of spaces: {self.object.n_spaces}\n"
-                f"Showing date: {self.object.showing.start_time.strftime('%Y-%m-%d %H:%M')}\n"
-            )
-            recipients = activity.get_contact_emails()
-
-            if recipients:  # Only send if there are emails configured
-                send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    recipients,
-                    fail_silently=False
-                )
-
-        except BadHeaderError:
-            logger.error("Invalid header found when sending visit team email.")
-        except Exception as e:
-            logger.error(f"Error sending email to the visits team: {e}")
-
+        self.object.send_cancelled_team_email()
 
     def get_success_url(self, **kwargs):
         self.object.send_deleted_email()
