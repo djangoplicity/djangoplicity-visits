@@ -41,9 +41,11 @@ class TestShowingCallListAdmin(TransactionTestCase):
             'form-MIN_NUM_FORMS': '0',
             'form-MAX_NUM_FORMS': '1000',
         }
-        for i, (reservation, value) in enumerate(values):
+        for i, (reservation, checked) in enumerate(values):
             data['form-{}-id'.format(i)] = reservation.pk
-            data['form-{}-attendance_confirmed'.format(i)] = value
+            # An unchecked checkbox is not sent in the POST
+            if checked:
+                data['form-{}-attendance_confirmed'.format(i)] = 'on'
         return data
 
     # test call list only shows confirmed reservations sorted by vehicle plate
@@ -55,13 +57,14 @@ class TestShowingCallListAdmin(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(self.waiting.is_waiting_list)
         self.assertEqual(['AAAA-11', 'BBBB-22'], plates)
-        self.assertEqual(2, response.context['summary']['not_reviewed'])
+        self.assertEqual(0, response.context['summary']['confirmed'])
+        self.assertEqual(2, response.context['summary']['pending'])
 
     # test attendance can be updated without changing the waiting list
     def test_update_attendance_confirmed(self):
         response = self.client.post(self.url, self.formset_data([
-            (self.reservation_a, 'true'),
-            (self.reservation_b, 'false'),
+            (self.reservation_a, True),
+            (self.reservation_b, False),
         ]))
 
         self.reservation_a.refresh_from_db()
@@ -69,19 +72,19 @@ class TestShowingCallListAdmin(TransactionTestCase):
         self.waiting.refresh_from_db()
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(True, self.reservation_a.attendance_confirmed)
-        self.assertEqual(False, self.reservation_b.attendance_confirmed)
-        self.assertEqual(None, self.waiting.attendance_confirmed)
+        self.assertTrue(self.reservation_a.attendance_confirmed)
+        self.assertFalse(self.reservation_b.attendance_confirmed)
+        self.assertFalse(self.waiting.attendance_confirmed)
         self.assertFalse(self.reservation_a.is_waiting_list)
         self.assertTrue(self.waiting.is_waiting_list)
 
-        # Back to not reviewed
+        # Back to pending (uncheck)
         self.client.post(self.url, self.formset_data([
-            (self.reservation_a, 'unknown'),
-            (self.reservation_b, 'false'),
+            (self.reservation_a, False),
+            (self.reservation_b, False),
         ]))
         self.reservation_a.refresh_from_db()
-        self.assertEqual(None, self.reservation_a.attendance_confirmed)
+        self.assertFalse(self.reservation_a.attendance_confirmed)
 
     # test cancel reservation from the admin
     def test_cancel_reservation(self):
