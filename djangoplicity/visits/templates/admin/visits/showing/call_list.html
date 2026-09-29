@@ -38,7 +38,6 @@
                 <table id="result_list">
                     <thead>
                         <tr>
-                            <th scope="col"><div class="text"><span>{% trans 'Attendance confirmed' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Vehicle Plate' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Name' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Email' %}</span></div></th>
@@ -50,6 +49,7 @@
                             <th scope="col"><div class="text"><span>{% trans 'Reservation code' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'RUT' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Reservation date' %}</span></div></th>
+                            <th scope="col"><div class="text"><span>{% trans 'Attendance confirmed' %}</span></div></th>
                             {% if has_delete_permission %}<th scope="col"><div class="text"><span>&nbsp;</span></div></th>{% endif %}
                         </tr>
                     </thead>
@@ -57,7 +57,6 @@
                         {% for form in formset %}
                         {% with r=form.instance %}
                         <tr class="{% cycle 'row1' 'row2' %}">
-                            <td>{{ form.id }}{{ form.attendance_confirmed.errors }}{{ form.attendance_confirmed }}</td>
                             <td><a href="{% url 'admin:visits_reservation_change' r.pk %}">{{ r.vehicle_plate|default:'-' }}</a></td>
                             <td>{{ r.name }}</td>
                             <td>{{ r.email }}</td>
@@ -69,6 +68,7 @@
                             <td>{{ r.code }}</td>
                             <td>{{ r.rut|default:'-' }}</td>
                             <td>{{ r.created }}</td>
+                            <td>{{ form.id }}{{ form.attendance_confirmed.errors }}{{ form.attendance_confirmed }}</td>
                             {% if has_delete_permission %}
                             <td><a href="{% url 'admin:visits_showing_cancel_reservation' showing.pk r.pk %}" class="deletelink">{% trans 'Cancel reservation' %}</a></td>
                             {% endif %}
