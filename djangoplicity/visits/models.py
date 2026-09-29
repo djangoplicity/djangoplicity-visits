@@ -32,13 +32,14 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 import datetime
+import logging
 import os
 import sys
 import pytz
 from hashids import Hashids
 import html2text
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import send_mail, BadHeaderError
 from django.db import models, transaction
 from django.db.models import Sum
 from django.db.models.signals import post_delete, post_save
@@ -55,6 +56,9 @@ from django.contrib.sites.models import Site
 from djangoplicity.products2.models import TechnicalDocument
 from datetime import timedelta
 from django.core.exceptions import ValidationError
+
+
+logger = logging.getLogger(__name__)
 
 
 def eprint(*args, **kwargs):
@@ -376,6 +380,14 @@ class Reservation(models.Model):
 
     is_waiting_list = models.BooleanField(default=False, verbose_name=_('Waiting List'))
 
+    attendance_confirmed = models.BooleanField(
+        null=True,
+        blank=True,
+        default=None,
+        verbose_name=_('Attendance confirmed'),
+        help_text=_('Set after calling the visitor. Empty = not reviewed yet')
+    )
+
     def __str__(self):
         return '{}, {} ({} spaces)'.format(self.email, self.showing,
                                            self.n_spaces)
@@ -555,6 +567,49 @@ class Reservation(models.Model):
         )
 
         translation.deactivate()
+
+    def send_cancelled_team_email(self):
+        '''
+        Notify the visits team (Activity.contact_emails_notify) that the reservation was cancelled
+        '''
+        activity = self.showing.activity
+
+        try:
+            subject = f"Reservation Cancelled - {activity.name}"
+            message = (
+                f"The reservation for {self.name} "
+                f"on {activity.name} has been cancelled.\n\n"
+                f"Reservation details:\n"
+                f"Name: {self.name}\n"
+                f"Email: {self.email}\n"
+                f"Phone: {self.phone}\n"
+                f"Number of spaces: {self.n_spaces}\n"
+                f"Showing date: {self.showing.start_time.strftime('%Y-%m-%d %H:%M')}\n"
+            )
+            recipients = activity.get_contact_emails()
+
+            if recipients:  # Only send if there are emails configured
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    recipients,
+                    fail_silently=False
+                )
+
+        except BadHeaderError:
+            logger.error("Invalid header found when sending visit team email.")
+        except Exception as e:
+            logger.error(f"Error sending email to the visits team: {e}")
+
+    def cancel(self):
+        '''
+        Cancel the reservation the same way the visitor does it: notify the
+        visits team, notify the visitor and delete the reservation
+        '''
+        self.send_cancelled_team_email()
+        self.send_deleted_email()
+        self.delete()
 
     def send_updated_email(self):
         template = loader.get_template('visits/emails/reservation-updated.html')
