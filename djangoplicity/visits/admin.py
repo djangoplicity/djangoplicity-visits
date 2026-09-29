@@ -367,8 +367,7 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
             formset=formset,
             summary={
                 'confirmed': attendance.count(True),
-                'not_confirmed': attendance.count(False),
-                'not_reviewed': attendance.count(None),
+                'pending': attendance.count(False),
             },
             has_change_permission=self._has_reservation_perm(request, 'change'),
             has_delete_permission=self._has_reservation_perm(request, 'delete'),

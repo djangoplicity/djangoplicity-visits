@@ -381,11 +381,9 @@ class Reservation(models.Model):
     is_waiting_list = models.BooleanField(default=False, verbose_name=_('Waiting List'))
 
     attendance_confirmed = models.BooleanField(
-        null=True,
-        blank=True,
-        default=None,
+        default=False,
         verbose_name=_('Attendance confirmed'),
-        help_text=_('Set after calling the visitor. Empty = not reviewed yet')
+        help_text=_('Checked after calling the visitor. To say no, cancel the reservation')
     )
 
     def __str__(self):

@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='reservation',
             name='attendance_confirmed',
-            field=models.BooleanField(blank=True, default=None, help_text='Set after calling the visitor. Empty = not reviewed yet', null=True, verbose_name='Attendance confirmed'),
+            field=models.BooleanField(default=False, help_text='Checked after calling the visitor. To say no, cancel the reservation', verbose_name='Attendance confirmed'),
         ),
     ]
