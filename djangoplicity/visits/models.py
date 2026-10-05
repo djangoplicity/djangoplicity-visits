@@ -386,6 +386,14 @@ class Reservation(models.Model):
         help_text=_('Checked after calling the visitor. To say no, cancel the reservation')
     )
 
+    # Null for reservations created before the check-in existed (shown as N/A)
+    check_in = models.BooleanField(
+        null=True,
+        default=False,
+        verbose_name=_('Check in'),
+        help_text=_('Checked when the visitor arrives at the showing')
+    )
+
     def __str__(self):
         return '{}, {} ({} spaces)'.format(self.email, self.showing,
                                            self.n_spaces)

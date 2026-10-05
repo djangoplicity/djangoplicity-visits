@@ -89,7 +89,7 @@ class ReservationForm(forms.ModelForm):
 
     class Meta:
         model = Reservation
-        exclude = ['code', 'created', 'last_modified', 'is_waiting_list', 'attendance_confirmed']
+        exclude = ['code', 'created', 'last_modified', 'is_waiting_list', 'attendance_confirmed', 'check_in']
 
     def __init__(self, *args, **kwargs):
         self.showing = kwargs.pop('showing', None)
