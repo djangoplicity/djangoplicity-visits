@@ -41,7 +41,7 @@ import html2text
 from django.conf import settings
 from django.core.mail import send_mail, BadHeaderError
 from django.db import models, transaction
-from django.db.models import Sum
+from django.db.models import Count, Q, Sum
 from django.db.models.signals import post_delete, post_save
 from django.template import loader
 from django.urls import reverse
@@ -700,6 +700,19 @@ class Showing(models.Model):
 
         super(Showing, self).save(**kwargs)
         transaction.on_commit(self.update_spaces_count)
+
+    def check_in_count(self):
+        '''
+        Number of visitors (spaces) that checked in, None if no reservation
+        has check-in information (showings created before the check-in existed)
+        '''
+        result = self.reservation_set.filter(is_waiting_list=False).aggregate(
+            with_check_in=Count('pk', filter=Q(check_in__isnull=False)),
+            checked_in=Sum('n_spaces', filter=Q(check_in=True)),
+        )
+        if not result['with_check_in']:
+            return None
+        return result['checked_in'] or 0
 
     def update_spaces_count(self):
         '''
