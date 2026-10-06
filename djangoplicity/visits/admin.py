@@ -41,6 +41,7 @@ from django.forms import modelformset_factory
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.db.models import Count, Q, Sum
 from django.utils import timezone
 from django.utils.html import format_html
 from import_export.widgets import ForeignKeyWidget
@@ -168,18 +169,18 @@ class ReservationResource(resources.ModelResource):
         fields = (
         'id', 'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone', 'email', 'country', 'language',
         'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'accept_safety_form',
-        'accept_disclaimer_form', 'accept_conduct_form', 'attendance_confirmed')
+        'accept_disclaimer_form', 'accept_conduct_form', 'attendance_confirmed', 'check_in')
         export_order = (
         'id', 'showing', 'date', 'time', 'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone',
         'email', 'country', 'language', 'n_spaces', 'created', 'last_modified', 'vehicle_plate',
-        'accept_safety_form', 'accept_disclaimer_form', 'accept_conduct_form', 'attendance_confirmed')
+        'accept_safety_form', 'accept_disclaimer_form', 'accept_conduct_form', 'attendance_confirmed', 'check_in')
 
 
 class ReservationAdmin(ImportExportModelAdmin):
     list_display = ('email', 'name', 'activity_name', 'showing_date', 'showing_time', 'is_waiting_list',
-                    'attendance_confirmed', 'phone', 'n_spaces', 'code', 'rut', 'vehicle_plate',
+                    'attendance_confirmed', 'check_in', 'phone', 'n_spaces', 'code', 'rut', 'vehicle_plate',
                     'hawaii_state_id_or_drivers_license_number', 'zip_code', 'language', 'created', 'age_range',)
-    list_filter = ('showing__activity', 'showing__start_time', 'created', 'is_waiting_list', 'attendance_confirmed')
+    list_filter = ('showing__activity', 'showing__start_time', 'created', 'is_waiting_list', 'attendance_confirmed', 'check_in')
     ordering = ['showing__start_time']
     raw_id_fields = ('showing',)
     date_hierarchy = 'showing__start_time'
@@ -263,7 +264,7 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
     form = ShowingAdminForm
     filter_horizontal = ('offered_languages',)
     list_display = ('activity', 'get_start_time_tz', 'private', 'total_spaces',
-                    'free_spaces', view_online, 'view_report')
+                    'free_spaces', 'check_in_count', view_online, 'view_report')
     list_filter = ('activity', 'private')
     readonly_fields = ('free_spaces',)
 
@@ -276,6 +277,21 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
 
     get_start_time_tz.short_description = 'Start time (TZ)'
     get_start_time_tz.admin_order_field = 'start_time'
+
+    def get_queryset(self, request):
+        confirmed = Q(reservation__is_waiting_list=False)
+        return super(ShowingAdmin, self).get_queryset(request).annotate(
+            with_check_in=Count('reservation', filter=confirmed & Q(reservation__check_in__isnull=False)),
+            checked_in=Sum('reservation__n_spaces', filter=confirmed & Q(reservation__check_in=True)),
+        )
+
+    def check_in_count(self, obj):
+        # Same as Showing.check_in_count but using the annotations of get_queryset
+        if not obj.with_check_in:
+            return 'N/A'
+        return obj.checked_in or 0
+
+    check_in_count.short_description = _('Check in')
 
     def view_report(self, obj):
         return format_html(
@@ -335,7 +351,14 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
         queryset = showing.reservation_set.filter(is_waiting_list=False) \
             .select_related('language').order_by('vehicle_plate', 'name')
 
-        ReservationFormSet = modelformset_factory(Reservation, fields=('attendance_confirmed',), extra=0)
+        # check_in is nullable, use a checkbox instead of the Yes/No/Unknown select
+        ReservationFormSet = modelformset_factory(
+            Reservation,
+            fields=('attendance_confirmed', 'check_in'),
+            field_classes={'check_in': forms.BooleanField},
+            widgets={'check_in': forms.CheckboxInput},
+            extra=0
+        )
 
         if request.method == 'POST':
             if not self._has_reservation_perm(request, 'change'):
@@ -349,7 +372,7 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
                         obj = form.save(commit=False)
                         # Same as ReservationAdmin.save_model, don't move reservations to/from the waiting list
                         obj.save(skip_waiting_list_calc=True)
-                        self.log_change(request, obj, [{'changed': {'fields': ['attendance_confirmed']}}])
+                        self.log_change(request, obj, [{'changed': {'fields': form.changed_data}}])
                         changed += 1
 
                 self.message_user(request, _('%d reservation(s) updated.') % changed)
@@ -358,6 +381,7 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
             formset = ReservationFormSet(queryset=queryset)
 
         attendance = [form.instance.attendance_confirmed for form in formset.forms]
+        check_in_count = showing.check_in_count()
 
         context = dict(
             self.admin_site.each_context(request),
@@ -367,7 +391,10 @@ class ShowingAdmin(dpadmin.DjangoplicityModelAdmin):
             formset=formset,
             summary={
                 'confirmed': attendance.count(True),
-                'pending': attendance.count(False),
+                # Reservations without attendance information (None) are pending too
+                'pending': len(attendance) - attendance.count(True),
+                'check_in': 'N/A' if check_in_count is None else check_in_count,
+                'check_in_reservations': [form.instance.check_in for form in formset.forms].count(True),
             },
             has_change_permission=self._has_reservation_perm(request, 'change'),
             has_delete_permission=self._has_reservation_perm(request, 'delete'),

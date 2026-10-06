@@ -34,7 +34,7 @@ class TestShowingCallListAdmin(TransactionTestCase):
 
         self.url = '/admin/visits/showing/{}/call-list/'.format(self.showing.pk)
 
-    def formset_data(self, values):
+    def formset_data(self, values, check_in=()):
         data = {
             'form-TOTAL_FORMS': str(len(values)),
             'form-INITIAL_FORMS': str(len(values)),
@@ -46,6 +46,8 @@ class TestShowingCallListAdmin(TransactionTestCase):
             # An unchecked checkbox is not sent in the POST
             if checked:
                 data['form-{}-attendance_confirmed'.format(i)] = 'on'
+            if reservation in check_in:
+                data['form-{}-check_in'.format(i)] = 'on'
         return data
 
     # test call list only shows confirmed reservations sorted by vehicle plate
@@ -59,6 +61,7 @@ class TestShowingCallListAdmin(TransactionTestCase):
         self.assertEqual(['AAAA-11', 'BBBB-22'], plates)
         self.assertEqual(0, response.context['summary']['confirmed'])
         self.assertEqual(2, response.context['summary']['pending'])
+        self.assertEqual(0, response.context['summary']['check_in'])
 
     # test attendance can be updated without changing the waiting list
     def test_update_attendance_confirmed(self):
@@ -85,6 +88,64 @@ class TestShowingCallListAdmin(TransactionTestCase):
         ]))
         self.reservation_a.refresh_from_db()
         self.assertFalse(self.reservation_a.attendance_confirmed)
+
+    # test check in can be updated from the call list
+    def test_update_check_in(self):
+        response = self.client.post(self.url, self.formset_data([
+            (self.reservation_a, False),
+            (self.reservation_b, False),
+        ], check_in=[self.reservation_a]))
+
+        self.reservation_a.refresh_from_db()
+        self.reservation_b.refresh_from_db()
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(self.reservation_a.check_in)
+        self.assertFalse(self.reservation_b.check_in)
+        self.assertFalse(self.reservation_a.attendance_confirmed)
+        summary = self.client.get(self.url).context['summary']
+        self.assertEqual(2, summary['check_in'])
+        self.assertEqual(1, summary['check_in_reservations'])
+
+        # Back to not checked in (uncheck)
+        self.client.post(self.url, self.formset_data([
+            (self.reservation_a, False),
+            (self.reservation_b, False),
+        ]))
+        self.reservation_a.refresh_from_db()
+        self.assertFalse(self.reservation_a.check_in)
+
+    # test check in count only counts spaces of confirmed reservations
+    def test_check_in_count(self):
+        self.assertEqual(0, self.showing.check_in_count())
+
+        for reservation in (self.reservation_a, self.waiting):
+            reservation.check_in = True
+            reservation.save(skip_waiting_list_calc=True)
+
+        self.assertEqual(2, self.showing.check_in_count())
+
+        response = self.client.get('/admin/visits/showing/')
+        showing = response.context['cl'].result_list.get(pk=self.showing.pk)
+        self.assertEqual(2, response.context['cl'].model_admin.check_in_count(showing))
+
+    # test showings created before the check in existed show N/A
+    def test_check_in_count_not_apply(self):
+        self.showing.reservation_set.update(check_in=None)
+
+        self.assertIsNone(self.showing.check_in_count())
+        self.assertEqual('N/A', self.client.get(self.url).context['summary']['check_in'])
+
+        response = self.client.get('/admin/visits/showing/')
+        showing = response.context['cl'].result_list.get(pk=self.showing.pk)
+        self.assertEqual('N/A', response.context['cl'].model_admin.check_in_count(showing))
+
+        # Saving the call list without checking anything keeps the reservations as N/A
+        self.client.post(self.url, self.formset_data([
+            (self.reservation_a, False),
+            (self.reservation_b, False),
+        ]))
+        self.assertIsNone(self.showing.check_in_count())
 
     # test cancel reservation from the admin
     def test_cancel_reservation(self):
