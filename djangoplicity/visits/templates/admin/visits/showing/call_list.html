@@ -33,7 +33,8 @@
         #result_list { width: 100%; font-size: 9px; border-collapse: collapse; }
         #result_list th, #result_list td { padding: 3px 4px; border: 1px solid #999; word-break: break-word; }
         #result_list thead th { background: #eee !important; }
-        #result_list td.column-country { word-break: normal; } /* wrap countries between words only */
+        /* wrap names and countries between words only */
+        #result_list td.column-name, #result_list td.column-country { word-break: normal; }
         #result_list thead { display: table-header-group; } /* repeat the header on every page */
         #result_list tr { page-break-inside: avoid; }
         #result_list a { color: #000; text-decoration: none; }
@@ -81,7 +82,7 @@
                     <thead>
                         <tr>
                             {% trans 'Vehicle Plate' as vehicle_plate %}
-                            <th scope="col"><div class="text"><span>{{ vehicle_plate|print_line_break }}</span></div></th>
+                            <th scope="col"><div class="text"><span>{{ vehicle_plate|print_line_break|print_line_break:' del ' }}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Name' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Email' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Phone number' %}</span></div></th>
@@ -106,7 +107,7 @@
                         {% with r=form.instance %}
                         <tr class="{% cycle 'row1' 'row2' %}">
                             <td><a href="{% url 'admin:visits_reservation_change' r.pk %}">{{ r.vehicle_plate|default:'-' }}</a></td>
-                            <td>{{ r.name }}</td>
+                            <td class="column-name">{{ r.name }}</td>
                             <td>{{ r.email }}</td>
                             <td>{{ r.phone }}</td>
                             <td>{{ r.alternative_phone|default:'-' }}</td>
