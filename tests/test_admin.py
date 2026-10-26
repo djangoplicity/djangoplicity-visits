@@ -62,6 +62,8 @@ class TestShowingCallListAdmin(TransactionTestCase):
         self.assertEqual(0, response.context['summary']['confirmed'])
         self.assertEqual(2, response.context['summary']['pending'])
         self.assertEqual(0, response.context['summary']['check_in'])
+        self.assertContains(response, 'onclick="window.print(); return false;"')
+        self.assertContains(response, '@media print')
 
     # test attendance can be updated without changing the waiting list
     def test_update_attendance_confirmed(self):
