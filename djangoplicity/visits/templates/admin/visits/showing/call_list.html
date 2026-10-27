@@ -1,10 +1,46 @@
 {% extends "admin/base_site.html" %}
-{% load i18n admin_urls static %}
+{% load i18n admin_urls static visits_tags %}
 
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}">
 <style>
     #result_list .column-attendance_confirmed,
     #result_list .column-check_in { text-align: center; }
+
+    /* Line breaks added by the print_line_break filter */
+    @media screen { .print-only { display: none; } }
+
+    /* Print only the title, the summary and the table (Cmd/Ctrl+P or the "Print / PDF" button) */
+    @media print {
+        @page { size: landscape; margin: 1cm; }
+
+        #header, #nav-sidebar, .toggle-nav-sidebar, .breadcrumbs, .messagelist,
+        .object-tools, .submit-row, #footer,
+        #result_list .column-cancel_reservation { display: none !important; }
+
+        body, #container, #main, .main, #content, #changelist, #changelist .results {
+            display: block !important;
+            width: auto !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+            background: none !important;
+        }
+
+        #content h1 { margin: 0 0 8px; }
+        #changelist { border: none; box-shadow: none; }
+
+        #result_list { width: 100%; font-size: 9px; border-collapse: collapse; }
+        #result_list th, #result_list td { padding: 3px 4px; border: 1px solid #999; word-break: break-word; }
+        #result_list thead th { background: #eee !important; }
+        /* wrap names and countries between words only */
+        #result_list td.column-name, #result_list td.column-country { word-break: normal; }
+        #result_list thead { display: table-header-group; } /* repeat the header on every page */
+        #result_list tr { page-break-inside: avoid; }
+        #result_list a { color: #000; text-decoration: none; }
+
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
 </style>
 {% endblock %}
 
@@ -25,6 +61,7 @@
     <ul class="object-tools">
         <li><a href="{{ showing.get_report_url }}" target="_blank">{% trans 'Old Report' %}</a></li>
         <li><a href="{% url 'visits-showings-waiting-list-report' showing.pk %}" target="_blank">{% trans 'Waiting List' %}</a></li>
+        <li><a href="#" onclick="window.print(); return false;">{% trans 'Print / PDF' %}</a></li>
     </ul>
 
     <p>
@@ -44,19 +81,24 @@
                 <table id="result_list">
                     <thead>
                         <tr>
-                            <th scope="col"><div class="text"><span>{% trans 'Vehicle Plate' %}</span></div></th>
+                            {% trans 'Vehicle Plate' as vehicle_plate %}
+                            <th scope="col"><div class="text"><span>{{ vehicle_plate|print_line_break|print_line_break:' del ' }}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Name' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Email' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Phone number' %}</span></div></th>
-                            <th scope="col"><div class="text"><span>{% trans 'Alternative Phone number' %}</span></div></th>
+                            {% trans 'Alternative Phone number' as alternative_phone %}
+                            <th scope="col"><div class="text"><span>{{ alternative_phone|print_line_break:' ' }}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Country' %}</span></div></th>
-                            <th scope="col"><div class="text"><span>{% trans 'Number of places' %}</span></div></th>
+                            {% trans 'Number of places' as number_of_places %}
+                            <th scope="col"><div class="text"><span>{{ number_of_places|print_line_break:' ' }}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Language' %}</span></div></th>
-                            <th scope="col"><div class="text"><span>{% trans 'Reservation code' %}</span></div></th>
+                            {% trans 'Reservation code' as reservation_code %}
+                            <th scope="col"><div class="text"><span>{{ reservation_code|print_line_break:' ' }}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'RUT' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Reservation date' %}</span></div></th>
-                            <th scope="col" class="column-attendance_confirmed"><div class="text"><span>{% trans 'Attendance confirmed' %}</span></div></th>
-                            {% if has_delete_permission %}<th scope="col"><div class="text"><span>&nbsp;</span></div></th>{% endif %}
+                            {% trans 'Attendance confirmed' as attendance_confirmed %}
+                            <th scope="col" class="column-attendance_confirmed"><div class="text"><span>{{ attendance_confirmed|print_line_break:' ' }}</span></div></th>
+                            {% if has_delete_permission %}<th scope="col" class="column-cancel_reservation"><div class="text"><span>&nbsp;</span></div></th>{% endif %}
                             <th scope="col" class="column-check_in"><div class="text"><span>{% trans 'Check in' %}</span></div></th>
                         </tr>
                     </thead>
@@ -65,11 +107,11 @@
                         {% with r=form.instance %}
                         <tr class="{% cycle 'row1' 'row2' %}">
                             <td><a href="{% url 'admin:visits_reservation_change' r.pk %}">{{ r.vehicle_plate|default:'-' }}</a></td>
-                            <td>{{ r.name }}</td>
+                            <td class="column-name">{{ r.name }}</td>
                             <td>{{ r.email }}</td>
                             <td>{{ r.phone }}</td>
                             <td>{{ r.alternative_phone|default:'-' }}</td>
-                            <td>{{ r.country }}</td>
+                            <td class="column-country">{{ r.country }}</td>
                             <td>{{ r.n_spaces }}</td>
                             <td>{{ r.language }}</td>
                             <td>{{ r.code }}</td>
@@ -77,7 +119,7 @@
                             <td>{{ r.created }}</td>
                             <td class="column-attendance_confirmed">{{ form.id }}{{ form.attendance_confirmed.errors }}{{ form.attendance_confirmed }}</td>
                             {% if has_delete_permission %}
-                            <td><a href="{% url 'admin:visits_showing_cancel_reservation' showing.pk r.pk %}" class="deletelink">{% trans 'Cancel reservation' %}</a></td>
+                            <td class="column-cancel_reservation"><a href="{% url 'admin:visits_showing_cancel_reservation' showing.pk r.pk %}" class="deletelink">{% trans 'Cancel reservation' %}</a></td>
                             {% endif %}
                             <td class="column-check_in">{{ form.check_in.errors }}{{ form.check_in }}</td>
                         </tr>
