@@ -117,7 +117,7 @@ class ActivityAdmin(dpadmin.DjangoplicityModelAdmin):
         }),
         ('Registration Settings', {
             'fields': ('latest_reservation_time', 'min_participants', 'max_participants', 'duration', 'required_vehicle_plate',
-                       'require_age', 'require_rut_number', 'require_hawaii_state_id_or_drivers_license_number', 'group_enable', 'enable_waiting_list',),
+                       'require_age', 'require_rut_number', 'require_hawaii_state_id_or_drivers_license_number', 'require_zip_code', 'group_enable', 'enable_waiting_list',),
             'classes': ('collapse',),
         }),
         ('Language and Accessibility', {
@@ -168,11 +168,13 @@ class ReservationResource(resources.ModelResource):
         model = Reservation
         fields = (
         'id', 'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone', 'email', 'country', 'language',
-        'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'accept_safety_form',
+        'n_spaces', 'created', 'last_modified', 'vehicle_plate', 'hawaii_state_id_or_drivers_license_number',
+        'zip_code', 'accept_safety_form',
         'accept_disclaimer_form', 'accept_conduct_form', 'attendance_confirmed', 'check_in')
         export_order = (
         'id', 'showing', 'date', 'time', 'name', 'code', 'rut', 'age_range', 'phone', 'alternative_phone',
         'email', 'country', 'language', 'n_spaces', 'created', 'last_modified', 'vehicle_plate',
+        'hawaii_state_id_or_drivers_license_number', 'zip_code',
         'accept_safety_form', 'accept_disclaimer_form', 'accept_conduct_form', 'attendance_confirmed', 'check_in')
 
 
