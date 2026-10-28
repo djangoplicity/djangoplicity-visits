@@ -160,7 +160,9 @@ class ReservationForm(forms.ModelForm):
         else:
             self.fields.pop('hawaii_state_id_or_drivers_license_number')
 
-        if self.showing.activity.require_hawaii_state_id_or_drivers_license_number:
+        if self.showing.activity.require_zip_code:
+            self.fields['zip_code'].required = True
+        elif self.showing.activity.require_hawaii_state_id_or_drivers_license_number:
             self.fields['zip_code']
         else:
             self.fields.pop('zip_code')
