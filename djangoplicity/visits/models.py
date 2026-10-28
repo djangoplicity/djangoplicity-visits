@@ -162,6 +162,10 @@ class Activity(TranslationModel):
         default=False,
         help_text=_('Hawai’i State ID or Drivers License Number required on the reservation form')
     )
+    require_zip_code = models.BooleanField(
+        default=False,
+        help_text=_('Zip Code required on the reservation form')
+    )
 
     key_visual_en = TranslationForeignKey(Image, blank=True, null=True,
                                           on_delete=models.SET_NULL, related_name='+',
