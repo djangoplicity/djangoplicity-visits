@@ -162,8 +162,10 @@ class ReservationForm(forms.ModelForm):
 
         if self.showing.activity.require_zip_code:
             self.fields['zip_code'].required = True
-        elif self.showing.activity.require_hawaii_state_id_or_drivers_license_number:
-            self.fields['zip_code']
+        elif (self.showing.activity.show_zip_code or
+              self.showing.activity.require_hawaii_state_id_or_drivers_license_number):
+            # Shown but optional
+            self.fields['zip_code'].required = False
         else:
             self.fields.pop('zip_code')
 
