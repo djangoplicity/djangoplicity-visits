@@ -8,6 +8,9 @@
 
     /* Line breaks added by the print_line_break filter */
     @media screen { .print-only { display: none; } }
+    /* ...except in the vehicle plate and attendance headers, which are also split in two lines on screen to narrow the columns */
+    #result_list .column-vehicle_plate .print-only,
+    #result_list th.column-attendance_confirmed .print-only { display: inline; }
 
     /* Print only the title, the summary and the table (Cmd/Ctrl+P or the "Print / PDF" button) */
     @media print {
@@ -85,7 +88,7 @@
                             {% trans 'Attendance confirmed' as attendance_confirmed %}
                             <th scope="col" class="column-attendance_confirmed"><div class="text"><span>{{ attendance_confirmed|print_line_break:' ' }}</span></div></th>
                             {% trans 'Vehicle Plate' as vehicle_plate %}
-                            <th scope="col"><div class="text"><span>{{ vehicle_plate|print_line_break|print_line_break:' del ' }}</span></div></th>
+                            <th scope="col" class="column-vehicle_plate"><div class="text"><span>{{ vehicle_plate|print_line_break }}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Name' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Email' %}</span></div></th>
                             <th scope="col"><div class="text"><span>{% trans 'Phone number' %}</span></div></th>
